@@ -1,0 +1,10 @@
+output
+build
+scripts
+*.o
+*.out
+*.~
+*.*~
+tags
+cpu-vh
+.DS_Store
