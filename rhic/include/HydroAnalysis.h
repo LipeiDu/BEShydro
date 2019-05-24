@@ -1,9 +1,8 @@
-//
-//  HydroAnalysis.h
-//  
-//
-//  Created by Lipei Du on 10/25/18.
-//
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #ifndef HydroAnalysis_h
 #define HydroAnalysis_h

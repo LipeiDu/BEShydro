@@ -1,9 +1,8 @@
-/*
- * DynamicalVariables.h
- *
- *  Created on: Oct 22, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #ifndef DYNAMICALVARIABLES_H_
 #define DYNAMICALVARIABLES_H_
@@ -16,7 +15,7 @@
 //Main switch//
 
 #define PIMUNU
-//#define PI
+#define PI
 
 #define NBMU
 #define VMU
@@ -24,8 +23,8 @@
 #define RootSolver_with_Baryon
 #define EOS_with_baryon
 
-#define HydroPlus
-#define CRITICAL
+//#define HydroPlus
+//#define CRITICAL
 
 /**************************************************************************************************************************************************/
 /*********************************************************/

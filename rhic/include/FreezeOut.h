@@ -1,5 +1,8 @@
-//This is a c++ wrapper for the OSU hydro codes (cpu-vh, gpu-vh ...)
-//Written by Derek Everett 2018
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 
 #ifndef FREEZEOUT_H

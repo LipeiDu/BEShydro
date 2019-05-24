@@ -1,9 +1,8 @@
-/*
- * LatticeParameters.c
- *
- *  Created on: Oct 22, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #include "../include/LatticeParameters.h"
 #include "../include/Properties.h"
@@ -28,7 +27,6 @@ void loadLatticeParameters(config_t *cfg, const char* configDirectory, void * pa
 	}
 
 	getIntegerProperty(cfg, "numLatticePointsX", &numLatticePointsX, 128);
-//	fprintf(stderr,"numLatticePointsX = %d\n",numLatticePointsX);
 	getIntegerProperty(cfg, "numLatticePointsY", &numLatticePointsY, 128);
 	getIntegerProperty(cfg, "numLatticePointsRapidity", &numLatticePointsRapidity, 64);
 	getIntegerProperty(cfg, "numProperTimePoints", &numProperTimePoints, 10);

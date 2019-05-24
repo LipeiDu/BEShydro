@@ -1,9 +1,8 @@
-//
-//  HydroAnalysis.cpp
-//  
-//
-//  Created by Lipei Du on 10/25/18.
-//
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #include <stdio.h>
 #include <stdlib.h>

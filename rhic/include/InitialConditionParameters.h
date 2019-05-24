@@ -1,9 +1,8 @@
-/*
- * InitialConditionParameters.h
- *
- *  Created on: Oct 23, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #ifndef INITIALCONDITIONPARAMETERS_H_
 #define INITIALCONDITIONPARAMETERS_H_

@@ -1,16 +1,16 @@
-/*
- * SourcePart.h
- *
- *  Created on: Nov 25, 2017
- *      Author: Lipei
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
-#ifndef SOURCE_H_
-#define SOURCE_H_
+#ifndef DYNAMICALSOURCE_H_
+#define DYNAMICALSOURCE_H_
 
 void noSource(void * latticeParams, void * initCondParams);
+
 void readInSource(int n, void * latticeParams, void * initCondParams, void * hydroParams, const char *rootDirectory);
-void setSource(int n, void * latticeParams, void * initCondParams, void * hydroParams, const char *rootDirectory);
+
 void setDynamicalSources(void * latticeParams, void * initCondParams, double *dp_dtau, double *pos); //function to set dynamical source terms for stress tensor and baryon current
-//PRECISION updateDynamicalSources(); //this function reads in source terms from external code
-#endif /* SOURCEPART_H_ */
+
+#endif /* DYNAMICALSOURCE_H_ */

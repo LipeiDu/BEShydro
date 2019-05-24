@@ -1,9 +1,8 @@
-/*
- * SourceTerms.cpp
- *
- *  Created on: Oct 22, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #include <stdio.h> // for printf
 #include <math.h> // for math functions
@@ -27,38 +26,51 @@
 
 void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISION * const __restrict__  piRHS, PRECISION * const __restrict__ nbmuRHS, PRECISION * const __restrict__ phiQRHS, PRECISION nbt, PRECISION nbx, PRECISION nby, PRECISION nbn, PRECISION rhob, PRECISION Nablat_rhob, PRECISION Nablax_rhob, PRECISION Nablay_rhob, PRECISION Nablan_rhob, PRECISION alphaB, PRECISION Nablat_alphaB, PRECISION Nablax_alphaB, PRECISION Nablay_alphaB, PRECISION Nablan_alphaB, PRECISION T, PRECISION Nablat_T, PRECISION Nablax_T, PRECISION Nablay_T, PRECISION Nablan_T, PRECISION seq, PRECISION t, PRECISION e, PRECISION p, PRECISION ut, PRECISION ux, PRECISION uy, PRECISION un, PRECISION utp, PRECISION uxp, PRECISION uyp, PRECISION unp, PRECISION pitt, PRECISION pitx, PRECISION pity, PRECISION pitn, PRECISION pixx, PRECISION pixy, PRECISION pixn, PRECISION piyy, PRECISION piyn, PRECISION pinn, PRECISION Pi, PRECISION dxut, PRECISION dyut, PRECISION dnut, PRECISION dxux, PRECISION dyux, PRECISION dnux, PRECISION dxuy, PRECISION dyuy, PRECISION dnuy, PRECISION dxun, PRECISION dyun, PRECISION dnun, PRECISION dkvk, PRECISION d_etabar, PRECISION d_dt, const PRECISION * const __restrict__ PhiQ, const PRECISION * const __restrict__ equiPhiQ)
 {
-	//*********************************************************\
-	//* Temperature dependent shear transport coefficients
-	//*********************************************************/
-	PRECISION taupiInv = T / 5  / d_etabar; //d_etabar=shearViscosityToEntropyDensity
-	PRECISION beta_pi = (e + p) / 5;
+    /*******************************************************************************/
+    /* Sec. I basic elements
+    /*******************************************************************************/
+    
+    PRECISION t2 = t * t;
+    PRECISION t3 = t * t2;
     
 	//*********************************************************\
-	//* Temperature dependent bulk transport coefficients
+	//* transport coefficients
 	//*********************************************************/
+    
+    // shear stress tensor
+	PRECISION taupiInv = T / 5  / d_etabar; //d_etabar is eta/(e+p)
+	PRECISION beta_pi = (e + p) / 5;
+    
+	// bulk transport coefficients
 	PRECISION cs2 = speedOfSoundSquared(e, rhob);
 	PRECISION a = 1.0/3.0 - cs2;
 	PRECISION a2 = a*a;
 	PRECISION beta_Pi = 15*a2*(e+p);
 	PRECISION lambda_Pipi = 8*a/5;
-
     PRECISION zetabar = bulkViscosityToEntropyDensity(T);
     PRECISION tauPiInv = 15*a2*T/zetabar;
+    
+    // baryon diffusion
+    PRECISION tau_n = Cb/T;
+    PRECISION taunInv = 1/tau_n;
+    PRECISION kappaB = baryonDiffusionCoefficientKinetic(T, rhob, alphaB, e, p);
+    ////baryonDiffusionCoefficientAdscft(T, rhob, alphaB, e, p, seq);//
+    
+    //*********************************************************\
+    //* flow velocity derivatives
+    //*********************************************************/
 
 	PRECISION ut2 = ut * ut;
 	PRECISION un2 = un * un;
-	PRECISION t2 = t * t;
-	PRECISION t3 = t * t2;
-
+    
 	// time derivatives of u
 	PRECISION dtut = (ut - utp) / d_dt;
 	PRECISION dtux = (ux - uxp) / d_dt;
 	PRECISION dtuy = (uy - uyp) / d_dt;
 	PRECISION dtun = (un - unp) / d_dt;
 
-	//*********************************************************\
-	//* covariant derivatives
-	//*********************************************************/
+	// covariant derivatives
+
 	PRECISION Dut = ut*dtut + ux*dxut + uy*dyut + un*dnut + t*un*un;
 	PRECISION DuxUpper = ut*dtux + ux*dxux + uy*dyux + un*dnux;
 	PRECISION Dux = -DuxUpper;
@@ -115,6 +127,10 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     PRECISION uy2 = uy*uy;
     PRECISION ps  = pitt*stt-2*pitx*stx-2*pity*sty+pixx*sxx+2*pixy*sxy+piyy*syy - 2*pitn*stn*t2+2*pixn*sxn*t2+2*piyn*syn*t2+pinn*snn*t2*t2;
 
+    /*******************************************************************************/
+    /* Sec. II source terms on RHS
+    /*******************************************************************************/
+    
 #ifdef PIMUNU
 	//*********************************************************\
 	//* I1
@@ -143,7 +159,6 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
 	PRECISION I2yy = theta * piyy;
 	PRECISION I2yn = theta * piyn;
 	PRECISION I2nn = theta * pinn;
-
 
 	//*********************************************************\
 	//* I3
@@ -181,7 +196,7 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
 	PRECISION I4nn = (pitn * stn - pixn * sxn  - piyn * syn - t2 * pinn * snn) + (1 / t2 + un2) * ps / 3;
 
 	//*********************************************************\
-	//* I
+	//* I_pi
 	//*********************************************************/
 	PRECISION Itt = I1tt + delta_pipi * I2tt - tau_piw * I3tt + tau_pipi * I4tt - lambda_piPi * Pi * stt;
 	PRECISION Itx = I1tx + delta_pipi * I2tx - tau_piw * I3tx + tau_pipi * I4tx - lambda_piPi * Pi * stx;
@@ -209,10 +224,15 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
 	PRECISION dpinn = 2 * beta_pi * snn - pinn * taupiInv - Inn - 2 * (ut * pinn + un * pitn) / t;
 #endif
 #ifdef PI
+    //*********************************************************\
+    //* I_Pi
+    //*********************************************************/
+    PRECISION I_Pi = delta_PiPi*Pi*theta - lambda_Pipi*ps;
+    
 	//*********************************************************\
 	//* bulk viscous pressure source terms, i.e. terms on RHS
 	//*********************************************************/
-	PRECISION dPi = -beta_Pi*theta - Pi*tauPiInv - delta_PiPi*Pi*theta + lambda_Pipi*ps;
+	PRECISION dPi = -beta_Pi*theta - Pi*tauPiInv - I_Pi;
 #endif
 
     // correlation length returns 1.0 if CRITICAL is not defined.
@@ -220,78 +240,49 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     PRECISION corrL = correlationLength(T, muB);
 
 #ifdef VMU
+    
     //*********************************************************\
-    //* for the diffusion current of baryon
+    //* I1, I2, I3, I4
     //*********************************************************/
     
-    // relaxation time
-    PRECISION tau_n = Cb/T;
-
-    // baryon diffusion coefficients
-    PRECISION kappaB = 0.0;
-    PRECISION DB = 0.0;
+    PRECISION nbD  = nbt * Dut + nbx * Dux + nby * Duy + nbn * Dun;
+    PRECISION I1t = ut * nbD;
+    PRECISION I1x = ux * nbD;
+    PRECISION I1y = uy * nbD;
+    PRECISION I1n = un * nbD;
     
-    PRECISION diffusionCoeff[2];
-    baryonDiffusionCoefficient(T, muB, diffusionCoeff);
+    PRECISION I2t = nbt * theta;
+    PRECISION I2x = nbx * theta;
+    PRECISION I2y = nby * theta;
+    PRECISION I2n = nbn * theta;
     
-    kappaB = diffusionCoeff[0];//baryonDiffusionCoefficientAdscft(T, rhob, alphaB, e, p, seq);//baryonDiffusionCoefficientKinetic(T, rhob, alphaB, e, p);//
-    DB = diffusionCoeff[1];
+    PRECISION I3t = -nbx * wxt - nby * wyt - t2 * nbn * wnt;
+    PRECISION I3x = -nbt * wtx + nby * wyx + t2 * nbn * wnx;
+    PRECISION I3y = -nbt * wty + nbx * wxy + t2 * nbn * wny;
+    PRECISION I3n = 1/t2 * (-nbt * wtn + nbx * wxn + nby * wyn);
     
-    // critical scaling
-//#ifdef CRITICAL
-//    tau_n = Cb/T * corrL;
-//    kappaB = diffusionCoeff[0] * corrL;
-//    DB = diffusionCoeff[1] / corrL;
-//#endif
+    PRECISION I4t = stt * nbt - stx * nbx - sty * nby - t2 * stn * nbn;
+    PRECISION I4x = stx * nbt - sxx * nbx - sxy * nby - t2 * sxn * nbn;
+    PRECISION I4y = sty * nbt - sxy * nbx - syy * nby - t2 * syn * nbn;
+    PRECISION I4n = stn * nbt - sxn * nbx - syn * nby - t2 * snn * nbn;
     
-    // other transport coefficients
-    PRECISION delta_nn = tau_n;
-    PRECISION lambda_nn = 0.60 * tau_n;
+    //*********************************************************\
+    //* In
+    //*********************************************************/
     
-    // kappaB * gradient of muB/T term
-//#ifndef CRITICAL
-    PRECISION NBI0t = kappaB * Nablat_alphaB;
-    PRECISION NBI0x = kappaB * Nablax_alphaB;
-    PRECISION NBI0y = kappaB * Nablay_alphaB;
-    PRECISION NBI0n = kappaB * Nablan_alphaB;
-/*/#else
-//    PRECISION TInv = 1 / T;
-//    PRECISION facG1 = kappaB / rhob * TInv;
-    PRECISION facG2 = dPdT(e, rhob) - (e + p) * TInv;
-    PRECISION facG = facG1 * facG2;
+    PRECISION It = I1t + delta_nn * I2t + tau_nw * I3t + lambda_nn * I4t;
+    PRECISION Ix = I1x + delta_nn * I2x + tau_nw * I3x + lambda_nn * I4x;
+    PRECISION Iy = I1y + delta_nn * I2y + tau_nw * I3y + lambda_nn * I4y;
+    PRECISION In = I1n + delta_nn * I2n + tau_nw * I3n + lambda_nn * I4n;
     
-    PRECISION NBI0t = DB * Nablat_rhob + facG *  Nablat_T;
-    PRECISION NBI0x = DB * Nablax_rhob + facG *  Nablax_T;
-    PRECISION NBI0y = DB * Nablay_rhob + facG *  Nablay_T;
-    PRECISION NBI0n = DB * Nablan_rhob + facG *  Nablan_T;
-#endif*/
+    //*********************************************************\
+    //* baryon diffusion source terms, i.e. terms on RHS
+    //*********************************************************/
     
-    // other souce terms
-    PRECISION facNBI1 = nbt * Dut + nbx * Dux + nby * Duy + nbn * Dun;
-    PRECISION NBI1t = ut * facNBI1;
-    PRECISION NBI1x = ux * facNBI1;
-    PRECISION NBI1y = uy * facNBI1;
-    PRECISION NBI1n = un * facNBI1;
-    
-    PRECISION facNBI2 = 1/tau_n * delta_nn * theta;
-    PRECISION NBI2t = facNBI2 * nbt;
-    PRECISION NBI2x = facNBI2 * nbx;
-    PRECISION NBI2y = facNBI2 * nby;
-    PRECISION NBI2n = facNBI2 * nbn;
-    
-    PRECISION NBI3t = 0;//-nbx * wxt - nby * wyt - t2 * nbn * wnt;
-    PRECISION NBI3x = 0;//-nbt * wtx + nby * wyx + t2 * nbn * wnx;
-    PRECISION NBI3y = 0;//-nbt * wty + nbx * wxy + t2 * nbn * wny;
-    PRECISION NBI3n = 0;//1/t2 * (-nbt * wtn + nbx * wxn + nby * wyn);
-    
-    PRECISION facNBI4 = lambda_nn/tau_n;
-    PRECISION NBI4t = facNBI4 * (stt * nbt - stx * nbx - sty * nby - t2 * stn * nbn);
-    PRECISION NBI4x = facNBI4 * (stx * nbt - sxx * nbx - sxy * nby - t2 * sxn * nbn);
-    PRECISION NBI4y = facNBI4 * (sty * nbt - sxy * nbx - syy * nby - t2 * syn * nbn);
-    PRECISION NBI4n = facNBI4 * (stn * nbt - sxn * nbx - syn * nby - t2 * snn * nbn);
-    
-    PRECISION GBt   = -t * un/ut * nbn;
-    PRECISION GBn   = -1/t * (nbn + un/ut * nbt);
+    PRECISION dnt = taunInv * kappaB * Nablat_alphaB - taunInv * nbt - It - t * un * nbn;
+    PRECISION dnx = taunInv * kappaB * Nablax_alphaB - taunInv * nbx - Ix;
+    PRECISION dny = taunInv * kappaB * Nablay_alphaB - taunInv * nby - Iy;
+    PRECISION dnn = taunInv * kappaB * Nablan_alphaB - taunInv * nbn - In - 1/t * (ut * nbn + un * nbt) ;
     
 #endif
 #ifdef HydroPlus
@@ -303,6 +294,10 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     PRECISION gammaPhi = relaxationCoefficientPhi(rhob, seq, T, corrL2);
 #endif
     
+    
+    /*******************************************************************************/
+    /* Sec. III load the sources
+    /*******************************************************************************/
     
 	//*********************************************************\
 	//* time derivative of the dissipative quantities
@@ -323,17 +318,10 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
 	*piRHS = dPi / ut + Pi * dkvk;
 #endif
 #ifdef VMU
-    //#ifndef CRITICAL
-    nbmuRHS[0] = -1/ut * (1/tau_n * nbt - 1/tau_n * NBI0t + NBI1t + NBI2t + NBI3t + NBI4t) + nbt * dkvk + GBt;
-    nbmuRHS[1] = -1/ut * (1/tau_n * nbx - 1/tau_n * NBI0x + NBI1x + NBI2x + NBI3x + NBI4x) + nbx * dkvk;
-    nbmuRHS[2] = -1/ut * (1/tau_n * nby - 1/tau_n * NBI0y + NBI1y + NBI2y + NBI3y + NBI4y) + nby * dkvk;
-    nbmuRHS[3] = -1/ut * (1/tau_n * nbn - 1/tau_n * NBI0n + NBI1n + NBI2n + NBI3n + NBI4n) + nbn * dkvk + GBn;
-    //#else
-    //nbmuRHS[0] = -1/ut * (1/tau_n * nbt - 1/tau_n * NBI0t + NBI1t) + nbt * dkvk + GBt;
-    //nbmuRHS[1] = -1/ut * (1/tau_n * nbx - 1/tau_n * NBI0x + NBI1x) + nbx * dkvk;
-    //nbmuRHS[2] = -1/ut * (1/tau_n * nby - 1/tau_n * NBI0y + NBI1y) + nby * dkvk;
-    //nbmuRHS[3] = -1/ut * (1/tau_n * nbn - 1/tau_n * NBI0n + NBI1n) + nbn * dkvk + GBn;
-    //#endif
+    nbmuRHS[0] = dnt / ut + nbt * dkvk;
+    nbmuRHS[1] = dnx / ut + nbx * dkvk;
+    nbmuRHS[2] = dny / ut + nby * dkvk;
+    nbmuRHS[3] = dnn / ut + nbn * dkvk;
 #endif
 #ifdef HydroPlus
     for(unsigned int n = 0; n < NUMBER_SLOW_MODES; ++n)

@@ -1,9 +1,8 @@
-/*
- * HydroParameters.h
- *
- *  Created on: Oct 23, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #ifndef HYDROPARAMETERS_H_
 #define HYDROPARAMETERS_H_

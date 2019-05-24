@@ -1,16 +1,15 @@
-//
-//  TransportCoefficients.hpp
-//  
-//
-//  Created by Lipei Du on 3/10/19.
-//
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #ifndef TransportCoefficients_h
 #define TransportCoefficients_h
 
 #include <stdio.h>
 
-//Transport coefficients
+//shear transport coefficients
 
 const PRECISION delta_pipi = 1.33333;
 const PRECISION tau_pipi = 0.0;//1.42857;
@@ -18,11 +17,18 @@ const PRECISION delta_PiPi = 0.666667;
 const PRECISION lambda_piPi = 1.2;
 const PRECISION tau_piw = 0.0;//1.0; coupling between shear and vorticity
 
+//bulk transport coefficients
+
 PRECISION bulkViscosityToEntropyDensity(PRECISION T);
 
-// baryon diffusion coefficients
+// baryon transport coefficients
 
 const PRECISION Cb = 4.0;
+const PRECISION delta_nn = 1.0;
+const PRECISION lambda_nn = 0.6;
+const PRECISION tau_nw = 1.0;// coupling between baryon diffusion and vorticity
+
+// functions
 
 void getBaryonDiffusionCoefficientTable();
 

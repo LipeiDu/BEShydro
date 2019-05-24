@@ -1,9 +1,8 @@
-//
-//  TransportCoefficients.cpp
-//  
-//
-//  Created by Lipei Du on 3/10/19.
-//
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #include <stdlib.h>
 #include <math.h>
@@ -53,7 +52,7 @@ PRECISION baryonDiffusionCoefficientKinetic(PRECISION T, PRECISION rhob, PRECISI
     PRECISION HyCotangent = 1/tanh(alphaB);
     if(isnan(HyCotangent)) printf("kappaB is nan. e=%4e,\t rhob=%4e,\t mub_over_T=%4e,\t T=%4e. \n",e,rhob, alphaB, T);
     
-    return Cb/T * rhob * (0.3333333 * HyCotangent - rhob*T/(e+p)); /*return Cb * rhob / (alphaB * T);*/
+    return Cb/T * rhob * (0.3333333 * HyCotangent - rhob*T/(e+p));
 }
 
 // D. T. Son and A. O. Starinets, JHEP 03, 052 (2006).
@@ -85,7 +84,7 @@ void getBaryonDiffusionCoefficientTable(){
     PRECISION chiB;
     
     // in the table: T [MeV] , muB [MeV] , chi2B / T^2 , sigmaB / T , T * DB
-    filebarycoeff = fopen ("input/BaryonDiffData.dat","r");
+    filebarycoeff = fopen ("input/coefficients/BaryonDiffData.dat","r");
     if(filebarycoeff==NULL){
         printf("The file BaryonDiffData.dat was not opened...\n");
         exit(-1);

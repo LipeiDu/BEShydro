@@ -30,13 +30,13 @@ ifeq ($(UNAME), Darwin)
 LIBS = -L /usr/local/lib -lm -lgsl -lgslcblas -lconfig -largp -lc++
 endif
 
-INCLUDES = -I rhic/include -I freezeout
+INCLUDES = -I rhic/include -I rhic/freezeout
 
 CPP := $(shell find $(DIR_SRC) -name '*.cpp' -and -not -name '*Test.cpp' )
 CPP_OBJ  = $(CPP:$(DIR_SRC)%.cpp=$(DIR_OBJ)%.o)
 OBJ = $(CPP_OBJ)
 
-EXE = cpu-vh
+EXE = beshydro
 
 $(EXE): $(OBJ)
 	echo "Linking:   $@ ($(COMPILER))"
@@ -51,7 +51,7 @@ TEST_CPP := $(shell find $(DIR_SRC) -name '*.cpp' -and -not -name '*Run.cpp')
 TEST_CPP_OBJ  = $(TEST_CPP:$(DIR_SRC)%.cpp=$(DIR_OBJ)%.o)
 TEST_OBJ = $(TEST_CPP_OBJ)
 
-TEST_EXE = cpu-vh-test
+TEST_EXE = beshydro-test
 
 $(TEST_EXE): $(TEST_OBJ)
 	echo "Linking:   $@ ($(COMPILER))"

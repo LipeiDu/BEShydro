@@ -1,9 +1,8 @@
-/*
- * GlauberModel.c
- *
- *  Created on: Oct 22, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #include "../include/GlauberModel.h"
 #include "../include/InitialConditionParameters.h"

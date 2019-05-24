@@ -1,9 +1,8 @@
-//
-//  HydroPlus.cpp
-//  
-//
-//  Created by Lipei Du on 10/17/18.
-//
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 // Equation indices from PRD 98 (2018) 036006
 

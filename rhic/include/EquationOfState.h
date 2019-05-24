@@ -1,16 +1,15 @@
-/*
- * EquationOfState.h
- *
- *  Created on: Oct 22, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #ifndef EQUATIONOFSTATE_H_
 #define EQUATIONOFSTATE_H_
 
 #include "../include/DynamicalVariables.h"
 
-#define CONFORMAL_EOS
+//#define CONFORMAL_EOS
 
 // ideal gas of massless quarks and gluons
 //#define EOS_FACTOR 15.6269 // Nc=3, Nf=3

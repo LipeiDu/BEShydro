@@ -1,9 +1,9 @@
-/*
- * DynamicalVariables.cpp
- *
- *  Created on: Oct 22, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
+
 #include <stdlib.h>
 #include <math.h>
 
@@ -63,11 +63,12 @@ void allocateHostMemory(int len) {
 	// Primary variables
 	//=======================================================================
     
-    // energy density, pressure, baryon density, entropy density
+    // energy density, pressure, entropy density
 	e = (PRECISION *)calloc(len, bytes);
 	p = (PRECISION *)calloc(len, bytes);
     seq = (PRECISION *)calloc(len, bytes);
     
+    // baryon density
     rhob = (PRECISION *)calloc(len, bytes);
     rhobp = (PRECISION *)calloc(len, bytes);
     rhobS = (PRECISION *)calloc(len, bytes);
@@ -231,7 +232,6 @@ void allocateHostMemory(int len) {
     // baryon diffusion coefficients
 #ifdef VMU
     BaryDiffCoeff = (BARYON_DIFFUSION_COEFF *)calloc(1, sizeof(BARYON_DIFFUSION_COEFF));
-    //BaryDiffCoeff->sigmaB = (PRECISION *)calloc(5751, bytes);
     BaryDiffCoeff->sigmaB = (PRECISION *)calloc(128721, bytes);
     BaryDiffCoeff->DB = (PRECISION *)calloc(128721, bytes);
 #endif

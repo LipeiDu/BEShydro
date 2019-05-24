@@ -1,27 +1,16 @@
-//#include "ToyJetClass.h"
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
+
 #include <stdio.h>
 #include <math.h>
+
 #include "../include/EquationOfState.h"
 #include "../include/DynamicalVariables.h"
+#include "../include/ToyJetClass.h"
 
-class jetParton{
-public:
-  //contravariant momentum four vector of parton p^{\mu} in milne coords
-  double momentum[4];
-  //contravariant position four vector of parton x^{\mu} in milne coords
-  double position[4];
-  //proper time derivative of four momentum
-  double dp_dtau[4];
-  //mass of parton
-  double mass;
-
-  //update the four momentum of parton; just an euler step
-  void updateMomentum(double dtau);
-  //update the four position of the parton - NOT CORRECT FIX IT
-  void updatePosition(double dtau);
-  //get parton energy loss based on fluid variables
-  void energyLoss(int nx, int ny, int nz, double dt, double dx, double dy, double dz, double *ut, double* ux, double *uy, double* un, double *e, double *rhob);
-};
 
 //update the four momentum of parton; just an euler step
 void jetParton::updateMomentum(double dtau)
@@ -51,13 +40,10 @@ void jetParton::energyLoss(int nx, int ny, int nz, double dt, double dx, double 
   //get the partons coordinate index
   double xmin = (-1.0) * ((double)(nx - 1) / 2.0) * dx;
   int ix = (int)round((position[1] - xmin) / dx);
-  //printf("ix = %d \n", ix);
   double ymin = (-1.0) * ((double)(ny - 1) / 2.0) * dy;
   int iy = (int)round((position[2] - ymin) / dy);
-  //printf("iy = %d \n", iy);
   double zmin = (-1.0) * ((double)(nz - 1) / 2.0) * dz;
   int iz = (int)round((position[3] - zmin) / dz);
-  //printf("iz = %d \n", iz);
   int s = columnMajorLinearIndex(ix, iy, iz, ncx, ncy);
 
   //safegaurd in case parton leaves grid!

@@ -1,9 +1,8 @@
-/*
- * EquationOfState.cpp
- *
- *  Created on: Oct 22, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #include <math.h>
 #include <cmath>
@@ -293,9 +292,9 @@ PRECISION primaryVariablesConformalEOS(PRECISION e, PRECISION rhob, const PRECIS
 /**************************************************************************************************************************************************/
 
 PRECISION equilibriumEntropy(PRECISION e, PRECISION rhob, PRECISION p, PRECISION T, PRECISION alphaB){
-    PRECISION s = (e + p) / T;// - alphaB * rhob;
+    PRECISION s = (e + p) / T - alphaB * rhob;
     if(s<0.0){
-        printf("Warning: s=%f\t e=%f\t rhob=%f, set to be zero!\n",s,e,rhob);
+        //printf("Warning: s=%f\t e=%f\t rhob=%f, set to be zero!\n",s,e,rhob);
         s = 1.e-10;
     }
     return s;
@@ -396,7 +395,7 @@ PRECISION effectiveTemperature(PRECISION e, PRECISION rhob) {
 #ifndef CONFORMAL_EOS
     return primaryVariablesEOS(e, fabs(rhob), EOState->Temperature);
 #else
-    return powf(e/EOS_FACTOR, 0.25);//primaryVariablesConformalEOS(e, fabs(rhob), EOState->Temperature);
+    return primaryVariablesConformalEOS(e, fabs(rhob), EOState->Temperature);
 #endif
 #endif
 }
@@ -548,82 +547,81 @@ void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __r
     PRECISION rhob0 = rhob;
     
     PrimaryVariables[0] = e/3;
-    PrimaryVariables[1] = powf(e/EOS_FACTOR, 0.25);
     
     if((0<=e0) && (e0<0.0036))
     {
         if((0<=rhob0) && (rhob0<=0.0249)){//zone 1
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.0, 0.0003, 500, 0.00005, 0, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.0, 0.0003, 500, 0.00005, 0, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, rhob0, 0.0, 0.0003, 500, 0.00005, 0, EOState->alphab);
         }
         else{
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, 0.02495, 0.0, 0.0003, 500, 0.00005, 0, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, 0.02495, 0.0, 0.0003, 500, 0.00005, 0, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 0.02495, 0.0, 0.0003, 500, 0.00005, 0, EOState->alphab);
         }
     }
     else if((0.0036<=e0) && (e0<0.015))
     {
         if((0<=rhob0) && (rhob0<=0.0740)){//zone 2
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.0036, 0.0006, 300, 0.00025, 6500, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.0036, 0.0006, 300, 0.00025, 6500, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, rhob0, 0.0036, 0.0006, 300, 0.00025, 6500, EOState->alphab);
         }
         else{
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, 0.07475, 0.0036, 0.0006, 300, 0.00025, 6500, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, 0.07475, 0.0036, 0.0006, 300, 0.00025, 6500, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 0.07475, 0.0036, 0.0006, 300, 0.00025, 6500, EOState->alphab);
         }
     }
     else if((0.015<=e0) && (e0<0.045))
     {
         if((0<=rhob0) && (rhob0<=0.445)){//zone 3
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.015, 0.001, 180, 0.0025, 12500, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.015, 0.001, 180, 0.0025, 12500, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, rhob0, 0.015, 0.001, 180, 0.0025, 12500, EOState->alphab);
         }
         else{
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, 0.4475, 0.015, 0.001, 180, 0.0025, 12500, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, 0.4475, 0.015, 0.001, 180, 0.0025, 12500, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 0.4475, 0.015, 0.001, 180, 0.0025, 12500, EOState->alphab);
         }
     }
     else if((0.045<=e0) && (e0<0.455))
     {
         if((0<=rhob0) && (rhob0<=1.488)){//zone 4
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.045, 0.01, 250, 0.006, 18080, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.045, 0.01, 250, 0.006, 18080, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, rhob0, 0.045, 0.01, 250, 0.006, 18080, EOState->alphab);
         }
         else{
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, 1.494, 0.045, 0.01, 250, 0.006, 18080, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, 1.494, 0.045, 0.01, 250, 0.006, 18080, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 1.494, 0.045, 0.01, 250, 0.006, 18080, EOState->alphab);
         }
     }
     else if((0.455<=e0) && (e0<20.355))
     {
         if((0<=rhob0) && (rhob0<=6.96)){//zone 5
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.455, 0.1, 350, 0.02, 28580, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.455, 0.1, 350, 0.02, 28580, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, rhob0, 0.455, 0.1, 350, 0.02, 28580, EOState->alphab);
         }
         else{
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, 6.98, 0.455, 0.1, 350, 0.02, 28580, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, 6.98, 0.455, 0.1, 350, 0.02, 28580, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 6.98, 0.455, 0.1, 350, 0.02, 28580, EOState->alphab);
         }
     }
     else if((20.355<=e0)&(e0<219.355))
     {
         if((0<=rhob0) && (rhob0<=24.8)){//zone 6
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 20.355, 1, 250, 0.1, 98580, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 20.355, 1, 250, 0.1, 98580, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, rhob0, 20.355, 1, 250, 0.1, 98580, EOState->alphab);
         }
         else{
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, 24.9, 20.355, 1, 250, 0.1, 98580, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, 24.9, 20.355, 1, 250, 0.1, 98580, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 24.9, 20.355, 1, 250, 0.1, 98580, EOState->alphab);
         }
     }
     else
     {
         if((0<=rhob0) && (rhob0<=39.6)){//zone 7
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 219.355, 10, 200, 0.2, 148580, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 219.355, 10, 200, 0.2, 148580, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, rhob0, 219.355, 10, 200, 0.2, 148580, EOState->alphab);
         }
         else{
-            //PrimaryVariables[1] = InferredPrimaryVariable(e0, 39.8, 219.355, 10, 200, 0.2, 148580, EOState->Temperature)/HBARC;
+            PrimaryVariables[1] = InferredPrimaryVariable(e0, 39.8, 219.355, 10, 200, 0.2, 148580, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 39.8, 219.355, 10, 200, 0.2, 148580, EOState->alphab);
         }
     }

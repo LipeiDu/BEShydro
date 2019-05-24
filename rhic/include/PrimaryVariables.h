@@ -1,9 +1,8 @@
-/*
- * PRIMARYVARIABLES.h
- *
- *  Created on: Oct 22, 2015
- *      Author: bazow
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #ifndef PRIMARYVARIABLES_H_
 #define PRIMARYVARIABLES_H_
@@ -25,6 +24,6 @@ PRECISION Tyy(PRECISION e, PRECISION p, PRECISION uy, PRECISION piyy);
 PRECISION Tyn(PRECISION e, PRECISION p, PRECISION uy, PRECISION un, PRECISION piyn);
 PRECISION Tnn(PRECISION e, PRECISION p, PRECISION un, PRECISION pinn, PRECISION t);
 
-PRECISION Nbt(PRECISION rhob, PRECISION ut, PRECISION nbt);//Lipei
+PRECISION Nbt(PRECISION rhob, PRECISION ut, PRECISION nbt);
 
 #endif /* PRIMARYVARIABLES_H_ */

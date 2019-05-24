@@ -1,22 +1,16 @@
-/*
- ============================================================================
- Name        : Run.c
- Author      : Dennis Bazow
- Version     :
- Copyright   :
- Description : Run viscous hydrodynamic simulation of a relativistic heavy ion collision
- ============================================================================
- */
+//**********************************************************************************//
+//  BEShydro: A (3+1)-dimensional diffusive relativistic hydrodynamic code          //
+//                                                                                  //
+//          By Dennis Bazow, Lipei Du, Derek Everett and Ulrich Heinz               //
+//**********************************************************************************//
 
 #include <stdlib.h>
 #include <stdio.h> // for printf
 #include <sys/time.h> // for timing
-#include <unistd.h>		// for current working directory
+#include <unistd.h> // for current working directory
 #include <libconfig.h>
+
 #include "../include/BEShydroLOGO.h"
-
-//#include "gtest/gtest.h" // for unit testing
-
 #include "../include/CommandLineArguments.h"
 #include "../include/LatticeParameters.h"
 #include "../include/InitialConditionParameters.h"
@@ -25,12 +19,7 @@
 
 const char *version = "";
 const char *address = "";
-/*
-int runTest(int argc, char **argv) {
-	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}
-*/
+
 void runHydro(void * latticeParams, void * initCondParams, void * hydroParams, const char *rootDirectory, const char *outputDir) {
 	run(latticeParams, initCondParams, hydroParams, rootDirectory, outputDir);
 }
@@ -48,15 +37,19 @@ int main(int argc, char **argv) {
 	size_t size;
 	rootDirectory = getcwd(rootDirectory,size);
     
+    // show logo and copyright information
     displayLogo();
+    displayCopyright();
 
 	// Print argument values
 	printf("configDirectory = %s\n", cli.configDirectory);
 	printf("outputDirectory = %s\n", cli.outputDirectory);
+    
 	if (cli.runHydro)
 		printf("runHydro = True\n");
 	else
 		printf("runHydro = False\n");
+    
 	if (cli.runTest)
 		printf("runTest = True\n");
 	else
@@ -71,34 +64,24 @@ int main(int argc, char **argv) {
 	config_init(&latticeConfig);
 	loadLatticeParameters(&latticeConfig, cli.configDirectory, &latticeParams);
 	config_destroy(&latticeConfig);
+    
 	// Set initial condition parameters from configuration file
 	config_init(&initCondConfig);
 	loadInitialConditionParameters(&initCondConfig, cli.configDirectory, &initCondParams);
 	config_destroy(&initCondConfig);
+    
 	// Set hydrodynamic parameters from configuration file
 	config_init(&hydroConfig);
 	loadHydroParameters(&hydroConfig, cli.configDirectory, &hydroParams);
 	config_destroy (&hydroConfig);
 
-	//=========================================
-	// Run tests
-	//=========================================
-	/*
-	if (cli.runTest) {
-		int status = runTest(argc, argv);		
-		printf("Done tests.\n");
-	}
-	*/
-	//=========================================
+    //=========================================
 	// Run hydro
 	//=========================================
 	if (cli.runHydro) {
 		runHydro(&latticeParams, &initCondParams, &hydroParams, rootDirectory, cli.outputDirectory);
 		printf("Done hydro.\n");
 	}
-
-	// TODO: Probably should free host memory here since the freezeout plugin will need
-	// to access the energy density, pressure, and fluid velocity.
 
 	return 0;
 }
