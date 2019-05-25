@@ -33,7 +33,7 @@ PRECISION energyDensityFromConservedVariables(PRECISION ePrev, PRECISION M0, PRE
         
         PRECISION A = M0*(1-cst2)+Pi;
         PRECISION B = M0*(M0+Pi)-M;
-        PRECISION H = sqrtf(fabs(A*A+4*cst2*B));
+        PRECISION H = sqrtf(A*A+4*cst2*B);
         PRECISION D = (A-H)/(2*cst2);
         
         PRECISION f = e0 + D;
@@ -46,7 +46,7 @@ PRECISION energyDensityFromConservedVariables(PRECISION ePrev, PRECISION M0, PRE
     printf("ev0 = Maxi_inter.\t ePrev=%.3f,\t M0=%.3f,\t M=%.3f,\t Pi=%.3f \n",ePrev,M0,M,Pi);
     return e0;
 #else
-    return fabs(sqrtf(fabs(4 * M0 * M0 - 3 * M)) - M0);
+    return fabs(sqrtf(4 * M0 * M0 - 3 * M) - M0);
 #endif
 }
 
@@ -96,7 +96,7 @@ PRECISION utauFromConservedVariables(PRECISION M0, PRECISION Ms, PRECISION Pi, P
         
         PRECISION u02 = u0 * u0;
         PRECISION v0 = sqrt(1 - 1 / u02);
-        PRECISION de_du0   = - Ms / (u02 * u0 * v0 + 1.e-10);
+        PRECISION de_du0 = - Ms / (u02 * u0 * v0 + 1.e-10);
         PRECISION drhob_du0 = - N0 / (u02 + 1.e-10);
         PRECISION dp_du0 = dp_drhob * drhob_du0 + dp_de * de_du0;
         
@@ -231,8 +231,6 @@ void InferredVariablesVelocityIterationHydroPlus(PRECISION * const __restrict__ 
         pPlus = peq; // initialize p(+) as equilibrium value
         
         //getPressurePlusFromSlowModes(deltaVariables, &pPlus, equiPhiQ0, PhiQ, e0, rhob0, peq, Teq, alphaBeq, Seq);
-        
-        //printf("deltaVariables0=%8f\t deltaVariables1=%8f\t deltaVariables2=%8f.\n",deltaVariables[3],deltaVariables[0],deltaVariables[1]);
         
         // recalculate the flow velocity, with p(+) from Hydro+
         v0 = Ms/(M0 + pPlus + Pi);
@@ -425,7 +423,8 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
 
 	PRECISION P = *p + Pi;
 	PRECISION E = 1/(*e + P);
-	*ut = sqrtf(fabs((M0 + P) * E));
+    
+	*ut = sqrtf((M0 + P) * E);
 	PRECISION E2 = E/(*ut);
 	*ux = M1 * E2;
 	*uy = M2 * E2;
@@ -520,7 +519,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         printf("v0 = nan.\t vPrev=%5e,\t ePrev=%5e,\t M0=%5e,\t Ms=%5e,\t Pi=%5e,\t rhobPrev=%5e,\t d_nbt=%5e.\n",vPrev,ePrev,M0,Ms,Pi,rhobPrev,N0);
     }
     
-    //if(v0<0.563624&&v0>=0){
+    if(v0<0.563624&&v0>=0){
         
         *e    = M0 - v0 * Ms;
         *rhob = N0 * sqrt(1 - v0*v0);
@@ -536,7 +535,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         *ux = u0 * v1;
         *uy = u0 * v2;
         *un = u0 * v3;
-    /*}
+    }
     else{
         
         utPrev = 1/sqrt(1 - v0*v0);
@@ -557,7 +556,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         *ux = u0 * M1/(M0 + P);
         *uy = u0 * M2/(M0 + P);
         *un = u0 * M3/(M0 + P);
-    }*/
+    }
     
     *T = effectiveTemperature(*e, *rhob);
     *alphaB = chemicalPotentialOverT(*e, *rhob);
@@ -589,9 +588,9 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         printf("v = nan.\t vPrev=%5e,\t ePrev=%5e,\t M0=%5e,\t Ms=%5e,\t Pi=%5e,\t rhobPrev=%5e,\t N0=%5e.\n",vPrev,ePrev,M0,Ms,Pi,rhobPrev,N0);
     }
     
-    //if(v < 0.563624 && v >= 0){
+    if(v < 0.563624 && v >= 0){
         *ut  = 1/sqrt(1 - v * v);
-    /*}
+    }
     else
     {
         utPrev  = 1/sqrt(1 - v*v);
@@ -600,7 +599,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         {
             printf("ut = nan.\t utPrev=%5e,\t ePrev=%5e,\t M0=%5e,\t Ms=%5e,\t Pi=%5e,\t rhobPrev=%5e,\t N0=%5e.\n",utPrev,ePrev,M0,Ms,Pi,rhobPrev,N0);
         }
-    }*/
+    }
     
     // STEP III: with updated pressure(+), update ux, uy, un
     
