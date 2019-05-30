@@ -1200,7 +1200,7 @@ void setBjorkenExpansionInitialCondition(void * latticeParams, void * initCondPa
 
                 e[s] = (PRECISION) ed + 1.e-3;
                 rhob[s] = (PRECISION) rhobd + 1.e-5;
-                p[s] = equilibriumPressure(e[s], rhob[s]);
+                p[s] = equilibriumPressureWB(e[s]);
             }
         }
     }
@@ -1579,7 +1579,7 @@ void setMusicInitialCondition(void * latticeParams, const char *rootDirectory) {
     
     if (file == NULL)
     {
-        printf("Couldn't open Gubser_InitialProfile_IS_Baryon.dat!\n");
+        printf("Couldn't open musictest.dat!\n");
     }
     else
     {
@@ -1955,7 +1955,7 @@ void setSoundPropagationInitialCondition(void * latticeParams, void * initCondPa
                 u->uy[s] = 0;
                 u->un[s] = 0;
                 u->ut[s] = u0;
-                
+#ifdef PIMUNU
                 q->pitt[s] = 0;
                 q->pitx[s] = 0;
                 q->pity[s] = 0;
@@ -1966,6 +1966,7 @@ void setSoundPropagationInitialCondition(void * latticeParams, void * initCondPa
                 q->piyy[s] = 0;
                 q->piyn[s] = 0;
                 q->pinn[s] = 0;
+#endif
             }
         }
     }

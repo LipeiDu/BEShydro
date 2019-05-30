@@ -6,4 +6,4 @@ Instructions on how to use the code can be found in the `BEShydro_User_Manual.pd
 *  _Massively parallel simulations of relativistic fluid dynamics on graphics processing units with CUDA_, Dennis Bazow, Ulrich W. Heinz and Michael Strickland, Comput.Phys.Commun. 225 (2018) 92-113, [arXiv:1608.06577](http://inspirehep.net/record/1482957);
 *  _(3+1)-dimensional dissipative relativistic fluid dynamics at non-zero net baryon density_, Lipei Du and Ulrich W. Heinz, [in preparation].
 
-If you use the code, please cite the papers above.
+This code is based on a CPU version of **GPU-VH** developed by [arXiv:1608.06577](http://inspirehep.net/record/1482957). If you use **BES-Hydro**, please cite the papers above.

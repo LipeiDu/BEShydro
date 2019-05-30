@@ -27,8 +27,8 @@ PRECISION energyDensityFromConservedVariables(PRECISION ePrev, PRECISION M0, PRE
     PRECISION e0 = ePrev;    //initial guess for energy density
     PRECISION rhob0 = rhobPrev;
     for(int j = 0; j < MAX_ITERS; ++j) {
-        PRECISION p = equilibriumPressure(e0, rhob0);
-        PRECISION cs2 = dPdE(e0, rhob0);
+        PRECISION p = equilibriumPressureWB(e0);
+        PRECISION cs2 = dpdeWB(e0);
         PRECISION cst2 = p/e0;
         
         PRECISION A = M0*(1-cst2)+Pi;
@@ -162,8 +162,8 @@ PRECISION velocityIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PR
 // designed for the case with baryon evolution, but no slow modes, not Newton method
 PRECISION utauIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION utPrev, PRECISION absoluteError, PRECISION relativeError) {
     
-    PRECISION utAbsoluteError = 1.0;
-    PRECISION utRelativeError = 1.0;
+    PRECISION utAbsoluteError = 10.0;
+    PRECISION utRelativeError = 10.0;
     
     PRECISION ut0 = utPrev;
     
@@ -179,7 +179,7 @@ PRECISION utauIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PRECIS
         utAbsoluteError = fabs(ut0 - utPrev);
         utRelativeError = 2 * utAbsoluteError/(ut0 + utPrev + 1.e-15);
         
-        if (utAbsoluteError < absoluteError && utRelativeError < relativeError)
+        if (utAbsoluteError < 1.e-6 && utRelativeError < 1.e-8)
             return ut0;
         
         utPrev = ut0;
@@ -418,7 +418,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
 		*e = 1.e-7;
 		*p = 1.e-7;
     }else{
-        *p = equilibriumPressure(*e);
+        *p = equilibriumPressureWB(*e);
     }
 
 	PRECISION P = *p + Pi;
@@ -433,7 +433,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     //baryon density is not evolving by default
     *rhob = rhobPrev;
     
-    *T = effectiveTemperature(*e, *rhob);
+    *T = effectiveTemperatureWB(*e);
     if (*T < 1.e-7) *T = 1.e-7;
     
     *seq = equilibriumEntropy(*e, 0.0, *p, *T, 0.0);
@@ -538,7 +538,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     }
     else{
         
-        utPrev = 1/sqrt(1 - v0*v0);
+        //utPrev = 1/sqrt(1 - v0*v0);
         
         u0 = utauIterationFromConservedVariables(M0, Ms, Pi, N0, utPrev, absoluteError, relativeError);
         

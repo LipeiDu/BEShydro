@@ -571,13 +571,13 @@ void freeHostMemory() {
 	free(u->uy);
 	free(u->un);
     
+#ifdef HydroPlus
     free(Qvec);
-    
     for(unsigned int n = 0; n < NUMBER_SLOW_MODES; ++n){
         free(eqPhiQ->phiQ[n]);
     }
-    
     free(eqPhiQ);
+#endif
 #ifdef CRITICAL
     free(xieq);
 #endif

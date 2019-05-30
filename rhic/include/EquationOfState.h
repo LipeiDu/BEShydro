@@ -12,7 +12,6 @@
 //#define CONFORMAL_EOS
 
 // ideal gas of massless quarks and gluons
-//#define EOS_FACTOR 15.6269 // Nc=3, Nf=3
 #define EOS_FACTOR 13.8997 // Nc=3, Nf=2.5
 
 
@@ -41,6 +40,8 @@ PRECISION dPdE(PRECISION e, PRECISION rhob);
 PRECISION dPdT(PRECISION e, PRECISION rhob);
 
 // Wuppertal-Budapest EoS without baryon
+
+PRECISION dpdeWB(PRECISION e);
 
 PRECISION equilibriumPressureWB(PRECISION e);
 

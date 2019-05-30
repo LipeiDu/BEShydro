@@ -53,7 +53,7 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     // baryon diffusion
     PRECISION tau_n = Cb/T;
     PRECISION taunInv = 1/tau_n;
-    PRECISION kappaB = baryonDiffusionCoefficientKinetic(T, rhob, alphaB, e, p);
+    PRECISION kappaB = baryonDiffusionCoefficientTest(T, rhob, alphaB);//baryonDiffusionCoefficientKinetic(T, rhob, alphaB, e, p);
     ////baryonDiffusionCoefficientAdscft(T, rhob, alphaB, e, p, seq);//
     
     //*********************************************************\

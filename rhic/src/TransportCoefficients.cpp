@@ -55,6 +55,11 @@ PRECISION baryonDiffusionCoefficientKinetic(PRECISION T, PRECISION rhob, PRECISI
     return Cb/T * rhob * (0.3333333 * HyCotangent - rhob*T/(e+p));
 }
 
+// compare to MUSIC
+PRECISION baryonDiffusionCoefficientTest(PRECISION T, PRECISION rhob, PRECISION alphaB){
+    return 0.2 * rhob / (alphaB * T);
+}
+
 // D. T. Son and A. O. Starinets, JHEP 03, 052 (2006).
 PRECISION baryonDiffusionCoefficientAdscft(PRECISION T, PRECISION rhob, PRECISION alphaB, PRECISION e, PRECISION p, PRECISION seq){
     PRECISION fac = rhob*T/(e+p);
