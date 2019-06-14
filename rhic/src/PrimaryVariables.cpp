@@ -27,8 +27,8 @@ PRECISION energyDensityFromConservedVariables(PRECISION ePrev, PRECISION M0, PRE
     PRECISION e0 = ePrev;    //initial guess for energy density
     PRECISION rhob0 = rhobPrev;
     for(int j = 0; j < MAX_ITERS; ++j) {
-        PRECISION p = equilibriumPressureWB(e0);
-        PRECISION cs2 = dpdeWB(e0);
+        PRECISION p = equilibriumPressure(e0, rhobPrev);
+        PRECISION cs2 = dPdE(e0, rhobPrev);
         PRECISION cst2 = p/e0;
         
         PRECISION A = M0*(1-cst2)+Pi;
@@ -418,7 +418,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
 		*e = 1.e-7;
 		*p = 1.e-7;
     }else{
-        *p = equilibriumPressureWB(*e);
+        *p = equilibriumPressure(*e, *rhob);
     }
 
 	PRECISION P = *p + Pi;
@@ -433,7 +433,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     //baryon density is not evolving by default
     *rhob = rhobPrev;
     
-    *T = effectiveTemperatureWB(*e);
+    *T = effectiveTemperature(*e, *rhob);
     if (*T < 1.e-7) *T = 1.e-7;
     
     *seq = equilibriumEntropy(*e, 0.0, *p, *T, 0.0);
