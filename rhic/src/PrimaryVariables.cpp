@@ -43,7 +43,7 @@ PRECISION energyDensityFromConservedVariables(PRECISION ePrev, PRECISION M0, PRE
         if(fabs(e - e0) <=  0.001 * fabs(e)) return e;
         e0 = e;
     }
-    printf("ev0 = Maxi_inter.\t ePrev=%.3f,\t M0=%.3f,\t M=%.3f,\t Pi=%.3f \n",ePrev,M0,M,Pi);
+    printf("ev0 = Maxiter.\t ePrev=%.3f,\t M0=%.3f,\t M=%.3f,\t Pi=%.3f \n",ePrev,M0,M,Pi);
     return e0;
 #else
     return fabs(sqrtf(4 * M0 * M0 - 3 * M) - M0);

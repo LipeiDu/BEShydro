@@ -7,7 +7,7 @@
 #ifndef DYNAMICALSOURCE_H_
 #define DYNAMICALSOURCE_H_
 
-void noSource(void * latticeParams, void * initCondParams);
+void zeroSource(void * latticeParams, void * initCondParams);
 
 void readInSource(int n, void * latticeParams, void * initCondParams, void * hydroParams, const char *rootDirectory);
 

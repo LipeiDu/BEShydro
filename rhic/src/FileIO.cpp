@@ -11,6 +11,8 @@
 #include "../include/LatticeParameters.h"
 #include "../include/DynamicalVariables.h"
 
+//#define OUTPUT_SLICE
+
 void output(const PRECISION * const var, double t, const char *pathToOutDir, const char *name, void * latticeParams) {
 	FILE *fp;
 	char fname[255];
@@ -37,7 +39,11 @@ void output(const PRECISION * const var, double t, const char *pathToOutDir, con
 			for(i = 2; i < nx+2; ++i) {
 				x = (i-2 - (nx-1)/2.)*dx;
 				s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+#ifndef OUTPUT_SLICE
 				fprintf(fp, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,var[s]);
+#else
+                if(j == (ny+3)/2) fprintf(fp, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,var[s]);
+#endif
 			}
 		}
 	}

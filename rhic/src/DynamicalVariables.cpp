@@ -34,7 +34,7 @@ EQUATION_OF_STATE *EOState;
 
 BARYON_DIFFUSION_COEFF *BaryDiffCoeff;
 
-DYNAMICAL_SOURCE *Source;
+DYNAMICAL_SOURCES *Source;
 
 PRECISION *Qvec; // Q vectors of slow modes
 
@@ -215,12 +215,14 @@ void allocateHostMemory(int len) {
     //=======================================================================
     
     // dynamical source terms
-    Source = (DYNAMICAL_SOURCE *)calloc(1, sizeof(DYNAMICAL_SOURCE));
+#ifdef DYNAMICAL_SOURCE
+    Source = (DYNAMICAL_SOURCES *)calloc(1, sizeof(DYNAMICAL_SOURCES));
     Source->sourcet = (PRECISION *)calloc(len, bytes);
     Source->sourcex = (PRECISION *)calloc(len, bytes);
     Source->sourcey = (PRECISION *)calloc(len, bytes);
     Source->sourcen = (PRECISION *)calloc(len, bytes);
     Source->sourceb = (PRECISION *)calloc(len, bytes);
+#endif
     
     // equation of state table
     EOState = (EQUATION_OF_STATE *)calloc(1, sizeof(EQUATION_OF_STATE));
@@ -529,11 +531,13 @@ void swapPrimaryVariables(PRECISION **arr1, PRECISION **arr2) {
 /**************************************************************************************************************************************************/
 
 void freeHostMemory() {
+#ifdef DYNAMICAL_SOURCE
     free(Source->sourcet);
     free(Source->sourcex);
     free(Source->sourcey);
     free(Source->sourcen);
     free(Source->sourceb);
+#endif
 
     free(EOState->Pressure);
     free(EOState->Temperature);

@@ -756,7 +756,7 @@ void longitudinalBaryonDensityDistribution(double * const __restrict__ rhoLa, do
 /**************************************************************************************************************************************************/
 /* Initial conditions for hydro with dynamical sources
 /**************************************************************************************************************************************************/
-void setICfromSource(void * latticeParams, void * initCondParams, void * hydroParams, const char * rootDirectory){
+void setDynamicalSourceInitialCondition(void * latticeParams, void * initCondParams, void * hydroParams, const char * rootDirectory){
     
     struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
     struct InitialConditionParameters * initCond = (struct InitialConditionParameters *) initCondParams;
@@ -780,330 +780,121 @@ void setICfromSource(void * latticeParams, void * initCondParams, void * hydroPa
     double dz = lattice->latticeSpacingRapidity;
     double t0 = hydro->initialProperTimePoint;
     
-    int DIM_X = lattice->numLatticePointsX;
-    int DIM_Y = lattice->numLatticePointsY;
-    int DIM_ETA = lattice->numLatticePointsRapidity;
-    int DIM = ncx*ncy*ncz;
-    
-    double DX = lattice->latticeSpacingX;
-    double DY = lattice->latticeSpacingY;
-    double DETA = lattice->latticeSpacingRapidity;
-    double TAU = hydro->initialProperTimePoint;
-    
     switch(sourceType){
             
-            //==================================================
-            // Initialize to vacuum
-            //==================================================
+        case 0: {
             
-            case 0: {
-                
-                printf("initialized to be vaccum \n");
-                
-                double ed = initialEnergyDensity;
-                double rhobd = initialBaryonDensity;
-                double pd = equilibriumPressure(ed, rhobd);
-                
-                //--------------------------------------------------
-                // Initialize energy, baryon and pressure density, also
-                // shear, bulk, flow velocity and baryon diffusion current
-                //--------------------------------------------------
-                
-                printf("Initialize \\pi^\\mu\\nu to zero.\n");
-                printf("Initialize \\nb^\\mu to zero.\n");
+            printf("initialized to be vaccum \n");
+            
+            double ed = initialEnergyDensity;
+            double rhobd = initialBaryonDensity;
+            double pd = equilibriumPressure(ed, rhobd);
+            
+            printf("Initialize \\pi^\\mu\\nu to zero.\n");
+            printf("Initialize \\nb^\\mu to zero.\n");
 
-                for(int i = 2; i < nx+2; ++i) {
-                    for(int j = 2; j < ny+2; ++j) {
-                        for(int k = 2; k < nz+2; ++k) {
-                            int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
-                            
-                            e[s] = (PRECISION) ed;
-                            rhob[s] = rhobd;
-                            p[s] = pd;
-                            
-                            PRECISION ux = 0;
-                            PRECISION uy = 0;
-                            PRECISION un = 0;
-                            
-                            u->ux[s] = 0;
-                            u->uy[s] = 0;
-                            u->un[s] = 0;
-                            u->ut[s] = sqrt(1+ux*ux+uy*uy+t0*t0*un*un);
-                            
-#ifdef PIMUNU
-                            q->pitt[s] = 0;
-                            q->pitx[s] = 0;
-                            q->pity[s] = 0;
-                            q->pitn[s] = 0;
-                            q->pixx[s] = 0;
-                            q->pixy[s] = 0;
-                            q->pixn[s] = 0;
-                            q->piyy[s] = 0;
-                            q->piyn[s] = 0;
-                            q->pinn[s] = 0;
-#endif
-#ifdef PI
-                            q->Pi[s] = 0;
-#endif
-#ifdef VMU
-                            q->nbt[s] = 0;
-                            q->nbx[s] = 0;
-                            q->nby[s] = 0;
-                            q->nbn[s] = 0;
-#endif
-                        }
-                    }
-                }
-                
-                return;
-            }
-            
-            //==================================================
-            // Initialize to distributions in the Landau Frame
-            //==================================================
-            
-            case 1: {
-                
-                printf("initialized with distributions in the Landau frame \n");
-                
-                //--------------------------------------------------
-                // Solve eigenvalue problem in the Landau Frame
-                //--------------------------------------------------
-                
-                double ttt_in, ttx_in, tty_in, ttn_in, txx_in, txy_in, txn_in, tyy_in, tyn_in, tnn_in;
-                double stressTensor[10][DIM];
-                
-                FILE *fileIn;
-                char fname[255];
-                
-                sprintf(fname, "%s/%s", rootDirectory, "source/initialTmunu.dat");
-                
-                fileIn = fopen(fname, "r");
-                if (fileIn == NULL)
-                {
-                    printf("Couldn't open initialTmunu.dat!\n");
-                }
-                else
-                {
-                    for(int i = 2; i < DIM_X+2; ++i) {
-                        for(int j = 2; j < DIM_Y+2; ++j) {
-                            for(int k = 2; k < DIM_ETA+2; ++k) {
-                                fscanf(fileIn, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", &ttt_in, &ttx_in, &tty_in, &ttn_in, &txx_in, &txy_in, &txn_in, &tyy_in, &tyn_in, &tnn_in);
-                                int is = columnMajorLinearIndex(i, j, k, DIM_X+4, DIM_Y+4);
-                                stressTensor[0][is] = ttt_in;
-                                stressTensor[1][is] = ttx_in;
-                                stressTensor[2][is] = tty_in;
-                                stressTensor[3][is] = ttn_in;
-                                stressTensor[4][is] = txx_in;
-                                stressTensor[5][is] = txy_in;
-                                stressTensor[6][is] = txn_in;
-                                stressTensor[7][is] = tyy_in;
-                                stressTensor[8][is] = tyn_in;
-                                stressTensor[9][is] = tnn_in;
-                            }
-                        }
-                    }
-                }
-                
-                float tolerance = 1.0e-3; //set energy density to tolerance if it is less than tolerance and if REGULATE is true
-                
-                for (int is = 0; is < DIM; is++)
-                {
-                    gsl_matrix *Tmunu; //T^(mu,nu) with two contravariant indices; we need to lower an index
-                    //using the metric to find the eigenvectors of T^(mu)_(nu) with one contravariant and one contravariant index
-                    Tmunu = gsl_matrix_alloc(4,4);
-                    gsl_matrix *gmunu;
-                    gmunu = gsl_matrix_alloc(4,4);
-                    gsl_matrix_complex *eigen_vectors;
-                    eigen_vectors = gsl_matrix_complex_alloc(4,4);
-                    gsl_vector_complex *eigen_values;
-                    eigen_values = gsl_vector_complex_alloc(4);
-                    //set the values of the energy momentum tensor
-                    gsl_matrix_set(Tmunu, 0, 0, stressTensor[0][is]); //tau,tau
-                    gsl_matrix_set(Tmunu, 0, 1, stressTensor[1][is]); //tau,x
-                    gsl_matrix_set(Tmunu, 0, 2, stressTensor[2][is]); //tau,y
-                    gsl_matrix_set(Tmunu, 0, 3, stressTensor[3][is]); //tau,eta
-                    gsl_matrix_set(Tmunu, 1, 1, stressTensor[4][is]); //x,x
-                    gsl_matrix_set(Tmunu, 1, 2, stressTensor[5][is]); //x,y
-                    gsl_matrix_set(Tmunu, 1, 3, stressTensor[6][is]); //x,eta
-                    gsl_matrix_set(Tmunu, 2, 2, stressTensor[7][is]); //y,y
-                    gsl_matrix_set(Tmunu, 2, 3, stressTensor[8][is]); //y,eta
-                    gsl_matrix_set(Tmunu, 3, 3, stressTensor[9][is]); //eta,eta
-                    gsl_matrix_set(Tmunu, 1, 0, stressTensor[1][is]); //x,tau
-                    gsl_matrix_set(Tmunu, 2, 0, stressTensor[2][is]); //y,tau
-                    gsl_matrix_set(Tmunu, 3, 0, stressTensor[3][is]); //eta,tau
-                    gsl_matrix_set(Tmunu, 2, 1, stressTensor[5][is]); //y,x
-                    gsl_matrix_set(Tmunu, 3, 1, stressTensor[6][is]); //eta,x
-                    gsl_matrix_set(Tmunu, 3, 2, stressTensor[8][is]); //eta,y
-                    
-                    //set the values of the "metric"; not really the metric, but the numerical constants
-                    //which are multiplied by the elements of T^(mu,nu) to get the values of T^(mu)_(nu)
-                    //note factors of TAU appropriate for milne coordinates g_(mu.nu) = diag(1,-1,-1,-TAU^2)
-                    gsl_matrix_set(gmunu, 0, 0, 1.0); //tau,tau
-                    gsl_matrix_set(gmunu, 0, 1, -1.0); //tau,x
-                    gsl_matrix_set(gmunu, 0, 2, -1.0); //tau,y
-                    gsl_matrix_set(gmunu, 0, 3, -1.0*TAU*TAU); //tau,eta
-                    gsl_matrix_set(gmunu, 1, 0, 1.0); //x,tau
-                    gsl_matrix_set(gmunu, 1, 1, -1.0); //x,x
-                    gsl_matrix_set(gmunu, 1, 2, -1.0); //x,y
-                    gsl_matrix_set(gmunu, 1, 3, -1.0*TAU*TAU); //x,eta
-                    gsl_matrix_set(gmunu, 2, 0, 1.0); //y,tau
-                    gsl_matrix_set(gmunu, 2, 1, -1.0); //y,x
-                    gsl_matrix_set(gmunu, 2, 2, -1.0); //y,y
-                    gsl_matrix_set(gmunu, 2, 3, -1.0*TAU*TAU); //y,eta
-                    gsl_matrix_set(gmunu, 3, 0, 1.0); //eta,tau
-                    gsl_matrix_set(gmunu, 3, 1, -1.0); //eta,x
-                    gsl_matrix_set(gmunu, 3, 2, -1.0); //eta,y
-                    gsl_matrix_set(gmunu, 3, 3, -1.0*TAU*TAU); //eta,eta
-                    //lower one index of the stress tensor; save it to the same matrix to save memory
-                    gsl_matrix_mul_elements(Tmunu, gmunu); //result stored in Tmunu !this multiplies element-wise, not ordinary matrix multiplication!
-                    gsl_eigen_nonsymmv_workspace *eigen_workspace;
-                    eigen_workspace = gsl_eigen_nonsymmv_alloc(4);
-                    gsl_eigen_nonsymmv(Tmunu, eigen_values, eigen_vectors, eigen_workspace);
-                    gsl_eigen_nonsymmv_free(eigen_workspace);
-                    
-                    //***does this have a solution for energy density and flow at every point?
-                    int eigenvalue_exists = 0;
-                    for (int i = 0; i < 4; i++)
-                    {
-                        gsl_complex eigenvalue = gsl_vector_complex_get(eigen_values, i);
+            for(int i = 2; i < nx+2; ++i) {
+                for(int j = 2; j < ny+2; ++j) {
+                    for(int k = 2; k < nz+2; ++k) {
+                        int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                         
-                        if (GSL_REAL(eigenvalue) > 0.0 && GSL_IMAG(eigenvalue) == 0) //choose eigenvalue
-                        {
-                            gsl_complex v0 = gsl_matrix_complex_get(eigen_vectors, 0 , i);
-                            gsl_complex v1 = gsl_matrix_complex_get(eigen_vectors, 1 , i);
-                            gsl_complex v2 = gsl_matrix_complex_get(eigen_vectors, 2 , i);
-                            gsl_complex v3 = gsl_matrix_complex_get(eigen_vectors, 3 , i);
-                            
-                            if (GSL_IMAG(v0) == 0 && (2.0 * GSL_REAL(v0) * GSL_REAL(v0) - 1.0 - (GSL_REAL(v3) * GSL_REAL(v3) * (TAU * TAU - 1.0) )) > 0) //choose timelike eigenvector
-                            {
-                                double minkowskiLength = GSL_REAL(v0)*GSL_REAL(v0) - (GSL_REAL(v1)*GSL_REAL(v1) + GSL_REAL(v2)*GSL_REAL(v2) + TAU*TAU*GSL_REAL(v3)*GSL_REAL(v3));
-                                double factor = 1.0 / sqrt(minkowskiLength);
-                                
-                                if (GSL_REAL(v0) < 0) factor=-factor;
-                                
-                                //ignore eigenvectors with gamma >~ 60
-                                if ( (GSL_REAL(v0) * factor) < GAMMA_MAX)
-                                {
-                                    eigenvalue_exists = 1;
-                                    e[is] = GSL_REAL(eigenvalue);
-                                    u->ut[is] = GSL_REAL(v0) * factor;
-                                    u->ux[is] = GSL_REAL(v1) * factor;
-                                    u->uy[is] = GSL_REAL(v2) * factor;
-                                    u->un[is] = GSL_REAL(v3) * factor;
-                                }
-                                
-                            } // if (GSL_IMAG(v0) == 0 && (2.0 * GSL_REAL(v0) * GSL_REAL(v0) - 1.0 - (GSL_REAL(v3) * GSL_REAL(v3) * (TAU * TAU - 1.0) )) > 0) //choose timelike eigenvector
-                        } // if (GSL_REAL(eigenvalue) > 0.0 && GSL_IMAG(eigenvalue) == 0) //choose eigenvalue
-                    } //for (int i = 0; i < 4; ...)
-                    
-                    if (eigenvalue_exists == 0)
-                    {
-                        //in dilute regions where we can't find a timelike eigenvector, set e = 0, u^t = 1, u^x=u^y=u^n=0
-                        e[is] = 0.0;
-                        u->ut[is] = 1.0;
-                        u->ux[is] = 0.0;
-                        u->uy[is] = 0.0;
-                        u->un[is] = 0.0;
-                    }
-                } // for (int is; is < DIM; ...)
-                
-                
-                //--------------------------------------------------
-                // Initialize flow velocity, energy, pressure and baryon densities
-                //--------------------------------------------------
-                
-                //now regulate the flow velocity by a smoothing procedure. Flow can be too large in dilute regions, cause hydro to crash...
-                //this method doesnt yield a smooth profile
-                
-                //try scaling the flow velocity by a smooth profile which goes to zero after some finite radius
-                if (REGULATE)
-                {
-                    printf("Regulating flow velocity profile in dilute regions \n");
-                    for(int i = 2; i < DIM_X+2; ++i) {
-                        double x = (i-2 - (DIM_X-1)/2.)*DX;
-                        for(int j = 2; j < DIM_Y+2; ++j) {
-                            double y = (j-2 - (DIM_Y-1)/2.)*DY;
-                            for(int k = 2; k < DIM_ETA+2; ++k) {
-                                
-                                int is = columnMajorLinearIndex(i, j, k, DIM_X+4, DIM_Y+4);
-                                
-                                double r = sqrt(x*x + y*y);
-                                //printf("r=%f\n",r);
-                                
-                                float R_WIDTH = 0.6;
-                                float R_FLAT = 4.5;
-                                float arg = (-1.0) * (r - R_FLAT) * (r - R_FLAT) / (2.0 * R_WIDTH * R_WIDTH);
-                                arg = arg * THETA_FUNCTION(r - R_FLAT);
-                                
-                                u->ux[is] = u->ux[is] * exp(arg);
-                                u->uy[is] = u->uy[is] * exp(arg);
-                                u->un[is] = 0.0;
-                                
-                                u->ut[is] = sqrt( 1 + u->ux[is]*u->ux[is] + u->uy[is]*u->uy[is] + TAU*TAU*u->un[is]*u->un[is]);
-                            }
-                        }
+                        e[s] = (PRECISION) 1.e-3;
+                        rhob[s] = 1.e-5;
+                        p[s] = 1.e-3;
+                        
+                        PRECISION ux = 0;
+                        PRECISION uy = 0;
+                        PRECISION un = 0;
+                        
+                        u->ux[s] = 0;
+                        u->uy[s] = 0;
+                        u->un[s] = 0;
+                        u->ut[s] = 0;//sqrt(1+ux*ux+uy*uy+t0*t0*un*un);
+                        
+#ifdef PIMUNU
+                        q->pitt[s] = 0;
+                        q->pitx[s] = 0;
+                        q->pity[s] = 0;
+                        q->pitn[s] = 0;
+                        q->pixx[s] = 0;
+                        q->pixy[s] = 0;
+                        q->pixn[s] = 0;
+                        q->piyy[s] = 0;
+                        q->piyn[s] = 0;
+                        q->pinn[s] = 0;
+#endif
+#ifdef PI
+                        q->Pi[s] = 0;
+#endif
+#ifdef VMU
+                        q->nbt[s] = 0;
+                        q->nbx[s] = 0;
+                        q->nby[s] = 0;
+                        q->nbn[s] = 0;
+#endif
                     }
                 }
-                
-                for(int i = 2; i < DIM_X+2; ++i) {
-                    for(int j = 2; j < DIM_Y+2; ++j) {
-                        for(int k = 2; k < DIM_ETA+2; ++k) {
-                            int is = columnMajorLinearIndex(i, j, k, DIM_X+4, DIM_Y+4);
-                            
-                            u->ux[is] = 0.0;
-                            u->uy[is] = 0.0;
-                            u->un[is] = 0.0;
-                            u->ut[is] = sqrt( 1 + u->ux[is]*u->ux[is] + u->uy[is]*u->uy[is] + TAU*TAU*u->un[is]*u->un[is]);
-                            
-                            e[is] = e[is] + initialEnergyDensity;
-
-                            p[is] = equilibriumPressureWB(e[is]);
-                        }
-                    }
-                }
-                fclose(fileIn);
-                
-                //--------------------------------------------------
-                // Initialize shear, bulk, and baryon diffusion current
-                //--------------------------------------------------
-                
-                printf("Initialize \\pi^\\mu\\nu to zero.\n");
-                printf("Initialize \\nb^\\mu to zero.\n");
-                
-                int nx = lattice->numLatticePointsX;
-                int ny = lattice->numLatticePointsY;
-                int nz = lattice->numLatticePointsRapidity;
+            }
+            
+            return;
+        }
+            
+        case 1: {
+            printf("initialized with distributions in the Landau frame \n");
+            
+            float x, y, z, e_in, p_in, ut_in, ux_in, uy_in, un_in;
+            float pitt_in, pitx_in, pity_in, pitn_in, pixx_in, pixy_in, pixn_in, piyy_in, piyn_in, pinn_in;
+            float Pi_in;
+            
+            FILE *fileIn;
+            char fname[255];
+            
+            sprintf(fname, "%s/%s", rootDirectory, "/input/dynamical-source/Tmunu.dat");
+            fileIn = fopen(fname, "r");
+            if (fileIn == NULL)
+            {
+                printf("Couldn't open Tmunu.dat!\n");
+            }
+            else
+            {
                 for(int i = 2; i < nx+2; ++i) {
                     for(int j = 2; j < ny+2; ++j) {
                         for(int k = 2; k < nz+2; ++k) {
+                            fscanf(fileIn, "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n", &x, &y, &z, &e_in, &p_in, &ut_in, &ux_in, &uy_in, &un_in, &pitt_in, &pitx_in, &pity_in, &pitn_in, &pixx_in, &pixy_in, &pixn_in, &piyy_in, &piyn_in, &pinn_in, &Pi_in);
+                            
                             int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+                            
+                            e[s] =  (PRECISION) e_in + 1.e-5;
+                            p[s] = p_in + 1.e-5;
+                            
+                            u->ut[s] = ut_in;
+                            u->ux[s] = ux_in;
+                            u->uy[s] = uy_in;
+                            u->un[s] = un_in;
+                            
 #ifdef PIMUNU
-                            q->pitt[s] = 0;
-                            q->pitx[s] = 0;
-                            q->pity[s] = 0;
-                            q->pitn[s] = 0;
-                            q->pixx[s] = 0;
-                            q->pixy[s] = 0;
-                            q->pixn[s] = 0;
-                            q->piyy[s] = 0;
-                            q->piyn[s] = 0;
-                            q->pinn[s] = 0;
+                            q->pitt[s] = pitt_in;
+                            q->pitx[s] = pitx_in;
+                            q->pity[s] = pity_in;
+                            q->pitn[s] = pitn_in;
+                            q->pixx[s] = pixx_in;
+                            q->pixy[s] = pixy_in;
+                            q->pixn[s] = pixn_in;
+                            q->piyy[s] = piyy_in;
+                            q->piyn[s] = piyn_in;
+                            q->pinn[s] = pinn_in;
 #endif
 #ifdef PI
-                            q->Pi[s] = 0;
-#endif
-#ifdef VMU
-                            q->nbt[s] = 0;
-                            q->nbx[s] = 0;
-                            q->nby[s] = 0;
-                            q->nbn[s] = 0;
+                            q->Pi[s] = Pi_in;
 #endif
                         }
                     }
                 }
-                return;
             }
+            fclose(fileIn);
+            
+            return;
+        }
     }
 }
 
@@ -2063,7 +1854,7 @@ void setInitialConditions(void * latticeParams, void * initCondParams, void * hy
         }
         case 13:{
             printf("Hydro with dynamical sources...\n");
-            setICfromSource(latticeParams, initCondParams, hydroParams, rootDirectory);
+            setDynamicalSourceInitialCondition(latticeParams, initCondParams, hydroParams, rootDirectory);
             return;
         }
         case 14:{

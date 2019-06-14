@@ -32,7 +32,7 @@
 #include "../include/DynamicalSources.h"
 #include "../include/HydroAnalysis.h"
 
-#define FREQ 200 //write output to file every FREQ timesteps
+#define FREQ 1 //write output to file every FREQ timesteps
 #define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
 #define JET 0 // 0 to turn off jet evolution, 1 to turn it on
@@ -43,29 +43,29 @@
 void outputDynamicalQuantities(double t, const char *outputDir, void * latticeParams)
 {
   output(e, t, outputDir, "e", latticeParams);
-  //output(p, t, outputDir, "p", latticeParams);
+  output(p, t, outputDir, "p", latticeParams);
   //output(seq, t, outputDir, "seq", latticeParams);
-  //output(u->ux, t, outputDir, "ux", latticeParams);
-  //output(u->uy, t, outputDir, "uy", latticeParams);
-  //output(u->un, t, outputDir, "un", latticeParams);
-  //output(u->ut, t, outputDir, "ut", latticeParams);
-  //output(q->ttt, t, outputDir, "ttt", latticeParams);
-  //output(q->ttx, t, outputDir, "ttx", latticeParams);
-  //output(q->tty, t, outputDir, "tty", latticeParams);
-  //output(q->ttn, t, outputDir, "ttn", latticeParams);
+  output(u->ux, t, outputDir, "ux", latticeParams);
+  output(u->uy, t, outputDir, "uy", latticeParams);
+  output(u->un, t, outputDir, "un", latticeParams);
+  output(u->ut, t, outputDir, "ut", latticeParams);
+  output(q->ttt, t, outputDir, "ttt", latticeParams);
+  output(q->ttx, t, outputDir, "ttx", latticeParams);
+  output(q->tty, t, outputDir, "tty", latticeParams);
+  output(q->ttn, t, outputDir, "ttn", latticeParams);
   #ifdef PIMUNU
-  //output(q->pitx, t, outputDir, "pitx", latticeParams);
-  //output(q->pixx, t, outputDir, "pixx", latticeParams);
-  //output(q->pixy, t, outputDir, "pixy", latticeParams);
-  //output(q->pixn, t, outputDir, "pixn", latticeParams);
-  //output(q->piyy, t, outputDir, "piyy", latticeParams);
-  //output(q->piyn, t, outputDir, "piyn", latticeParams);
-  //output(q->pinn, t, outputDir, "pinn", latticeParams);
+  output(q->pitx, t, outputDir, "pitx", latticeParams);
+  output(q->pixx, t, outputDir, "pixx", latticeParams);
+  output(q->pixy, t, outputDir, "pixy", latticeParams);
+  output(q->pixn, t, outputDir, "pixn", latticeParams);
+  output(q->piyy, t, outputDir, "piyy", latticeParams);
+  output(q->piyn, t, outputDir, "piyn", latticeParams);
+  output(q->pinn, t, outputDir, "pinn", latticeParams);
   #endif
   #ifdef PI
-  //output(q->Pi, t, outputDir, "Pi", latticeParams);
+  output(q->Pi, t, outputDir, "Pi", latticeParams);
   #endif
-  //output(T, t, outputDir, "T", latticeParams);
+  output(T, t, outputDir, "T", latticeParams);
   #ifdef NBMU
   output(rhob, t, outputDir, "rhob", latticeParams);
   //output(alphaB, t, outputDir, "alphaB", latticeParams);
@@ -338,10 +338,12 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     //=======================================================
       
     // Read in source terms from particles
+#ifdef DYNAMICAL_SOURCE
     if(initialConditionType==13){
           if(n <= numberOfSourceFiles) readInSource(n, latticeParams, initCondParams, hydroParams, rootDirectory);
-          else if(n == numberOfSourceFiles + 1) noSource(latticeParams, initCondParams);
+          else if(n == numberOfSourceFiles + 1) zeroSource(latticeParams, initCondParams);
     }
+#endif
       
     //=======================================================
     //*  RK-KT algorithm

@@ -36,19 +36,12 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
 	int ny = lattice->numLatticePointsY;
 	int nz = lattice->numLatticePointsRapidity;
 
-    // For each time step, the total number of cells in 3D space
-    int nElements = nx * ny * nz;
-    
-    double t0 = hydro->initialProperTimePoint;
-    double dt = lattice->latticeSpacingProperTime;
-    
-    double t = t0 + (n-1)* dt;
-    double time;
-
     FILE *sourcefile;
     char fname[255];
-    sprintf(fname, "%s/%s%d.dat", rootDirectory, "source/Sources",n);
+    sprintf(fname, "%s/%s%d.dat", rootDirectory, "input/dynamical-source/Sources",n);
     sourcefile = fopen(fname, "r");
+    
+    double x, y, z;
 
     if(sourcefile==NULL){
         printf("The source file could not be opened...\n");
@@ -62,7 +55,7 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
          for(int j = 2; j < ny+2; ++j){
              for(int k = 2; k < nz+2; ++k){
                int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
-               fscanf(sourcefile,"%le %le %le %le %le %*s%*s%*s%*s%*s%*s%*s", & Source->sourcet[s], & Source->sourcex[s], & Source->sourcey[s], & Source->sourcen[s], & Source->sourceb[s]);
+               fscanf(sourcefile,"%le %le %le %le %le %le %le %le\n", &x, &y, &z, & Source->sourcet[s], & Source->sourcex[s], & Source->sourcey[s], & Source->sourcen[s], & Source->sourceb[s]);
              }
           }
        }
@@ -75,7 +68,7 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
 /* When dynamical source ends, zero it
 /**************************************************************************************************************************************************/
 
-void noSource(void * latticeParams, void * initCondParams)
+void zeroSource(void * latticeParams, void * initCondParams)
 {
     struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
     struct InitialConditionParameters * initCond = (struct InitialConditionParameters *) initCondParams;

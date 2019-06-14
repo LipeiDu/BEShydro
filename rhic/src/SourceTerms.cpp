@@ -564,7 +564,7 @@ PRECISION d_dz
 /* load source terms for all components, but exclude source terms directly dependent of gradients of shear, bulk and baryon diffusion
 /**************************************************************************************************************************************************/
 
-void loadSourceTerms2(const PRECISION * const __restrict__ Q, PRECISION * const __restrict__ S, const FLUID_VELOCITY * const __restrict__ u, PRECISION utp, PRECISION uxp, PRECISION uyp, PRECISION unp, PRECISION t, const PRECISION * const __restrict__ evec, const PRECISION * const __restrict__ pvec, int s, int d_ncx, int d_ncy, int d_ncz, PRECISION d_etabar, PRECISION d_dt, PRECISION d_dx, PRECISION d_dy, PRECISION d_dz, const DYNAMICAL_SOURCE * const __restrict__ Source, const PRECISION * const __restrict__ rhobvec, PRECISION rhobp, const PRECISION * const __restrict__ alphaBvec, PRECISION alphaBp, const PRECISION * const __restrict__ Tvec, PRECISION Tp, PRECISION seq, const SLOW_MODES *  const __restrict__ eqPhiQ)
+void loadSourceTerms2(const PRECISION * const __restrict__ Q, PRECISION * const __restrict__ S, const FLUID_VELOCITY * const __restrict__ u, PRECISION utp, PRECISION uxp, PRECISION uyp, PRECISION unp, PRECISION t, const PRECISION * const __restrict__ evec, const PRECISION * const __restrict__ pvec, int s, int d_ncx, int d_ncy, int d_ncz, PRECISION d_etabar, PRECISION d_dt, PRECISION d_dx, PRECISION d_dy, PRECISION d_dz, const DYNAMICAL_SOURCES * const __restrict__ Source, const PRECISION * const __restrict__ rhobvec, PRECISION rhobp, const PRECISION * const __restrict__ alphaBvec, PRECISION alphaBp, const PRECISION * const __restrict__ Tvec, PRECISION Tp, PRECISION seq, const SLOW_MODES *  const __restrict__ eqPhiQ)
 {
 	//=========================================================
 	// conserved variables
@@ -845,10 +845,17 @@ void loadSourceTerms2(const PRECISION * const __restrict__ Q, PRECISION * const 
     PRECISION dkvk = dxvx + dyvy + dnvn;
     
     // added dynamical source terms
+#ifdef DYNAMICAL_SOURCE
 	S[0] = Source->sourcet[s] - (ttt / t + t * tnn) + dkvk*(pitt-p-Pi) - vx*dxp - vy*dyp - vn*dnp;
 	S[1] = Source->sourcex[s] - ttx/t -dxp + dkvk*pitx;
 	S[2] = Source->sourcey[s] - tty/t -dyp + dkvk*pity;
 	S[3] = Source->sourcen[s] - 3*ttn/t -dnp/pow(t,2) + dkvk*pitn;
+#else
+    S[0] = - (ttt / t + t * tnn) + dkvk*(pitt-p-Pi) - vx*dxp - vy*dyp - vn*dnp;
+    S[1] = - ttx/t -dxp + dkvk*pitx;
+    S[2] = - tty/t -dyp + dkvk*pity;
+    S[3] = - 3*ttn/t -dnp/pow(t,2) + dkvk*pitn;
+#endif
 #ifdef USE_CARTESIAN_COORDINATES
 	S[0] = + dkvk*(pitt-p-Pi) - vx*dxp - vy*dyp - vn*dnp;
 	S[1] = - dxp + dkvk*pitx;
@@ -860,7 +867,11 @@ void loadSourceTerms2(const PRECISION * const __restrict__ Q, PRECISION * const 
     // N^{\mu} source terms
     //=========================================================
 #ifdef NBMU
+#ifdef DYNAMICAL_SOURCE
     S[NUMBER_CONSERVED_VARIABLES] = Source->sourceb[s] - Nbt/t + dkvk*nbt;
+#else
+    S[NUMBER_CONSERVED_VARIABLES] = - Nbt/t + dkvk*nbt;
+#endif
 #ifdef USE_CARTESIAN_COORDINATES
     S[NUMBER_CONSERVED_VARIABLES] = + dkvk*nbt;
 #endif

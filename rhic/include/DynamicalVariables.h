@@ -14,14 +14,16 @@
 /*********************************************************/
 //Main switch//
 
-#define PIMUNU
-#define PI
+//#define PIMUNU
+//#define PI
 
-#define NBMU
-#define VMU
+//#define NBMU
+//#define VMU
 
-#define RootSolver_with_Baryon
-#define EOS_with_baryon
+//#define RootSolver_with_Baryon
+//#define EOS_with_baryon
+
+//#define DYNAMICAL_SOURCE
 
 //#define HydroPlus
 //#define CRITICAL
@@ -182,7 +184,7 @@ typedef struct
     PRECISION *sourcey;
     PRECISION *sourcen;
     PRECISION *sourceb;
-} DYNAMICAL_SOURCE;
+} DYNAMICAL_SOURCES;
 
 
 /**************************************************************************************************************************************************/
@@ -201,7 +203,7 @@ extern PRECISION *rhob, *rhobp, *rhobS;
 extern PRECISION *alphaB, *alphaBp, *alphaBS;
 extern PRECISION *T, *Tp, *TS;
 
-extern DYNAMICAL_SOURCE *Source;
+extern DYNAMICAL_SOURCES *Source;
 
 extern EQUATION_OF_STATE *EOState;
 
