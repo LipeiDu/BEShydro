@@ -50,6 +50,32 @@ PRECISION energyDensityFromConservedVariables(PRECISION ePrev, PRECISION M0, PRE
 #endif
 }
 
+PRECISION energyDensityFromConservedVariables2(PRECISION ePrev, PRECISION M0, PRECISION M, PRECISION Pi, PRECISION rhobPrev) {
+#ifndef CONFORMAL_EOS
+    PRECISION e0 = ePrev;    //initial guess for energy density
+    PRECISION rhob0 = rhobPrev;
+    for(int j = 0; j < MAX_ITERS; ++j) {
+        PRECISION p = equilibriumPressure(e0, rhobPrev);
+        PRECISION cs2 = dPdE(e0, rhobPrev);
+        
+        PRECISION A = 1 / (M0 + p + Pi);
+        PRECISION A2 = A * A;
+        PRECISION B = M * M;
+        
+        PRECISION f = e0 - M0 + B * A;
+        PRECISION fp = 1 - B * A2 * cs2;
+        
+        PRECISION e = e0 - f/fp;
+        if(fabs(e - e0) <=  0.001 * fabs(e)) return e;
+        e0 = e;
+    }
+    printf("ev0 = Maxiter.\t ePrev=%.3f,\t M0=%.3f,\t M=%.3f,\t Pi=%.3f \n",ePrev,M0,M,Pi);
+    return e0;
+#else
+    return fabs(sqrtf(4 * M0 * M0 - 3 * M) - M0);
+#endif
+}
+
 // designed for the case with baryon evolution, but no slow modes
 PRECISION velocityFromConservedVariables(PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION vPrev) {
 
@@ -400,7 +426,8 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     
 #ifndef RootSolver_with_Baryon // Root Solver without Baryon
     
-    *e = energyDensityFromConservedVariables(ePrev, M0, M, Pi, rhobPrev);
+    //*e = energyDensityFromConservedVariables(ePrev, M0, M, Pi, rhobPrev);
+    *e = energyDensityFromConservedVariables2(ePrev, M0, M, Pi, rhobPrev);
 
 	if (isnan(*e)) {
 		printf("e is nan. \n M0=%.3f,\t M1=%.3f,\t M2=%.3f,\t M3=%.3f\n", M0, M1, M2, M3);
@@ -414,12 +441,12 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         printf("pitt=%.3f,\t pitx=%.3f,\t pity=%.3f,\t pitn=%.3f\n", pitt, pitx, pity, pitn);
     }
     
-	if (*e < 1.e-7) {
-		*e = 1.e-7;
-		*p = 1.e-7;
-    }else{
+	//if (*e < 1.e-7) {
+	//	*e = 1.e-7;
+	//	*p = 1.e-7;
+    //}else{
         *p = equilibriumPressure(*e, *rhob);
-    }
+    //}
 
 	PRECISION P = *p + Pi;
 	PRECISION E = 1/(*e + P);
@@ -434,7 +461,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     *rhob = rhobPrev;
     
     *T = effectiveTemperature(*e, *rhob);
-    if (*T < 1.e-7) *T = 1.e-7;
+    //if (*T < 1.e-7) *T = 1.e-7;
     
     *seq = equilibriumEntropy(*e, 0.0, *p, *T, 0.0);
     

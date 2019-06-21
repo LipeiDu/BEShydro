@@ -840,7 +840,7 @@ void setDynamicalSourceInitialCondition(void * latticeParams, void * initCondPar
         }
             
         case 1: {
-            printf("initialized with distributions in the Landau frame \n");
+            printf("initialized with results in Landau frame \n");
             
             float x, y, z, e_in, p_in, ut_in, ux_in, uy_in, un_in;
             float pitt_in, pitx_in, pity_in, pitn_in, pixx_in, pixy_in, pixn_in, piyy_in, piyn_in, pinn_in;
@@ -864,8 +864,8 @@ void setDynamicalSourceInitialCondition(void * latticeParams, void * initCondPar
                             
                             int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                             
-                            e[s] =  (PRECISION) e_in + 1.e-5;
-                            p[s] = p_in + 1.e-5;
+                            e[s] =  (PRECISION) e_in + 1.e-2;
+                            p[s] = p_in + 1.e-3;
                             
                             u->ut[s] = ut_in;
                             u->ux[s] = ux_in;
