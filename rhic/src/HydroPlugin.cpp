@@ -76,6 +76,7 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   //output(q->nbx, t, outputDir, "nbx", latticeParams);
   //output(q->nby, t, outputDir, "nby", latticeParams);
   output(q->nbn, t, outputDir, "nbn", latticeParams);
+  outputPhaseDiagram(alphaB, T, t, outputDir, "muBT", latticeParams);
   #endif
   #ifdef HydroPlus
   //output(q->phiQ[0], t, outputDir, "phiQ0", latticeParams);

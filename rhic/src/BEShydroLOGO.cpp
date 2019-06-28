@@ -32,7 +32,7 @@ void displayCopyright(){
     cout << "                                                              "   << endl;
     cout << "  If you use the code, please cite:                           "   << endl;
     cout << "  (1) D. Bazow et al, arXiv: 1608.06577                       "   << endl;
-    cout << "  (2) L. Du et al,                                            "   << endl;
+    cout << "  (2) L. Du and U. Heinz, arXiv:1906.11181                   "   << endl;
     cout << "                                                              "   << endl;
     cout << "=============================================================="   << endl;
     

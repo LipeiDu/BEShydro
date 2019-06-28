@@ -11,4 +11,6 @@
 
 void output(const PRECISION * const var, double t, const char *pathToOutDir, const char *name, void * latticeParams);
 
+void outputPhaseDiagram(const PRECISION * const var1, const PRECISION * const var2, double t, const char *pathToOutDir, const char *name, void * latticeParams);
+
 #endif /* FILEIO_H_ */

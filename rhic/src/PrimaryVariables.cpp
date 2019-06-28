@@ -153,9 +153,8 @@ PRECISION utauFromConservedVariables(PRECISION M0, PRECISION Ms, PRECISION Pi, P
 /**************************************************************************************************************************************************/
 
 // designed for the case with baryon evolution, but no slow modes, not Newton method
-PRECISION velocityIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION vPrev, PRECISION absoluteError, PRECISION relativeError) {
+PRECISION velocityIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION vPrev) {
     
-    PRECISION vAbsoluteError = 10.0;
     PRECISION vRelativeError = 10.0;
     
     PRECISION v0 = vPrev;
@@ -169,11 +168,9 @@ PRECISION velocityIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PR
         
         v0 = Ms/(M0 + p0 + Pi);
         
-        vAbsoluteError = fabs(v0 - vPrev);
-        vRelativeError = 2 * vAbsoluteError/(v0 + vPrev + 1.e-15);
+        vRelativeError = fabs(v0 - vPrev)/(v0 + 1.e-10);
         
-        if (vAbsoluteError < absoluteError && vRelativeError < relativeError)
-            return v0;
+        if (vRelativeError < 1.e-6) return v0;
         
         vPrev = v0;
         e0 = M0 - vPrev * Ms;
@@ -186,9 +183,8 @@ PRECISION velocityIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PR
 }
 
 // designed for the case with baryon evolution, but no slow modes, not Newton method
-PRECISION utauIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION utPrev, PRECISION absoluteError, PRECISION relativeError) {
+PRECISION utauIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION utPrev) {
     
-    PRECISION utAbsoluteError = 10.0;
     PRECISION utRelativeError = 10.0;
     
     PRECISION ut0 = utPrev;
@@ -202,11 +198,9 @@ PRECISION utauIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PRECIS
         
         ut0 = sqrt((M0 + p0 + Pi)/(e0 + p0 + Pi));
         
-        utAbsoluteError = fabs(ut0 - utPrev);
-        utRelativeError = 2 * utAbsoluteError/(ut0 + utPrev + 1.e-15);
+        utRelativeError = fabs(ut0 - utPrev)/(ut0 + 1.e-10);
         
-        if (utAbsoluteError < 1.e-6 && utRelativeError < 1.e-8)
-            return ut0;
+        if (utRelativeError < 1.e-4) return ut0;
         
         utPrev = ut0;
         e0 = M0 - Ms * sqrt(1 - 1 / (utPrev * utPrev));
@@ -532,15 +526,12 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     //**************************** non-Newton method ****************************
 #else
     
-    PRECISION absoluteError = 1.e-16;
-    PRECISION relativeError = 1.e-8;
-    
     PRECISION v0 = 0;
     PRECISION u0 = 0;
     
     PRECISION vPrev = sqrt(1-1/(utPrev*utPrev));
 
-    v0 = velocityIterationFromConservedVariables(M0, Ms, Pi, N0, vPrev, absoluteError, relativeError);
+    v0 = velocityIterationFromConservedVariables(M0, Ms, Pi, N0, vPrev);
     
     if (isnan(v0)) {
         printf("v0 = nan.\t vPrev=%5e,\t ePrev=%5e,\t M0=%5e,\t Ms=%5e,\t Pi=%5e,\t rhobPrev=%5e,\t d_nbt=%5e.\n",vPrev,ePrev,M0,Ms,Pi,rhobPrev,N0);
@@ -567,7 +558,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         
         //utPrev = 1/sqrt(1 - v0*v0);
         
-        u0 = utauIterationFromConservedVariables(M0, Ms, Pi, N0, utPrev, absoluteError, relativeError);
+        u0 = utauIterationFromConservedVariables(M0, Ms, Pi, N0, utPrev);
         
         if (isnan(u0)) {
             printf("u0 = nan.\t utPrev=%5e,\t ePrev=%5e,\t M0=%5e,\t Ms=%5e,\t Pi=%5e,\t rhobPrev=%5e,\t d_nbt=%5e.\n",utPrev,ePrev,M0,Ms,Pi,rhobPrev,N0);
