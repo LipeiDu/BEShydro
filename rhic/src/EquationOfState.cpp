@@ -547,8 +547,10 @@ void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __r
     PRECISION rhob0 = rhob;
     
     PrimaryVariables[0] = e/3;
+    PrimaryVariables[1] = powf(e/EOS_FACTOR, 0.25);
+    PrimaryVariables[2] = 0.145;
     
-    if((0<=e0) && (e0<0.0036))
+    /*if((0<=e0) && (e0<0.0036))
     {
         if((0<=rhob0) && (rhob0<=0.0249)){//zone 1
             PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.0, 0.0003, 500, 0.00005, 0, EOState->Temperature)/HBARC;
@@ -624,7 +626,7 @@ void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __r
             PrimaryVariables[1] = InferredPrimaryVariable(e0, 39.8, 219.355, 10, 200, 0.2, 148580, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 39.8, 219.355, 10, 200, 0.2, 148580, EOState->alphab);
         }
-    }
+    }*/
 #endif
 #endif
 }

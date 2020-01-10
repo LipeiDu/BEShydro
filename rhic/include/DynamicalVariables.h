@@ -17,16 +17,16 @@
 //#define PIMUNU
 //#define PI
 
-//#define NBMU
+#define NBMU
 //#define VMU
 
-//#define RootSolver_with_Baryon
-//#define EOS_with_baryon
+#define RootSolver_with_Baryon
+#define EOS_with_baryon
 
 //#define DYNAMICAL_SOURCE
 
-//#define HydroPlus
-//#define CRITICAL
+#define HydroPlus
+#define CRITICAL
 
 /**************************************************************************************************************************************************/
 /*********************************************************/
@@ -67,7 +67,7 @@
 #ifndef HydroPlus
 #define NUMBER_SLOW_MODES 0
 #else
-#define NUMBER_SLOW_MODES 3
+#define NUMBER_SLOW_MODES 2
 #endif
 
 /**************************************************************************************************************************************************/

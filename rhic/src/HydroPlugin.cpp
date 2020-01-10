@@ -32,7 +32,7 @@
 #include "../include/DynamicalSources.h"
 #include "../include/HydroAnalysis.h"
 
-#define FREQ 1 //write output to file every FREQ timesteps
+#define FREQ 100 //write output to file every FREQ timesteps
 #define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
 #define JET 0 // 0 to turn off jet evolution, 1 to turn it on
@@ -43,16 +43,16 @@
 void outputDynamicalQuantities(double t, const char *outputDir, void * latticeParams)
 {
   output(e, t, outputDir, "e", latticeParams);
-  output(p, t, outputDir, "p", latticeParams);
+  //output(p, t, outputDir, "p", latticeParams);
   //output(seq, t, outputDir, "seq", latticeParams);
   output(u->ux, t, outputDir, "ux", latticeParams);
-  output(u->uy, t, outputDir, "uy", latticeParams);
-  output(u->un, t, outputDir, "un", latticeParams);
+  //output(u->uy, t, outputDir, "uy", latticeParams);
+  //output(u->un, t, outputDir, "un", latticeParams);
   output(u->ut, t, outputDir, "ut", latticeParams);
-  output(q->ttt, t, outputDir, "ttt", latticeParams);
-  output(q->ttx, t, outputDir, "ttx", latticeParams);
-  output(q->tty, t, outputDir, "tty", latticeParams);
-  output(q->ttn, t, outputDir, "ttn", latticeParams);
+  //output(q->ttt, t, outputDir, "ttt", latticeParams);
+  //output(q->ttx, t, outputDir, "ttx", latticeParams);
+  //output(q->tty, t, outputDir, "tty", latticeParams);
+  //output(q->ttn, t, outputDir, "ttn", latticeParams);
   #ifdef PIMUNU
   output(q->pitx, t, outputDir, "pitx", latticeParams);
   output(q->pixx, t, outputDir, "pixx", latticeParams);
@@ -65,7 +65,7 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   #ifdef PI
   output(q->Pi, t, outputDir, "Pi", latticeParams);
   #endif
-  output(T, t, outputDir, "T", latticeParams);
+  //output(T, t, outputDir, "T", latticeParams);
   #ifdef NBMU
   output(rhob, t, outputDir, "rhob", latticeParams);
   //output(alphaB, t, outputDir, "alphaB", latticeParams);
@@ -79,11 +79,11 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   outputPhaseDiagram(alphaB, T, t, outputDir, "muBT", latticeParams);
   #endif
   #ifdef HydroPlus
-  //output(q->phiQ[0], t, outputDir, "phiQ0", latticeParams);
-  //output(q->phiQ[1], t, outputDir, "phiQ1", latticeParams);
+  output(q->phiQ[0], t, outputDir, "phiQ0", latticeParams);
+  output(q->phiQ[1], t, outputDir, "phiQ1", latticeParams);
   //output(q->phiQ[2], t, outputDir, "phiQ2", latticeParams);
-  //output(eqPhiQ->phiQ[0], t, outputDir, "eqPhiQ0", latticeParams);
-  //output(eqPhiQ->phiQ[1], t, outputDir, "eqPhiQ1", latticeParams);
+  output(eqPhiQ->phiQ[0], t, outputDir, "eqPhiQ0", latticeParams);
+  output(eqPhiQ->phiQ[1], t, outputDir, "eqPhiQ1", latticeParams);
   //output(eqPhiQ->phiQ[2], t, outputDir, "eqPhiQ2", latticeParams);
   #endif
 }
