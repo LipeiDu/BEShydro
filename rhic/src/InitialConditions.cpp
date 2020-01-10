@@ -36,6 +36,8 @@
 #define HBARC 0.197326938
 //#define Avg_MCGlauber
 
+#define GUBSER_FILE
+
 using namespace std;
 
 /**************************************************************************************************************************************************/
@@ -1229,9 +1231,10 @@ void setMCGlauberInitialCondition(void * latticeParams, void * initCondParams, v
 /* Initial conditions for the Gubser ideal hydro test
 /*		- set energy density, pressure, fluid velocity u^\mu, and \pi^\mu\ny
 /**************************************************************************************************************************************************/
-void setIdealGubserInitialCondition(void * latticeParams, void * initCondParams, const char *rootDirectory) {
+void setIdealGubserInitialCondition(void * latticeParams, void * initCondParams, void * hydroParams, const char *rootDirectory) {
 	struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
 	struct InitialConditionParameters * initCond = (struct InitialConditionParameters *) initCondParams;
+    struct HydroParameters * hydro = (struct HydroParameters *) hydroParams;
 
 	int nx = lattice->numLatticePointsX;
 	int ny = lattice->numLatticePointsY;
@@ -1242,9 +1245,11 @@ void setIdealGubserInitialCondition(void * latticeParams, void * initCondParams,
 	double dz = lattice->latticeSpacingRapidity;
 
 	double e0 = initCond->initialEnergyDensity;
+    double t0 = hydro->initialProperTimePoint;
 
     double x,y,ed,u1,u2,rhod;
-    
+
+#ifdef GUBSER_FILE
     FILE *file;
     char fname[255];
 
@@ -1269,11 +1274,46 @@ void setIdealGubserInitialCondition(void * latticeParams, void * initCondParams,
                     u->uy[s] = u2;
                     u->un[s] = 0;
                     u->ut[s] = sqrt(1 + u1*u1 + u2*u2);
-                    rhob[s] = (PRECISION) rhod;
+                    rhob[s] = (PRECISION) rhod/30*0.0701568;
                 }
             }
         }
     }
+#else
+    double L = 1.0; // L is the q used in Gubser profile
+    
+    for(int i = 2; i < nx+2; ++i) {
+        for(int j = 2; j < ny+2; ++j) {
+            for(int k = 2; k < nz+2; ++k) {
+                
+                double x = (i-2 - (nx-1)/2.)*dx;
+                double y = (j-2 - (ny-1)/2.)*dy;
+                double r = sqrt(x*x+y*y);
+                
+                int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+
+                // T, e, and p with conformal EoS
+                
+                double C = 1.2;
+                double T = (C/t0) * pow(2*L*t0, 0.6666666666666667)/pow((1 + 2*L*L*(t0*t0 + r*r) + pow(L,4)*pow((t0*t0 - r*r),2)),0.3333333333333333);
+                
+                e[s] = (PRECISION) (13.9 * pow(T,4));
+                p[s] = e[s]/3.0;
+                rhob[s] = (PRECISION) (0.145 * 0.28 * pow(T,3));
+                
+                // Gubser flow profiles
+                
+                double phi = atanh(2.0 * L * L * t0 * r / (1.0 + L * L * t0 * t0 +  L * L * r * r));
+
+                u->ux[s] = (PRECISION) (sinh(phi)*x/r);
+                u->uy[s] = (PRECISION) (sinh(phi)*y/r);
+                u->un[s] = 0.0;
+                u->ut[s] = sqrt(1 + u->ux[s]*u->ux[s] + u->uy[s]*u->uy[s]);
+
+            }
+        }
+    }
+#endif
 }
 
 /**************************************************************************************************************************************************/
@@ -1801,7 +1841,7 @@ void setInitialConditions(void * latticeParams, void * initCondParams, void * hy
 		}
 		case 3: {
 			printf("Ideal hydrodynamic Gubser flow test.\n");
-			setIdealGubserInitialCondition(latticeParams, initCondParams, rootDirectory);
+			setIdealGubserInitialCondition(latticeParams, initCondParams, hydroParams, rootDirectory);
 			return;
 		}
 		case 4: {

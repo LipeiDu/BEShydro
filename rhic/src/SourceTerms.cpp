@@ -813,8 +813,8 @@ void loadSourceTerms2(const PRECISION * const __restrict__ Q, PRECISION * const 
 #else
     PRECISION es = evec[s];
     PRECISION Ts  = Tvec[s];
-    PRECISION rhobs = 0;
-    PRECISION alphaBs  = 0;
+    PRECISION rhobs = rhobvec[s];
+    PRECISION alphaBs  = alphaBvec[s];
     
     PRECISION Nablat_rhob = 0;
     PRECISION Nablax_rhob = 0;

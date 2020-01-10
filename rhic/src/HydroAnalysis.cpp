@@ -94,12 +94,18 @@ void testHydroPlus()
 
 void outputHydroPlus(double t, const char *pathToOutDir, void * latticeParams) {
     
-    FILE *fpgamma, *fpxi;
+    FILE *fpgamma0, *fpgamma1, *fpgamma2, *fpxi;
     FILE *fpdp, *fpds, *fpdt, *fpdmu;
     char fname[255];
     
-    sprintf(fname, "%s/gammaQ_%.3f.dat", pathToOutDir, t);
-    fpgamma=fopen(fname, "w");
+    sprintf(fname, "%s/gammaQ0_%.3f.dat", pathToOutDir, t);
+    fpgamma0=fopen(fname, "w");
+    
+    sprintf(fname, "%s/gammaQ1_%.3f.dat", pathToOutDir, t);
+    fpgamma1=fopen(fname, "w");
+    
+    sprintf(fname, "%s/gammaQ2_%.3f.dat", pathToOutDir, t);
+    fpgamma2=fopen(fname, "w");
     
     sprintf(fname, "%s/xi_%.3f.dat", pathToOutDir, t);
     fpxi=fopen(fname, "w");
@@ -152,9 +158,13 @@ void outputHydroPlus(double t, const char *pathToOutDir, void * latticeParams) {
                 double corrL2 = corrL * corrL;
                 
                 double gammaPhi = relaxationCoefficientPhi(rhobs, seqs, Ts, corrL2);
-                double gammaQ = relaxationCoefficientPhiQ(gammaPhi, corrL2, Q);
+                double gammaQ0 = relaxationCoefficientPhiQ(gammaPhi, corrL2, Qvec[0]);
+                double gammaQ1 = relaxationCoefficientPhiQ(gammaPhi, corrL2, Qvec[1]);
+                double gammaQ2 = relaxationCoefficientPhiQ(gammaPhi, corrL2, Qvec[2]);
                 
-                fprintf(fpgamma, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,gammaQ);
+                fprintf(fpgamma0, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,gammaQ0);
+                fprintf(fpgamma1, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,gammaQ1);
+                fprintf(fpgamma2, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,gammaQ2);
                 fprintf(fpxi, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,corrL);
                 
                 // output contributions from slow modes to p, T, s and alphaB
@@ -175,7 +185,9 @@ void outputHydroPlus(double t, const char *pathToOutDir, void * latticeParams) {
         }
     }
     
-    fclose(fpgamma);
+    fclose(fpgamma0);
+    fclose(fpgamma1);
+    fclose(fpgamma2);
     fclose(fpxi);
     fclose(fpdp);
     fclose(fpds);

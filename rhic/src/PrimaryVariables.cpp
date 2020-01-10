@@ -217,9 +217,8 @@ PRECISION utauIterationFromConservedVariables(PRECISION M0, PRECISION Ms, PRECIS
 /**************************************************************************************************************************************************/
 
 // designed for the case with baryon evolution and slow modes
-void InferredVariablesVelocityIterationHydroPlus(PRECISION * const __restrict__ e, PRECISION * const __restrict__ rhob, PRECISION * const __restrict__ p, PRECISION * const __restrict__ T, PRECISION * const __restrict__ alphaB, PRECISION * const __restrict__ seq, PRECISION * const __restrict__ v, PRECISION * const __restrict__ equiPhiQ, PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION vPrev, const PRECISION * const __restrict__ PhiQ, PRECISION absoluteError, PRECISION relativeError)
+void InferredVariablesVelocityIterationHydroPlus(PRECISION * const __restrict__ e, PRECISION * const __restrict__ rhob, PRECISION * const __restrict__ p, PRECISION * const __restrict__ T, PRECISION * const __restrict__ alphaB, PRECISION * const __restrict__ seq, PRECISION * const __restrict__ v, PRECISION * const __restrict__ equiPhiQ, PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION vPrev, const PRECISION * const __restrict__ PhiQ)
 {
-    PRECISION vAbsoluteError = 10.0;
     PRECISION vRelativeError = 10.0;
     
     PRECISION e0, rhob0, pPlus, peq, Teq, alphaBeq, muBeq, Seq, v0, equiPhiQ0[NUMBER_SLOW_MODES];
@@ -255,10 +254,9 @@ void InferredVariablesVelocityIterationHydroPlus(PRECISION * const __restrict__ 
         // recalculate the flow velocity, with p(+) from Hydro+
         v0 = Ms/(M0 + pPlus + Pi);
         
-        vAbsoluteError = fabs(v0 - vPrev);
-        vRelativeError = 2 * vAbsoluteError/(v0 + vPrev + 1.e-15);
+        vRelativeError = fabs(v0 - vPrev)/(v0 + 1.e-10);
         
-        if (vAbsoluteError < absoluteError && vRelativeError < relativeError)
+        if (vRelativeError < 1.e-6)
             break;
         
         vPrev = v0;
@@ -284,11 +282,10 @@ void InferredVariablesVelocityIterationHydroPlus(PRECISION * const __restrict__ 
 }
 
 // designed for the case with baryon evolution and slow modes
-void InferredVariablesUtauIterationHydroPlus(PRECISION * const __restrict__ e, PRECISION * const __restrict__ rhob, PRECISION * const __restrict__ p, PRECISION * const __restrict__ T, PRECISION * const __restrict__ alphaB, PRECISION * const __restrict__ seq, PRECISION * const __restrict__ ut, PRECISION * const __restrict__ equiPhiQ, PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION utPrev, const PRECISION * const __restrict__ PhiQ, PRECISION absoluteError, PRECISION relativeError)
+void InferredVariablesUtauIterationHydroPlus(PRECISION * const __restrict__ e, PRECISION * const __restrict__ rhob, PRECISION * const __restrict__ p, PRECISION * const __restrict__ T, PRECISION * const __restrict__ alphaB, PRECISION * const __restrict__ seq, PRECISION * const __restrict__ ut, PRECISION * const __restrict__ equiPhiQ, PRECISION M0, PRECISION Ms, PRECISION Pi, PRECISION N0, PRECISION utPrev, const PRECISION * const __restrict__ PhiQ)
 {
-    int j = 0;
-    PRECISION utAbsoluteError = 1.0;
-    PRECISION utRelativeError = 1.0;
+
+    PRECISION utRelativeError = 10.0;
     
     PRECISION e0, rhob0, pPlus, peq, Teq, alphaBeq, muBeq, Seq, ut0, equiPhiQ0[NUMBER_SLOW_MODES];
     
@@ -321,10 +318,9 @@ void InferredVariablesUtauIterationHydroPlus(PRECISION * const __restrict__ e, P
         // recalculate the flow velocity, with p(+) from Hydro+
         ut0 = sqrt((M0 + pPlus + Pi)/(e0 + pPlus + Pi));
         
-        utAbsoluteError = fabs(ut0 - utPrev);
-        utRelativeError = 2 * utAbsoluteError/(ut0 + utPrev + 1.e-15);
+        utRelativeError = fabs(ut0 - utPrev)/(ut0 + 1.e-10);
         
-        if (utAbsoluteError < absoluteError && utRelativeError < relativeError)
+        if (utRelativeError < 1.e-4)
             break;
         
         utPrev = ut0;
@@ -420,7 +416,6 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     
 #ifndef RootSolver_with_Baryon // Root Solver without Baryon
     
-    //*e = energyDensityFromConservedVariables(ePrev, M0, M, Pi, rhobPrev);
     *e = energyDensityFromConservedVariables2(ePrev, M0, M, Pi, rhobPrev);
 
 	if (isnan(*e)) {
@@ -435,12 +430,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         printf("pitt=%.3f,\t pitx=%.3f,\t pity=%.3f,\t pitn=%.3f\n", pitt, pitx, pity, pitn);
     }
     
-	//if (*e < 1.e-7) {
-	//	*e = 1.e-7;
-	//	*p = 1.e-7;
-    //}else{
-        *p = equilibriumPressure(*e, *rhob);
-    //}
+    *p = equilibriumPressure(*e, *rhob);
 
 	PRECISION P = *p + Pi;
 	PRECISION E = 1/(*e + P);
@@ -455,7 +445,6 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     *rhob = rhobPrev;
     
     *T = effectiveTemperature(*e, *rhob);
-    //if (*T < 1.e-7) *T = 1.e-7;
     
     *seq = equilibriumEntropy(*e, 0.0, *p, *T, 0.0);
     
@@ -556,8 +545,6 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     }
     else{
         
-        //utPrev = 1/sqrt(1 - v0*v0);
-        
         u0 = utauIterationFromConservedVariables(M0, Ms, Pi, N0, utPrev);
         
         if (isnan(u0)) {
@@ -590,16 +577,14 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     // Note: the root sloving routine below, which is not Newton's method, is adapted from a version of MUSIC
     
     // STEP I: setup
-    
-    PRECISION absoluteError = 1e-16;
-    PRECISION relativeError = 1e-8;
+
     PRECISION vPrev = sqrt(1-1/(utPrev*utPrev));
     
     PRECISION v = 0;
     
     // STEP II: update v or utau, and then calculate e, rhob and p with contributions from slow modes
     
-    InferredVariablesVelocityIterationHydroPlus(e, rhob, p, T, alphaB, seq, &v, equiPhiQ, M0, Ms, Pi, N0, vPrev, PhiQ, absoluteError, relativeError);
+    InferredVariablesVelocityIterationHydroPlus(e, rhob, p, T, alphaB, seq, &v, equiPhiQ, M0, Ms, Pi, N0, vPrev, PhiQ);
     
     if (isnan(v))
     {
@@ -611,8 +596,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     }
     else
     {
-        utPrev  = 1/sqrt(1 - v*v);
-        InferredVariablesUtauIterationHydroPlus(e, rhob, p, T, alphaB, seq, ut, equiPhiQ, M0, Ms, Pi, N0, utPrev, PhiQ, absoluteError, relativeError);
+        InferredVariablesUtauIterationHydroPlus(e, rhob, p, T, alphaB, seq, ut, equiPhiQ, M0, Ms, Pi, N0, utPrev, PhiQ);
         if (isnan(*ut))
         {
             printf("ut = nan.\t utPrev=%5e,\t ePrev=%5e,\t M0=%5e,\t Ms=%5e,\t Pi=%5e,\t rhobPrev=%5e,\t N0=%5e.\n",utPrev,ePrev,M0,Ms,Pi,rhobPrev,N0);

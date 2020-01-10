@@ -29,16 +29,15 @@ using namespace std;
 
 #define GaussianXI
 
-#define dQvec 2.0 // difference between Q vectors of slow modes
-#define Q0 0.0
+#define dQvec 0.7 // difference between the elements of Q vector of slow modes
+#define Q0 0.5
 #define HBARC 0.197326938
 
 #define xi0 1.0
 #define xi02 1.0 // correlation length squared
-#define xic 0.2 // gaussian xi center
-#define xiw 0.05 // gaussian xi width
+#define xiw 0.0192 // gaussian xi width
 
-#define Cr 1.0 // LambdaT = Cr * T^2
+#define Cr 4606.67 // LambdaT = Cr * T^2, a normalization factor to match the setup in the paper, Gamma0*T(t0,r=0)*h^2/(alphaB*g)/2
 
 /**************************************************************************************************************************************************/
 /* Conductivity, heat capacity, and some derivatives
@@ -125,7 +124,7 @@ void setInitialConditionSlowModes(void * latticeParams, void * hydroParams)
 #ifdef HydroPlus
     printf("HYDRO+ is ON, number of slow modes is %d, Q0 is %f, dQ is %f...\n",NUMBER_SLOW_MODES, Q0, dQvec);
     
-    // initialization of Q vectors
+    // initialization of the Q vector
     for(unsigned int n = 0; n < NUMBER_SLOW_MODES; ++n){
         Qvec[n] = Q0 + n * dQvec;
     }
@@ -192,7 +191,6 @@ void getPressurePlusFromSlowModes(PRECISION * const __restrict__ deltaVariables,
         PRECISION phiRatio = PhiQ[n] / (equiPhiQ[n] + 1e-15);
         PRECISION phiRatioLog = log(phiRatio);
         PRECISION phiRatioOne = phiRatio - 1;
-        //printf("PhiQ[n]=%f\t equiPhiQ[n]=%f\t phiRatio=%f\t phiRatioLog=%f\n",PhiQ[n],equiPhiQ[n],phiRatio,phiRatioLog);
 
         // (Q*xi)f2(Q*xi), Riemann sum for the intergal below
         PRECISION Q = Qvec[n] + 0.5 * dQvec;
@@ -225,14 +223,11 @@ void getPressurePlusFromSlowModes(PRECISION * const __restrict__ deltaVariables,
     PRECISION deltaAlphaB = - facQ * alpha;
     PRECISION deltaBeta = facQ * beta;
     
-    //printf("deltaS=%8f\t deltaAlphaB=%8f\t deltaBeta=%8f.\n",deltaS,deltaAlphaB,deltaBeta);
-    
     // variables(+) with contribution from slow modes
     T = 1 / (1/T + deltaBeta);
     
     PRECISION deltaP = T * (deltaS - (e + p) * deltaBeta + rhob * deltaAlphaB);
     *pPlus = p;// + deltaP;
-    //printf("corrL=%f\t dlnXi_de=%f\t muB=%f\t deltaP=%f\t p+=%f\n",corrL,dlnXi_de,muB,deltaP,p+deltaP);
     
     deltaVariables[0] = deltaAlphaB;
     deltaVariables[1] = deltaBeta;
@@ -339,7 +334,12 @@ PRECISION correlationLength(PRECISION T, PRECISION muB){
         return 1.0;
 #else
     PRECISION T0 = T*HBARC;
-    return xi0 + 4.0 * exp(-(T0-0.2)*(T0-0.2)/(2*xiw*xiw));
+    return xi0 + 2.0 * exp(-(T0-0.16)*(T0-0.16)/(2*xiw*xiw));
+    
+    //long double A = pow(tanh((T0-0.16)/(0.4*0.16)),2);
+    //long double B = 1/81;
+    //double xi = 1.0 / pow((A*(1-B) + B),0.25);
+    //return xi;
 #endif
 #else
     return 1.0;
