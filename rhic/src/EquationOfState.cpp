@@ -40,9 +40,9 @@ void getEquationOfStateTable(){
     
     // temperature table
 #ifndef CONFORMAL_EOS
-    eosfilet = fopen ("eos/eos_t.dat","r");
+    eosfilet = fopen ("eos/EOS4/eos_t.dat","r");
 #else
-    eosfilet = fopen ("eos/conformal_eos_t.dat","r");
+    eosfilet = fopen ("eos/EOS3/conformal_eos_t.dat","r");
 #endif
     if(eosfilet==NULL){
         printf("The EOS file eos_t.dat was not opened...\n");
@@ -59,7 +59,7 @@ void getEquationOfStateTable(){
     
     // pressure table, for conformal EoS, p = e/3
 #ifndef CONFORMAL_EOS
-    eosfilep = fopen ("eos/eos_p.dat","r");
+    eosfilep = fopen ("eos/EOS4/eos_p.dat","r");
 
     if(eosfilep==NULL){
         printf("The EOS file eos_p.dat was not opened...\n");
@@ -77,9 +77,9 @@ void getEquationOfStateTable(){
     
     // baryon chemical potential over temperature table
 #ifndef CONFORMAL_EOS
-    eosfilembt = fopen ("eos/eos_mbovert.dat","r");
+    eosfilembt = fopen ("eos/EOS4/eos_mbovert.dat","r");
 #else
-    eosfilembt = fopen ("eos/conformal_eos_mbovert.dat","r");
+    eosfilembt = fopen ("eos/EOS3/conformal_eos_mbovert.dat","r");
 #endif
     if(eosfilembt==NULL){
         printf("The EOS file eos_mbovert.dat was not opened...\n");
@@ -96,7 +96,7 @@ void getEquationOfStateTable(){
  
     // dPdRhob table, for conformal EoS, dpdrhob = 0
 #ifndef CONFORMAL_EOS
-    eosfileprhob = fopen ("eos/eos_dpdrhob.dat","r");
+    eosfileprhob = fopen ("eos/EOS4/eos_dpdrhob.dat","r");
 
     if(eosfileprhob==NULL){
         printf("The EOS file eos_dpdrhob.dat was not opened...\n");
@@ -113,6 +113,79 @@ void getEquationOfStateTable(){
 #endif
     
     printf("Equation of State table is read in.\n");
+#endif
+}
+
+void getEquationOfStateTableNEOS(){
+#ifdef EOS_with_baryon
+    
+    printf("The NEOS is used...\n");
+    
+    FILE *eosfilet, *eosfilep, *eosfilemb, *eosfilechib;
+    char fname[255];
+    int ne, nb;
+    int idx = 0;
+    
+    for(int j = 0; j < 7; ++j){
+        sprintf(fname, "%s%d%s.dat", "eos/neosb/neos", j+1, "_t");
+        eosfilet = fopen(fname, "r");
+        sprintf(fname, "%s%d%s.dat", "eos/neosb/neos", j+1, "_p");
+        eosfilep = fopen(fname, "r");
+        sprintf(fname, "%s%d%s.dat", "eos/neosb/neos", j+1, "_mub");
+        eosfilemb = fopen(fname, "r");
+        sprintf(fname, "%s%d%s.dat", "eos/neosb/neos", j+1, "_chi");
+        eosfilechib = fopen(fname, "r");
+        
+        if(eosfilet==NULL||eosfilep==NULL||eosfilemb==NULL||eosfilechib==NULL)
+        {
+            printf("The NEOS file was not opened...\n");
+            exit(-1);
+        }
+        else
+        {
+            fseek(eosfilet,0L,SEEK_SET);
+            
+            fscanf(eosfilet,"%*[^\n]%*c");
+            fscanf(eosfilet,"%*s%*s%d%d%*c", & nb, & ne);
+            
+            fscanf(eosfilep,"%*[^\n]%*c%*[^\n]%*c");
+            fscanf(eosfilemb,"%*[^\n]%*c%*[^\n]%*c");
+            fscanf(eosfilechib,"%*[^\n]%*c%*[^\n]%*c");
+            
+            int ngrid = (nb + 1) * (ne + 1);
+            int nline = ngrid/5;
+            
+            for(int i = 0; i < nline; ++i)
+            {
+                fscanf(eosfilet,"%le %le %le %le %le\n", & EOState->Temperature[idx], & EOState->Temperature[idx+1], & EOState->Temperature[idx+2],
+                       & EOState->Temperature[idx+3], & EOState->Temperature[idx+4]);
+                
+                fscanf(eosfilep,"%le %le %le %le %le\n", & EOState->Pressure[idx], & EOState->Pressure[idx+1], & EOState->Pressure[idx+2],
+                       & EOState->Pressure[idx+3], & EOState->Pressure[idx+4]);
+                
+                fscanf(eosfilemb,"%le %le %le %le %le\n", & EOState->alphab[idx], & EOState->alphab[idx+1], & EOState->alphab[idx+2],
+                       & EOState->alphab[idx+3], & EOState->alphab[idx+4]);
+                
+                EOState->alphab[idx] = EOState->alphab[idx]/EOState->Temperature[idx];
+                EOState->alphab[idx+1] = EOState->alphab[idx+1]/EOState->Temperature[idx+1];
+                EOState->alphab[idx+2] = EOState->alphab[idx+2]/EOState->Temperature[idx+2];
+                EOState->alphab[idx+3] = EOState->alphab[idx+3]/EOState->Temperature[idx+3];
+                EOState->alphab[idx+4] = EOState->alphab[idx+4]/EOState->Temperature[idx+4];
+                
+                fscanf(eosfilechib,"%le %le %le %le %le\n", & EOState->Chib[idx], & EOState->Chib[idx+1], & EOState->Chib[idx+2],
+                       & EOState->Chib[idx+3], & EOState->Chib[idx+4]);
+                
+                idx = idx + 5;
+            }
+        }
+        
+        fclose(eosfilet);
+        fclose(eosfilep);
+        fclose(eosfilemb);
+        fclose(eosfilechib);
+    }
+        
+    printf("NEOS table is read in.\n");
 #endif
 }
 
@@ -170,6 +243,7 @@ PRECISION InferredPrimaryVariable(PRECISION e, PRECISION rhob, PRECISION e_start
 
 /**************************************************************************************************************************************************/
 /* The following two functions only defined for a specific EoS table, By Lipei Jan 18, 2018
+/* input units: e [1/fm^4], rhob [1/fm^3]; output: table units rescaled by hbarc*/
 /**************************************************************************************************************************************************/
 
 // (e, rhob) can lie in the triavial zone, the value will be trivially equal to the value at the edge of the nontrivial zone.
@@ -229,6 +303,7 @@ PRECISION primaryVariablesEOS(PRECISION e, PRECISION rhob, const PRECISION * con
     }
 }
 
+// very similar to primaryVariablesEOS, but some numbers are different
 PRECISION primaryVariablesConformalEOS(PRECISION e, PRECISION rhob, const PRECISION * const __restrict__ EOS_Variable){
     
     PRECISION e0 = e*HBARC;
@@ -285,169 +360,20 @@ PRECISION primaryVariablesConformalEOS(PRECISION e, PRECISION rhob, const PRECIS
     }
 }
 
-/**************************************************************************************************************************************************/
-/* Equation of State, functions X(e, rhob)
-/* 1. without rhob: (1) conformal (2) Wuppertal-Budapest
-/* 2. with rhob: (1) conformal (2) PRC 98 (2018) 034916
-/**************************************************************************************************************************************************/
-
-PRECISION equilibriumEntropy(PRECISION e, PRECISION rhob, PRECISION p, PRECISION T, PRECISION alphaB){
-    PRECISION s = (e + p) / T - alphaB * rhob;
-    if(s<0.0){
-        //printf("Warning: s=%f\t e=%f\t rhob=%f, set to be zero!\n",s,e,rhob);
-        s = 1.e-10;
-    }
-    return s;
-}
-
-PRECISION chemicalPotentialOverT(PRECISION e, PRECISION rhob){
-#ifndef EOS_with_baryon
-    return 0.0;
-#else
-#ifndef CONFORMAL_EOS
-    return primaryVariablesEOS(e, rhob, EOState->alphab)*HBARC;
-#else
-    return primaryVariablesConformalEOS(e, rhob, EOState->alphab)*HBARC;
-#endif
-#endif
-}
-
-PRECISION dPdRhob(PRECISION e, PRECISION rhob){
-#ifndef EOS_with_baryon
-    return 0.0;
-#else
-#ifndef CONFORMAL_EOS
-    return primaryVariablesEOS(e, rhob, EOState->dpdrhob);
-#else
-    return 0.0;
-#endif
-#endif
-}
-
-PRECISION dPdE(PRECISION e, PRECISION rhob) {
-#ifndef EOS_with_baryon
-#ifndef CONFORMAL_EOS
-    return dpdeWB(e);
-#else
-    return 1/3;
-#endif
-#else
-#ifndef CONFORMAL_EOS
-    PRECISION e0 = e*HBARC;
-    PRECISION delta_e = 0;
-    if((0<=e0) && (e0<0.0036))
-        delta_e = 0.0003;
-    else if((0.0036<=e0) && (e0<0.015))
-        delta_e = 0.0006;
-    else if((0.015<=e0) && (e0<0.045))
-        delta_e = 0.001;
-    else if((0.045<=e0) && (e0<0.455))
-        delta_e = 0.01;
-    else if((0.455<=e0) && (e0<20.355))
-        delta_e = 0.1;
-    else if((20.355<=e0)&(e0<219.355))
-        delta_e = 1;
-    else
-        delta_e = 10;
-    
-    PRECISION ep, em, pp, pm, p0;
-    ep = (e0 + 0.1 * delta_e)/HBARC;
-    em = (e0 - 0.1 * delta_e)/HBARC;
-    
-    pp = primaryVariablesEOS(ep, rhob, EOState->Pressure);
-    if(em>=0){
-        pm = primaryVariablesEOS(em, rhob, EOState->Pressure);
-        return (pp-pm)/(2*0.1 * delta_e/HBARC);
-    }else{
-        p0 = primaryVariablesEOS(e0, rhob, EOState->Pressure);
-        return (pp-p0)/(0.1*delta_e)/HBARC;
-    }
-#else
-    return 1/3;
-#endif
-#endif
-}
-
-PRECISION equilibriumPressure(PRECISION e, PRECISION rhob) {
-#ifndef EOS_with_baryon
-#ifndef CONFORMAL_EOS
-    return equilibriumPressureWB(e);
-#else
-    return e/3;
-#endif
-#else
-#ifndef CONFORMAL_EOS
-    return primaryVariablesEOS(e, fabs(rhob), EOState->Pressure);
-#else
-    return e/3;
-#endif
-#endif
-}
-
-PRECISION effectiveTemperature(PRECISION e, PRECISION rhob) {
-#ifndef EOS_with_baryon
-#ifndef CONFORMAL_EOS
-    return effectiveTemperatureWB(e);
-#else
-    return powf(e/EOS_FACTOR, 0.25);
-#endif
-#else
-#ifndef CONFORMAL_EOS
-    return primaryVariablesEOS(e, fabs(rhob), EOState->Temperature);
-#else
-    return primaryVariablesConformalEOS(e, fabs(rhob), EOState->Temperature);
-#endif
-#endif
-}
-
-PRECISION speedOfSoundSquared(PRECISION e, PRECISION rhob) {
-#ifndef EOS_with_baryon
-#ifndef CONFORMAL_EOS
-    return dpdeWB(e);
-#else
-    return 1/3;
-#endif
-#else
-#ifndef CONFORMAL_EOS
-    PRECISION p = equilibriumPressure(e, rhob);
-    PRECISION dp_drhob = dPdRhob(e, rhob);
-    PRECISION dp_de = dPdE(e, rhob);
-    return dp_de + rhob / (e + p) * dp_drhob;
-#else
-    return 1/3;
-#endif
-#endif
-}
-
-PRECISION dPdT(PRECISION e, PRECISION rhob) {
-    PRECISION ep = 1.1 * e;
-    PRECISION em = 0.9 * e;
-    
-    PRECISION pPrimaryVariables[3], mPrimaryVariables[3];
-    
-    getPrimaryVariablesCombo(ep, rhob, pPrimaryVariables);
-    getPrimaryVariablesCombo(em, rhob, mPrimaryVariables);
-    
-    PRECISION dp = pPrimaryVariables[0] - mPrimaryVariables[0];
-    PRECISION dT = pPrimaryVariables[1] - mPrimaryVariables[1];
-    
-    return dp/dT;
-}
-
-// a function returns temperature, pressure and chemical potential over temperature altogether
+// a function returns temperature, pressure and chemical potential over temperature together, note outputs have units in fm
 void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __restrict__ PrimaryVariables){
 #ifndef EOS_with_baryon
-#ifndef CONFORMAL_EOS
+#ifndef CONFORMAL_EOS // EOS2
     PrimaryVariables[0] = equilibriumPressureWB(e);
     PrimaryVariables[1] = effectiveTemperatureWB(e);
     PrimaryVariables[2] = 0.0;
-#else
-    PrimaryVariables[0] = e/3;
+#else // EOS1
+    PrimaryVariables[0] = e/3.0;
     PrimaryVariables[1] = powf(e/EOS_FACTOR, 0.25);
     PrimaryVariables[2] = 0.0;
 #endif
 #else
-#ifndef CONFORMAL_EOS
+#ifndef CONFORMAL_EOS // EOS4
     PRECISION e0 = e*HBARC;
     PRECISION rhob0 = rhob;
     
@@ -542,11 +468,12 @@ void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __r
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 39.8, 219.355, 10, 200, 0.2, 148580, EOState->alphab);
         }
     }
-#else
+#else // conformal EOS3
+#ifndef EOS_TEST
     PRECISION e0 = e*HBARC;
     PRECISION rhob0 = rhob;
     
-    PrimaryVariables[0] = e/3;
+    PrimaryVariables[0] = e/3.0;
     
     if((0<=e0) && (e0<0.0036))
     {
@@ -625,9 +552,250 @@ void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __r
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 39.8, 219.355, 10, 200, 0.2, 148580, EOState->alphab);
         }
     }
+#else
+    PrimaryVariables[0] = e/3.0;
+    PrimaryVariables[1] = e/rhob/3.0;
+    PrimaryVariables[2] = (PRECISION) log(27*M_PI*M_PI/16) + 4*log(rhob) - 3*log(e);
+#endif
 #endif
 #endif
 }
+
+/**************************************************************************************************************************************************/
+/* Equation of State, functions X(e, rhob)
+/* 1. without rhob: (1) conformal (2) Wuppertal-Budapest
+/* 2. with rhob: (1) conformal (2) PRC 98 (2018) 034916
+/**************************************************************************************************************************************************/
+
+PRECISION equilibriumEntropy(PRECISION e, PRECISION rhob, PRECISION p, PRECISION T, PRECISION alphaB){
+    PRECISION s = (e + p) / T - alphaB * rhob;
+    if(s<0.0){
+        //printf("Warning: s=%f\t e=%f\t rhob=%f, set to be zero!\n",s,e,rhob);
+        s = 1.e-10;
+    }
+    return s;
+}
+
+// hbarc to give unitless output
+PRECISION chemicalPotentialOverT(PRECISION e, PRECISION rhob){
+#ifndef EOS_with_baryon
+    return 0.0;
+#else
+#ifndef CONFORMAL_EOS
+    return primaryVariablesEOS(e, rhob, EOState->alphab)*HBARC;
+#else
+#ifndef EOS_TEST
+    return primaryVariablesConformalEOS(e, rhob, EOState->alphab)*HBARC;
+#else
+    return (PRECISION) log(27*M_PI*M_PI/16) + 4*log(rhob) - 3*log(e);
+#endif
+#endif
+#endif
+}
+
+PRECISION equilibriumPressure(PRECISION e, PRECISION rhob) {
+#ifndef EOS_with_baryon
+#ifndef CONFORMAL_EOS
+    return equilibriumPressureWB(e);
+#else
+    return e/3.0;
+#endif
+#else
+#ifndef CONFORMAL_EOS
+    return primaryVariablesEOS(e, fabs(rhob), EOState->Pressure);
+#else
+    return e/3.0;
+#endif
+#endif
+}
+
+PRECISION effectiveTemperature(PRECISION e, PRECISION rhob) {
+#ifndef EOS_with_baryon
+#ifndef CONFORMAL_EOS
+    return effectiveTemperatureWB(e);
+#else
+    return powf(e/EOS_FACTOR, 0.25);
+#endif
+#else
+#ifndef CONFORMAL_EOS
+    return primaryVariablesEOS(e, fabs(rhob), EOState->Temperature);
+#else
+#ifndef EOS_TEST
+    return primaryVariablesConformalEOS(e, fabs(rhob), EOState->Temperature);
+#else
+    return e/rhob/3.0;
+#endif
+#endif
+#endif
+}
+
+PRECISION speedOfSoundSquared(PRECISION e, PRECISION rhob) {
+#ifndef EOS_with_baryon
+#ifndef CONFORMAL_EOS
+    return dpdeWB(e);
+#else
+    return 1/3.0;
+#endif
+#else
+#ifndef CONFORMAL_EOS
+    PRECISION p = equilibriumPressure(e, rhob);
+    PRECISION dp_drhob = dPdRhob(e, rhob);
+    PRECISION dp_de = dPdE(e, rhob);
+    return dp_de + rhob / (e + p) * dp_drhob;
+#else
+    return 1/3.0;
+#endif
+#endif
+}
+
+PRECISION dPdRhob(PRECISION e, PRECISION rhob){
+#ifndef EOS_with_baryon
+    return 0.0;
+#else
+#ifndef CONFORMAL_EOS
+    //return primaryVariablesEOS(e, rhob, EOState->dpdrhob);
+    
+    // here e0 unit is GeV/fm^3
+    PRECISION e0 = e*HBARC;
+    PRECISION delta_rhob = 0.0;
+    if((0<=e0) && (e0<0.0036))
+        delta_rhob = 0.00001;
+    else if((0.0036<=e0) && (e0<0.015))
+        delta_rhob = 0.00005;
+    else if((0.015<=e0) && (e0<0.045))
+        delta_rhob = 0.00025;
+    else if((0.045<=e0) && (e0<0.455))
+        delta_rhob = 0.002;
+    else if((0.455<=e0) && (e0<20.355))
+        delta_rhob = 0.01;
+    else if((20.355<=e0)&(e0<219.355))
+        delta_rhob = 0.05;
+    else
+        delta_rhob = 0.2;
+    
+    // here inputs and outputs units should in fm
+    PRECISION rhobp, rhobm, pp, pm, p0;
+    rhobp = (rhob + 0.1 * delta_rhob);
+    rhobm = (rhob - 0.1 * delta_rhob);
+    
+    pp = primaryVariablesEOS(e, rhobp, EOState->Pressure);
+    if(rhobm>=0){
+        pm = primaryVariablesEOS(e, rhobm, EOState->Pressure);
+        return (pp-pm)/(rhobp - rhobm);
+    }else{
+        p0 = primaryVariablesEOS(e, rhob, EOState->Pressure);
+        return (pp-p0)/(rhobp - rhob);
+    }
+#else
+    return 0.0;
+#endif
+#endif
+}
+
+PRECISION dPdE(PRECISION e, PRECISION rhob) {
+#ifndef EOS_with_baryon
+#ifndef CONFORMAL_EOS
+    return dpdeWB(e);
+#else
+    return 1.0/3.0;
+#endif
+#else
+#ifndef CONFORMAL_EOS
+    PRECISION e0 = e*HBARC;
+    PRECISION delta_e = 0;
+    if((0<=e0) && (e0<0.0036))
+        delta_e = 0.0003;
+    else if((0.0036<=e0) && (e0<0.015))
+        delta_e = 0.0006;
+    else if((0.015<=e0) && (e0<0.045))
+        delta_e = 0.001;
+    else if((0.045<=e0) && (e0<0.455))
+        delta_e = 0.01;
+    else if((0.455<=e0) && (e0<20.355))
+        delta_e = 0.1;
+    else if((20.355<=e0)&(e0<219.355))
+        delta_e = 1;
+    else
+        delta_e = 10;
+    
+    PRECISION ep, em, pp, pm, p0;
+    ep = (e0 + 0.1 * delta_e)/HBARC;
+    em = (e0 - 0.1 * delta_e)/HBARC;
+    
+    pp = primaryVariablesEOS(ep, rhob, EOState->Pressure);
+    if(em>=0){
+        pm = primaryVariablesEOS(em, rhob, EOState->Pressure);
+        return (pp-pm)/(ep - em);
+    }else{
+        p0 = primaryVariablesEOS(e, rhob, EOState->Pressure);
+        return (pp-p0)/(ep - e);
+    }
+#else
+    return 1.0/3.0;
+#endif
+#endif
+}
+
+// dp/dT at fixed rhob
+PRECISION dPdT(PRECISION e, PRECISION rhob) {
+#ifndef EOS_TEST
+    PRECISION e0 = e*HBARC;
+    PRECISION delta_e = 0;
+    if((0<=e0) && (e0<0.0036))
+        delta_e = 0.0003;
+    else if((0.0036<=e0) && (e0<0.015))
+        delta_e = 0.0006;
+    else if((0.015<=e0) && (e0<0.045))
+        delta_e = 0.001;
+    else if((0.045<=e0) && (e0<0.455))
+        delta_e = 0.01;
+    else if((0.455<=e0) && (e0<20.355))
+        delta_e = 0.1;
+    else if((20.355<=e0)&(e0<219.355))
+        delta_e = 1;
+    else
+        delta_e = 10;
+    
+    PRECISION ep, em, pp, pm, p0;
+    ep = (e0 + 0.1 * delta_e)/HBARC;
+    em = (e0 - 0.1 * delta_e)/HBARC;
+    
+    PRECISION pPrimaryVariables[3], mPrimaryVariables[3];
+    PRECISION dp, dT;
+    
+    getPrimaryVariablesCombo(ep, rhob, pPrimaryVariables);
+    
+    if(em>=0){
+        getPrimaryVariablesCombo(em, rhob, mPrimaryVariables);
+        
+        dp = pPrimaryVariables[0] - mPrimaryVariables[0];
+        dT = pPrimaryVariables[1] - mPrimaryVariables[1];
+        
+        return dp/dT;
+    }else{
+        getPrimaryVariablesCombo(e, rhob, mPrimaryVariables);
+        
+        dp = pPrimaryVariables[0] - mPrimaryVariables[0];
+        dT = pPrimaryVariables[1] - mPrimaryVariables[1];
+        
+        return dp/dT;
+    }
+    
+#else
+    return rhob;
+#endif
+}
+
+// chiB
+PRECISION chiB(PRECISION e, PRECISION rhob) {
+#ifndef EOS_TEST
+    return primaryVariablesEOS(e, rhob, EOState->Chib)*HBARC;
+#else
+    return 16/M_PI/M_PI * pow(effectiveTemperature(e, rhob),2) * exp(chemicalPotentialOverT(e, rhob));
+#endif
+}
+
+
 
 /**************************************************************************************************************************************************/
 /* Equation of state from the Wuppertal-Budapest collaboration, functions X(e)

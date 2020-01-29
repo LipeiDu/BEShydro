@@ -449,7 +449,7 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
     *seq = equilibriumEntropy(*e, 0.0, *p, *T, 0.0);
     
     //**************************************************************************
-    // SECTION II: baryon evolution is on, but no slow modes
+    // SECTION II: baryon evolution is on, but no Hydro+
     //**************************************************************************
     
 #else // RootSolver_with_Baryon

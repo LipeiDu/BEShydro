@@ -57,7 +57,11 @@ PRECISION baryonDiffusionCoefficientKinetic(PRECISION T, PRECISION rhob, PRECISI
 
 // compare to MUSIC
 PRECISION baryonDiffusionCoefficientTest(PRECISION T, PRECISION rhob, PRECISION alphaB){
+#ifndef EOS_TEST
     return 0.2 * rhob / (alphaB * T);
+#else
+    return 3.0/16.0;
+#endif
 }
 
 // D. T. Son and A. O. Starinets, JHEP 03, 052 (2006).

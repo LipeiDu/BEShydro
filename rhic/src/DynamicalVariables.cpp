@@ -230,6 +230,7 @@ void allocateHostMemory(int len) {
     EOState->Temperature   = (PRECISION *)calloc(188580, bytes);
     EOState->alphab      = (PRECISION *)calloc(188580, bytes);
     EOState->dpdrhob       = (PRECISION *)calloc(188580, bytes);
+    EOState->Chib       = (PRECISION *)calloc(188580, bytes);
     
     // baryon diffusion coefficients
 #ifdef VMU
@@ -543,6 +544,7 @@ void freeHostMemory() {
     free(EOState->Temperature);
     free(EOState->alphab);
     free(EOState->dpdrhob);
+    free(EOState->Chib);
 #ifdef VMU
     free(BaryDiffCoeff->sigmaB);
     free(BaryDiffCoeff->DB);

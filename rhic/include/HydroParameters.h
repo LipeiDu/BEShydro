@@ -15,7 +15,7 @@ struct HydroParameters
 {
 	double initialProperTimePoint;
 	double shearViscosityToEntropyDensity;
-	double freezeoutTemperatureGeV;
+	double freezeoutEnergyDensityGeV;
 	int initializePimunuNavierStokes;
     int initializePiNavierStokes;
 };

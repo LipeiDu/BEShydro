@@ -10,12 +10,14 @@
 #include "../include/DynamicalVariables.h"
 
 //#define CONFORMAL_EOS
+//#define EOS_TEST
 
 // ideal gas of massless quarks and gluons
 #define EOS_FACTOR 13.8997 // Nc=3, Nf=2.5
 
 
 void getEquationOfStateTable();
+void getEquationOfStateTableNEOS();
 
 void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __restrict__ PrimaryVariables);
 
@@ -38,6 +40,8 @@ PRECISION dPdRhob(PRECISION e, PRECISION rhob);
 PRECISION dPdE(PRECISION e, PRECISION rhob);
 
 PRECISION dPdT(PRECISION e, PRECISION rhob);
+
+PRECISION chiB(PRECISION e, PRECISION rhob);
 
 // Wuppertal-Budapest EoS without baryon
 

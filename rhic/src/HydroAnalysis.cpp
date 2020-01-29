@@ -545,43 +545,23 @@ void outputAnalysis(double t, FILE *outputDir, void * latticeParams)
 
 // To test the interpolatin function to see it reproduce the EOS table
 void testEOS(){
-    
-    //char EOStable[] = "output/sigmaB_test.dat";
-    //ofstream eos_table(EOStable);
-    char EOStable1[] = "output/EOS_t_cpuvh.dat";
+
+    char EOStable1[] = "output/EOS_chib.dat";
     ofstream eos_table1(EOStable1);
-    //char EOStable2[] = "output/eos_dpdrhob_test5.dat";
-    //ofstream eos_table2(EOStable2);
-    //char EOStable3[] = "output/eos_p_test5.dat";
-    //ofstream eos_table3(EOStable3);
-    //char EOStable4[] = "output/eos_cs2_test5.dat";
-    //ofstream eos_table4(EOStable4);
-    
-    for(int i = 0; i < 41; ++i) {
-        for(int j = 0; j < 250; ++j){
-            //PRECISION ttest=(0.5+j*5)/HBARC/1000.0;
-            ///PRECISION mubtest=i*5/HBARC/1000.0;
-            PRECISION etest = (0.045+i*0.01)/HBARC;
-            PRECISION rhobtest = (0.0+j*0.006)/HBARC;
-            //printf("ttest=%lf, mubtest=%lf.\n",ttest,mubtest);
-            //eos_table4  << setprecision(6) << setw(18) << etest*HBARC << setprecision(6) << setw(18) << rhobtest
-            //           << setprecision(6) << setw(18) << speedOfSoundSquared(etest, rhobtest) << endl;
-            //eos_table3 << setprecision(6) << setw(18) << etest*HBARC << setprecision(6) << setw(18) << rhobtest
-            //           << setprecision(6) << setw(18) << equilibriumPressure(etest, rhobtest)*HBARC << endl;
-            //eos_table2 << setprecision(6) << setw(18) << etest*HBARC << setprecision(6) << setw(18) << rhobtest
-            //           << setprecision(6) << setw(18) << dPdRhob(etest,rhobtest)*HBARC << endl;
+
+    for(int i = 0; i < 13; ++i) {
+        for(int j = 0; j < 500; ++j){
+
+            PRECISION etest = (0.0 + i * 0.0003)/HBARC;
+            PRECISION rhobtest = (0.0 + j * 0.00001)/HBARC;
+
             eos_table1 << setprecision(6) << setw(18) << etest*HBARC << setprecision(6) << setw(18) << rhobtest
-                       << setprecision(6) << setw(18) << chemicalPotentialOverT(etest, rhobtest) << endl;
-            //eos_table  << setprecision(6) << setw(18) << ttest << setprecision(6) << setw(18) << mubtest
-            //<< setprecision(6) << setw(18) << baryonDiffusionConstant(ttest, mubtest) << endl;
+                       << setprecision(6) << setw(18) << chiB(etest, rhobtest) << endl;
+
         }
     }
     
-    //eos_table.close();
     eos_table1.close();
-    //eos_table2.close();
-    //eos_table3.close();
-    //eos_table4.close();
     printf("EOS table is reproduced.\n");
 }
 

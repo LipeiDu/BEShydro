@@ -32,7 +32,7 @@
 #include "../include/DynamicalSources.h"
 #include "../include/HydroAnalysis.h"
 
-#define FREQ 1 //write output to file every FREQ timesteps
+#define FREQ 200 //write output to file every FREQ timesteps
 #define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
 #define JET 0 // 0 to turn off jet evolution, 1 to turn it on
@@ -43,23 +43,23 @@
 void outputDynamicalQuantities(double t, const char *outputDir, void * latticeParams)
 {
   output(e, t, outputDir, "e", latticeParams);
-  output(p, t, outputDir, "p", latticeParams);
+  //output(p, t, outputDir, "p", latticeParams);
   //output(seq, t, outputDir, "seq", latticeParams);
-  output(u->ux, t, outputDir, "ux", latticeParams);
-  output(u->uy, t, outputDir, "uy", latticeParams);
+  //output(u->ux, t, outputDir, "ux", latticeParams);
+  //output(u->uy, t, outputDir, "uy", latticeParams);
   output(u->un, t, outputDir, "un", latticeParams);
   output(u->ut, t, outputDir, "ut", latticeParams);
-  output(q->ttt, t, outputDir, "ttt", latticeParams);
-  output(q->ttx, t, outputDir, "ttx", latticeParams);
-  output(q->tty, t, outputDir, "tty", latticeParams);
-  output(q->ttn, t, outputDir, "ttn", latticeParams);
+  //output(q->ttt, t, outputDir, "ttt", latticeParams);
+  //output(q->ttx, t, outputDir, "ttx", latticeParams);
+  //output(q->tty, t, outputDir, "tty", latticeParams);
+  //output(q->ttn, t, outputDir, "ttn", latticeParams);
   #ifdef PIMUNU
-  output(q->pitx, t, outputDir, "pitx", latticeParams);
-  output(q->pixx, t, outputDir, "pixx", latticeParams);
-  output(q->pixy, t, outputDir, "pixy", latticeParams);
-  output(q->pixn, t, outputDir, "pixn", latticeParams);
-  output(q->piyy, t, outputDir, "piyy", latticeParams);
-  output(q->piyn, t, outputDir, "piyn", latticeParams);
+  //output(q->pitx, t, outputDir, "pitx", latticeParams);
+  //output(q->pixx, t, outputDir, "pixx", latticeParams);
+  //output(q->pixy, t, outputDir, "pixy", latticeParams);
+  //output(q->pixn, t, outputDir, "pixn", latticeParams);
+  //output(q->piyy, t, outputDir, "piyy", latticeParams);
+  //output(q->piyn, t, outputDir, "piyn", latticeParams);
   output(q->pinn, t, outputDir, "pinn", latticeParams);
   #endif
   #ifdef PI
@@ -68,11 +68,11 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   output(T, t, outputDir, "T", latticeParams);
   #ifdef NBMU
   output(rhob, t, outputDir, "rhob", latticeParams);
-  //output(alphaB, t, outputDir, "alphaB", latticeParams);
-  //output(q->Nbt, t, outputDir, "Nbt", latticeParams);
+  output(alphaB, t, outputDir, "alphaB", latticeParams);
+  output(q->Nbt, t, outputDir, "Nbt", latticeParams);
   #endif
   #ifdef VMU
-  //output(q->nbt, t, outputDir, "nbtau", latticeParams);
+  output(q->nbt, t, outputDir, "nbtau", latticeParams);
   //output(q->nbx, t, outputDir, "nbx", latticeParams);
   //output(q->nby, t, outputDir, "nby", latticeParams);
   output(q->nbn, t, outputDir, "nbn", latticeParams);
@@ -122,14 +122,13 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   int initialConditionType = initCond->initialConditionType;
   int numberOfSourceFiles = initCond->numberOfSourceFiles;
 
-  double freezeoutTemperatureGeV = hydro->freezeoutTemperatureGeV;
+  double freezeoutEnergyDensityGeV = hydro->freezeoutEnergyDensityGeV;
   const double hbarc = 0.197326938;
-  const double freezeoutTemperature = freezeoutTemperatureGeV/hbarc;
-  const double freezeoutEnergyDensity = 0.15/hbarc;
+  const double freezeoutEnergyDensity = freezeoutEnergyDensityGeV/hbarc;
     
   printf("Grid size = %d x %d x %d\n", nx, ny, nz);
   printf("spatial resolution = (%.3f, %.3f, %.3f)\n", lattice->latticeSpacingX, lattice->latticeSpacingY, lattice->latticeSpacingRapidity);
-  printf("freezeout temperature = %.3f [fm^-1], eF = %.3f [fm^-4]\n", freezeoutTemperature, freezeoutEnergyDensity);
+  printf("freezeout energy density eF = %.3f [fm^-4]\n", freezeoutEnergyDensity);
 
   //************************************************************************************\
   //* Allocation and reading in tables
@@ -138,7 +137,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   // allocate memory
   allocateHostMemory(nElements);
   // Read in the table of Equation of State with baryon
-  getEquationOfStateTable();
+  //getEquationOfStateTable();
+  getEquationOfStateTableNEOS();
   // baryon diffusion coefficients table
   getBaryonDiffusionCoefficientTable();
   // read in the parameterized correlation length xi(T, muB)

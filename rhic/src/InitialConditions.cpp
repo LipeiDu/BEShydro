@@ -37,6 +37,7 @@
 //#define Avg_MCGlauber
 
 #define GUBSER_FILE
+//#define PROFILE_TWO
 
 using namespace std;
 
@@ -754,6 +755,138 @@ void longitudinalBaryonDensityDistribution(double * const __restrict__ rhoLa, do
     }
 }
 
+/**************************************************************************************************************************************************/
+/* Initial conditions for (1+1)D longitudinal expansion
+/**************************************************************************************************************************************************/
+void setLongitudinalExpansionInitialCondition(void * latticeParams, void * initCondParams, void * hydroParams){
+    
+    struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
+    struct InitialConditionParameters * initCond = (struct InitialConditionParameters *) initCondParams;
+    struct HydroParameters * hydro = (struct HydroParameters *) hydroParams;
+    
+    int ncx = lattice->numComputationalLatticePointsX;
+    int ncy = lattice->numComputationalLatticePointsY;
+    int ncz = lattice->numComputationalLatticePointsRapidity;
+    
+    int nx = lattice->numLatticePointsX;
+    int ny = lattice->numLatticePointsY;
+    int nz = lattice->numLatticePointsRapidity;
+    
+    double dx = lattice->latticeSpacingX;
+    double dy = lattice->latticeSpacingY;
+    double dz = lattice->latticeSpacingRapidity;
+    
+    double t0 = hydro->initialProperTimePoint;
+    
+    double T0 = (PRECISION) 0.5/HBARC;
+    double nmax = (PRECISION) 10.0;
+    double R0 = 0.5;
+    double eta1 = 1.0;
+    double eta2 = -1.0;
+    double omega = 100.0;
+    double fac = (PRECISION) 16.0/M_PI/M_PI;
+    
+    for(int i = 2; i < nx+2; ++i) {
+        for(int j = 2; j < ny+2; ++j) {
+            for(int k = 2; k < nz+2; ++k) {
+                int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+                
+                double eta = ((double)k - ((double) nz/2.0 + 1.0))*dz;
+
+#ifndef PROFILE_TWO
+                rhob[s] = fac * pow(T0,3.0) + nmax * (exp(-2.0*omega*sqrt(1.0+(eta+eta1)*(eta+eta1)/R0/R0/omega) + 2.0*omega) + exp(-2.0*omega*sqrt(1.0+(eta-eta1)*(eta-eta1)/R0/R0/omega) + 2.0*omega));
+                
+                e[s] = (PRECISION) 3.0 * rhob[s] * T0;
+                
+                p[s] = (PRECISION) e[s]/3.0;
+                
+#else
+                double etaFlat = 4.0;
+                double etaVariance = 1.0;
+                
+                double arg = -eta * eta / 2 / 2. / 2.;
+                e[s] = 200.0 * exp(arg) + 1.0;
+                
+                p[s] = e[s]/3;
+                
+                rhob[s] = (PRECISION) nmax * (exp(-(eta-2.0)*(eta-2.0)/2.0) + exp(-(eta+2.0)*(eta+2.0)/2.0)) + 1.0;
+#endif
+                
+                PRECISION ux = 0;
+                PRECISION uy = 0;
+                PRECISION un = 0;
+                
+                u->ux[s] = 0;
+                u->uy[s] = 0;
+                u->un[s] = 0;
+                u->ut[s] = sqrt(1+ux*ux+uy*uy+t0*t0*un*un);
+#ifdef PIMUNU
+                q->pitt[s] = 0;
+                q->pitx[s] = 0;
+                q->pity[s] = 0;
+                q->pitn[s] = 0;
+                q->pixx[s] = 0;
+                q->pixy[s] = 0;
+                q->pixn[s] = 0;
+                q->piyy[s] = 0;
+                q->piyn[s] = 0;
+                q->pinn[s] = 0;
+#endif
+#ifdef VMU
+                q->nbt[s] = 0.0;
+                q->nbx[s] = 0.0;
+                q->nby[s] = 0.0;
+                q->nbn[s] = 0.0;
+#endif
+            }
+        }
+    }
+    
+    
+    /*for(int i = 2; i < 3; ++i) {
+        for(int j = 2; j < 3; ++j) {
+            for(int k = 2; k < nz+2; ++k) {
+                int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+                
+                double eta = ((double)k - ((double) nz/2.0 + 1.0))*dz;
+                
+                rhob[s] = fac * pow(T0,3.0) + nmax * (exp(-2.0*omega*sqrt(1.0+(eta+eta1)*(eta+eta1)/R0/R0/omega) + 2.0*omega) + exp(-2.0*omega*sqrt(1.0+(eta-eta1)*(eta-eta1)/R0/R0/omega) + 2.0*omega));
+                
+                e[s] = (PRECISION) 3.0 * rhob[s] * T0;
+                
+                p[s] = (PRECISION) e[s]/3.0;
+            }
+        }
+    }
+    
+    for(int i = 2; i < nx+2; ++i) {
+        for(int j = 2; j < ny+2; ++j) {
+            for(int k = 2; k < nz+2; ++k) {
+                int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+                int s1= columnMajorLinearIndex(2, 2, k, nx+4, ny+4);
+
+                if(i !=2 || j!=2){
+                    e[s] = e[s1];
+                    rhob[s] = rhob[s1];
+                    p[s] = p[s1];
+                }
+                
+                u->ux[s] = 0;
+                u->uy[s] = 0;
+                u->un[s] = 0;
+                u->ut[s] = 1.0;
+#ifdef VMU
+                q->nbt[s] = 0;
+                q->nbx[s] = 0;
+                q->nby[s] = 0;
+                q->nbn[s] = 0;
+#endif
+            }
+        }
+    }*/
+    
+    
+}
 
 /**************************************************************************************************************************************************/
 /* Initial conditions for hydro with dynamical sources
@@ -1455,7 +1588,38 @@ void setMusicInitialCondition(void * latticeParams, const char *rootDirectory) {
             }
         }
     }
-
+    
+    /*if (file == NULL)
+        {
+            printf("Couldn't open musictest.dat!\n");
+        }
+        else
+        {
+            for(int i = 2; i < nx+2; ++i) {
+                for(int j = 2; j < ny+2; ++j) {
+                    for(int k = 2; k < nz+2; ++k) {
+                        int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+                        
+                        int status = fscanf(file,"%le\t%le\t%le\n",&eta,&ed,&rhobd);
+                        
+                        e[s] = (PRECISION) ed/HBARC;
+                        rhob[s] = (PRECISION) rhobd;
+                        p[s] = equilibriumPressure(e[s], rhob[s]);
+                        
+                        u->ux[s] = 0.;
+                        u->uy[s] = 0.;
+                        u->un[s] = 0.;
+                        u->ut[s] = 1.0;
+    #ifdef VMU
+                        q->nbt[s] = 0.;
+                        q->nbx[s] = 0.;
+                        q->nby[s] = 0.;
+                        q->nbn[s] = 0.;
+    #endif
+                    }
+                }
+            }
+        }*/
 }
 
 /**************************************************************************************************************************************************/
@@ -1716,22 +1880,46 @@ void GaussianProfile(void * latticeParams, void * initCondParams) {
     
     double e0 = initCond->initialEnergyDensity;
     
-    double SIG0 = 2;
+    //double SIG0 = 2.0;
+    //double T0 = 3.04;
+    
+    double T0 = (PRECISION) 0.5/HBARC;
+    double R0 = 3.0;
+    double omega = 100.0;
+    double fac = (PRECISION) 16.0/M_PI/M_PI;
     
     for(int i = 2; i < nx+2; ++i) {
         for(int j = 2; j < ny+2; ++j) {
             for(int k = 2; k < nz+2; ++k) {
                 int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
-                double x = (i - ((double)nx-1.)/2.)*dx;
-                double y = (j - ((double)ny-1.)/2.)*dy;
+                double x = (i - ((double)nx+2.)/2.)*dx;
+                double y = (j - ((double)ny+2.)/2.)*dy;
                 
-                e[s] += 50*exp(-x*x/2/SIG0/SIG0-y*y/2/SIG0/SIG0);
+                //e[s] = (PRECISION) 200.0 * exp(-x*x/SIG0/SIG0-y*y/SIG0/SIG0);
+                //p[s] = e[s]/3.;
+                //rhob[s] = (PRECISION) e[s]/3./T0;
                 
-                p[s] = e[s]/3;
-                u->ux[s] = 0;
-                u->uy[s] = 0;
-                u->un[s] = 0;
-                u->ut[s] = 1;
+                rhob[s] = fac * pow(T0,3.0) * exp(-2.0*omega*sqrt(1.0+(x*x+y*y)/R0/R0/omega) + 2.0*omega);
+                PRECISION Ti = pow(rhob[s]/fac,0.33333333);
+                
+                e[s] = (PRECISION) 3.0 * rhob[s] * Ti;
+                
+                p[s] = (PRECISION) e[s]/3.0;
+                
+                PRECISION ux = 0.;
+                PRECISION uy = 0.;
+                PRECISION un = 0.;
+                
+                u->ux[s] = 0.;
+                u->uy[s] = 0.;
+                u->un[s] = 0.;
+                u->ut[s] = 1.0;
+#ifdef VMU
+                q->nbt[s] = 0.0;
+                q->nbx[s] = 0.0;
+                q->nby[s] = 0.0;
+                q->nbn[s] = 0.0;
+#endif
             }
         }
     }
@@ -1908,6 +2096,11 @@ void setInitialConditions(void * latticeParams, void * initCondParams, void * hy
             setFluidVelocityInitialCondition(latticeParams, hydroParams);
             setNbmuInitialCondition(latticeParams, initCondParams, hydroParams);
             setPimunuInitialCondition(latticeParams, initCondParams, hydroParams);
+            return;
+        }
+        case 16:{
+            printf("(1+1)D longitudinal expansion...\n");
+            setLongitudinalExpansionInitialCondition(latticeParams, initCondParams, hydroParams);
             return;
         }
 		default: {

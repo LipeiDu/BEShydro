@@ -17,11 +17,11 @@
 //#define PIMUNU
 //#define PI
 
-//#define NBMU
-//#define VMU
+#define NBMU
+#define VMU
 
-//#define RootSolver_with_Baryon
-//#define EOS_with_baryon
+#define RootSolver_with_Baryon
+#define EOS_with_baryon
 
 //#define DYNAMICAL_SOURCE
 
@@ -161,6 +161,7 @@ typedef struct
     PRECISION *Temperature;
     PRECISION *alphab;
     PRECISION *dpdrhob;
+    PRECISION *Chib;
 } EQUATION_OF_STATE;
 
 // baryon diffusion coefficients

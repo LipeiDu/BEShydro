@@ -9,7 +9,7 @@
 
 double initialProperTimePoint;
 double shearViscosityToEntropyDensity;
-double freezeoutTemperatureGeV;
+double freezeoutEnergyDensityGeV;
 int initializePimunuNavierStokes;
 int initializePiNavierStokes;
 
@@ -24,7 +24,7 @@ void loadHydroParameters(config_t *cfg, const char* configDirectory, void * para
 
 	getDoubleProperty(cfg, "initialProperTimePoint", &initialProperTimePoint, 0.1);
 	getDoubleProperty(cfg, "shearViscosityToEntropyDensity", &shearViscosityToEntropyDensity, 0.0795775);
-	getDoubleProperty(cfg, "freezeoutTemperatureGeV", &freezeoutTemperatureGeV, 0.155);
+	getDoubleProperty(cfg, "freezeoutEnergyDensityGeV", &freezeoutEnergyDensityGeV, 0.155);
 
 	getIntegerProperty(cfg, "initializePimunuNavierStokes", &initializePimunuNavierStokes, 1);
     getIntegerProperty(cfg, "initializePiNavierStokes", &initializePiNavierStokes, 1);
@@ -32,7 +32,7 @@ void loadHydroParameters(config_t *cfg, const char* configDirectory, void * para
 	struct HydroParameters * hydro = (struct HydroParameters *) params;
 	hydro->initialProperTimePoint = initialProperTimePoint;
 	hydro->shearViscosityToEntropyDensity = shearViscosityToEntropyDensity;
-	hydro->freezeoutTemperatureGeV = freezeoutTemperatureGeV;
+	hydro->freezeoutEnergyDensityGeV = freezeoutEnergyDensityGeV;
 	hydro->initializePimunuNavierStokes = initializePimunuNavierStokes;
     hydro->initializePiNavierStokes = initializePiNavierStokes;
 }
