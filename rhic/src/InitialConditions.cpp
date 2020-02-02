@@ -39,6 +39,7 @@
 
 #define GUBSER_FILE
 //#define PROFILE_TWO
+#define ANISOTROPIC
 
 using namespace std;
 
@@ -1966,6 +1967,7 @@ void GaussianProfile(void * latticeParams, void * initCondParams) {
     
     double T0 = (PRECISION) 0.5/HBARC;
     double R0 = 3.0;
+    double R1 = 2.0;
     double omega = 100.0;
     double fac = (PRECISION) 16.0/M_PI/M_PI;
     
@@ -1979,8 +1981,11 @@ void GaussianProfile(void * latticeParams, void * initCondParams) {
                 //e[s] = (PRECISION) 200.0 * exp(-x*x/SIG0/SIG0-y*y/SIG0/SIG0);
                 //p[s] = e[s]/3.;
                 //rhob[s] = (PRECISION) e[s]/3./T0;
-                
+#ifndef ANISOTROPIC
                 rhob[s] = fac * pow(T0,3.0) * exp(-2.0*omega*sqrt(1.0+(x*x+y*y)/R0/R0/omega) + 2.0*omega);
+#else
+                rhob[s] = fac * pow(T0,3.0) * (exp(-2.0*omega*sqrt(1.0+(y*y)/R0/R0/omega) + 2.0*omega) + exp(-2.0*omega*sqrt(1.0+(x*x)/R1/R1/omega) + 2.0*omega));
+#endif
                 PRECISION Ti = pow(rhob[s]/fac,0.33333333);
                 
                 e[s] = (PRECISION) 3.0 * rhob[s] * Ti;

@@ -43,22 +43,22 @@
 void outputDynamicalQuantities(double t, const char *outputDir, void * latticeParams)
 {
   output(e, t, outputDir, "e", latticeParams);
-  output(p, t, outputDir, "p", latticeParams);
+  //output(p, t, outputDir, "p", latticeParams);
   //output(seq, t, outputDir, "seq", latticeParams);
-  //output(u->ux, t, outputDir, "ux", latticeParams);
-  //output(u->uy, t, outputDir, "uy", latticeParams);
-  output(u->un, t, outputDir, "un", latticeParams);
+  output(u->ux, t, outputDir, "ux", latticeParams);
+  output(u->uy, t, outputDir, "uy", latticeParams);
+  //output(u->un, t, outputDir, "un", latticeParams);
   output(u->ut, t, outputDir, "ut", latticeParams);
   //output(q->ttt, t, outputDir, "ttt", latticeParams);
   //output(q->ttx, t, outputDir, "ttx", latticeParams);
   //output(q->tty, t, outputDir, "tty", latticeParams);
   //output(q->ttn, t, outputDir, "ttn", latticeParams);
   #ifdef PIMUNU
-  //output(q->pitx, t, outputDir, "pitx", latticeParams);
-  //output(q->pixx, t, outputDir, "pixx", latticeParams);
-  //output(q->pixy, t, outputDir, "pixy", latticeParams);
+  output(q->pitx, t, outputDir, "pitx", latticeParams);
+  output(q->pixx, t, outputDir, "pixx", latticeParams);
+  output(q->pixy, t, outputDir, "pixy", latticeParams);
   //output(q->pixn, t, outputDir, "pixn", latticeParams);
-  //output(q->piyy, t, outputDir, "piyy", latticeParams);
+  output(q->piyy, t, outputDir, "piyy", latticeParams);
   //output(q->piyn, t, outputDir, "piyn", latticeParams);
   //output(q->pinn, t, outputDir, "pinn", latticeParams);
   #endif
@@ -73,9 +73,9 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   #endif
   #ifdef VMU
   output(q->nbt, t, outputDir, "nbtau", latticeParams);
-  //output(q->nbx, t, outputDir, "nbx", latticeParams);
-  //output(q->nby, t, outputDir, "nby", latticeParams);
-  output(q->nbn, t, outputDir, "nbn", latticeParams);
+  output(q->nbx, t, outputDir, "nbx", latticeParams);
+  output(q->nby, t, outputDir, "nby", latticeParams);
+  //output(q->nbn, t, outputDir, "nbn", latticeParams);
   //outputPhaseDiagram(alphaB, T, t, outputDir, "muBT", latticeParams);
   #endif
   #ifdef HydroPlus
@@ -263,7 +263,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   for (int n = 1; n <= nt+1; ++n)
   {
     
-    outputAnalysisa(n, t, fpan, latticeParams);
+    //outputAnalysisa(n, t, fpan, latticeParams);
     //outputBaryonCP(t, outputDir, latticeParams);
       
     // copy variables back to host and write to disk
