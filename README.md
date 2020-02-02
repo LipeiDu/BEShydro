@@ -7,3 +7,5 @@ Instructions on how to use the code can be found in the `BEShydro_User_Manual.pd
 *  _(3+1)-dimensional dissipative relativistic fluid dynamics at non-zero net baryon density_, Lipei Du and Ulrich W. Heinz, [arXiv:1906.11181](http://inspirehep.net/record/1741415).
 
 This code is based on a CPU version of **GPU-VH** developed by [arXiv:1608.06577](http://inspirehep.net/record/1482957). If you use **BEShydro**, please cite the papers above.
+
+**Please give credits to other works where they should be given.**

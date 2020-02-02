@@ -43,7 +43,7 @@
 void outputDynamicalQuantities(double t, const char *outputDir, void * latticeParams)
 {
   output(e, t, outputDir, "e", latticeParams);
-  //output(p, t, outputDir, "p", latticeParams);
+  output(p, t, outputDir, "p", latticeParams);
   //output(seq, t, outputDir, "seq", latticeParams);
   //output(u->ux, t, outputDir, "ux", latticeParams);
   //output(u->uy, t, outputDir, "uy", latticeParams);
@@ -60,7 +60,7 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   //output(q->pixn, t, outputDir, "pixn", latticeParams);
   //output(q->piyy, t, outputDir, "piyy", latticeParams);
   //output(q->piyn, t, outputDir, "piyn", latticeParams);
-  output(q->pinn, t, outputDir, "pinn", latticeParams);
+  //output(q->pinn, t, outputDir, "pinn", latticeParams);
   #endif
   #ifdef PI
   output(q->Pi, t, outputDir, "Pi", latticeParams);
@@ -69,14 +69,14 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   #ifdef NBMU
   output(rhob, t, outputDir, "rhob", latticeParams);
   output(alphaB, t, outputDir, "alphaB", latticeParams);
-  output(q->Nbt, t, outputDir, "Nbt", latticeParams);
+  //output(q->Nbt, t, outputDir, "Nbt", latticeParams);
   #endif
   #ifdef VMU
   output(q->nbt, t, outputDir, "nbtau", latticeParams);
   //output(q->nbx, t, outputDir, "nbx", latticeParams);
   //output(q->nby, t, outputDir, "nby", latticeParams);
   output(q->nbn, t, outputDir, "nbn", latticeParams);
-  outputPhaseDiagram(alphaB, T, t, outputDir, "muBT", latticeParams);
+  //outputPhaseDiagram(alphaB, T, t, outputDir, "muBT", latticeParams);
   #endif
   #ifdef HydroPlus
   //output(q->phiQ[0], t, outputDir, "phiQ0", latticeParams);
@@ -139,10 +139,12 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   // Read in the table of Equation of State with baryon
   //getEquationOfStateTable();
   getEquationOfStateTableNEOS();
+  //testEOS();
   // baryon diffusion coefficients table
   getBaryonDiffusionCoefficientTable();
   // read in the parameterized correlation length xi(T, muB)
   getCorrelationLengthTable();
+  //testCorreLength();
 
   //************************************************************************************\
   //* Jet initialization
@@ -250,11 +252,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   int accumulator1 = 0;
   int accumulator2 = 0;
     
-  // a customized output file
-  FILE *fp;
-  char fname[255];
-  sprintf(fname, "%s/AnalysisData.dat", outputDir);
-  fp=fopen(fname, "w");
+  FILE *fpan = fopen("output/AnalysisData.dat", "w");
     
   //************************************************************************************\
   //* loop over time steps
@@ -264,8 +262,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     
   for (int n = 1; n <= nt+1; ++n)
   {
-      
-    //outputAnalysis(t, fp, latticeParams);
+    
+    outputAnalysisa(n, t, fpan, latticeParams);
     //outputBaryonCP(t, outputDir, latticeParams);
       
     // copy variables back to host and write to disk
@@ -274,7 +272,6 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       printf("n = %d:%d (t = %.3f),\t (e, p) = (%.3f, %.3f) [fm^-4],\t (rhob = %.3f ),\t (T = %.3f [GeV]),\n",
       n - 1, nt, t, e[sctr], p[sctr], rhob[sctr], effectiveTemperature(e[sctr], rhob[sctr]) * hbarc);
       outputDynamicalQuantities(t, outputDir, latticeParams);
-      //outputAnalysis(t, outputDir, latticeParams);
       //outputHydroPlus(t, outputDir, latticeParams);
     }
 
@@ -368,8 +365,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     
   printf("Average time/step: %.3f ms\n",totalTime/((double)nsteps));
     
-  fclose(fp); // close customized output file
-    
+  fclose(fpan);
   //************************************************************************************\
   //* Deallocate memory
   //************************************************************************************/

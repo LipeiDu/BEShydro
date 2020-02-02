@@ -125,6 +125,7 @@ void getEquationOfStateTableNEOS(){
     char fname[255];
     int ne, nb;
     int idx = 0;
+    double drhob;
     
     for(int j = 0; j < 7; ++j){
         sprintf(fname, "%s%d%s.dat", "eos/neosb/neos", j+1, "_t");
@@ -146,17 +147,20 @@ void getEquationOfStateTableNEOS(){
             fseek(eosfilet,0L,SEEK_SET);
             
             fscanf(eosfilet,"%*[^\n]%*c");
-            fscanf(eosfilet,"%*s%*s%d%d%*c", & nb, & ne);
+            fscanf(eosfilet,"%lf%*s%d%d%*c", &drhob, & nb, & ne);
             
             fscanf(eosfilep,"%*[^\n]%*c%*[^\n]%*c");
             fscanf(eosfilemb,"%*[^\n]%*c%*[^\n]%*c");
             fscanf(eosfilechib,"%*[^\n]%*c%*[^\n]%*c");
             
             int ngrid = (nb + 1) * (ne + 1);
-            int nline = ngrid/5;
+            int nline = ngrid/5; // how many lines in the table, note: 5 columns each line
+            
+            int idex = idx; // store the starting index of this table for calculating dP/dT
             
             for(int i = 0; i < nline; ++i)
             {
+                
                 fscanf(eosfilet,"%le %le %le %le %le\n", & EOState->Temperature[idx], & EOState->Temperature[idx+1], & EOState->Temperature[idx+2],
                        & EOState->Temperature[idx+3], & EOState->Temperature[idx+4]);
                 
@@ -166,6 +170,7 @@ void getEquationOfStateTableNEOS(){
                 fscanf(eosfilemb,"%le %le %le %le %le\n", & EOState->alphab[idx], & EOState->alphab[idx+1], & EOState->alphab[idx+2],
                        & EOState->alphab[idx+3], & EOState->alphab[idx+4]);
                 
+                // calculate mu/T and store in EOState->alphab
                 EOState->alphab[idx] = EOState->alphab[idx]/EOState->Temperature[idx];
                 EOState->alphab[idx+1] = EOState->alphab[idx+1]/EOState->Temperature[idx+1];
                 EOState->alphab[idx+2] = EOState->alphab[idx+2]/EOState->Temperature[idx+2];
@@ -176,6 +181,20 @@ void getEquationOfStateTableNEOS(){
                        & EOState->Chib[idx+3], & EOState->Chib[idx+4]);
                 
                 idx = idx + 5;
+            }
+            
+            // after reading in pressure and temperature, calculating dP/dT at fixed rhob
+            for(int i = 0; i < nline; ++i)
+            {
+
+                // calculate dP/dT and store in EOState->dPdT
+                EOState->dPdT[idex]   = (EOState->Pressure[idex]   - EOState->Pressure[idex+nb+1]) / (EOState->Temperature[idex]   - EOState->Temperature[idex+nb+1]);
+                EOState->dPdT[idex+1] = (EOState->Pressure[idex+1] - EOState->Pressure[idex+nb+2]) / (EOState->Temperature[idex+1] - EOState->Temperature[idex+nb+2]);
+                EOState->dPdT[idex+2] = (EOState->Pressure[idex+2] - EOState->Pressure[idex+nb+3]) / (EOState->Temperature[idex+2] - EOState->Temperature[idex+nb+3]);
+                EOState->dPdT[idex+3] = (EOState->Pressure[idex+3] - EOState->Pressure[idex+nb+4]) / (EOState->Temperature[idex+3] - EOState->Temperature[idex+nb+4]);
+                EOState->dPdT[idex+4] = (EOState->Pressure[idex+4] - EOState->Pressure[idex+nb+5]) / (EOState->Temperature[idex+4] - EOState->Temperature[idex+nb+5]);
+                
+                idex = idex + 5;
             }
         }
         
@@ -739,7 +758,7 @@ PRECISION dPdE(PRECISION e, PRECISION rhob) {
 // dp/dT at fixed rhob
 PRECISION dPdT(PRECISION e, PRECISION rhob) {
 #ifndef EOS_TEST
-    PRECISION e0 = e*HBARC;
+    /*PRECISION e0 = e*HBARC;
     PRECISION delta_e = 0;
     if((0<=e0) && (e0<0.0036))
         delta_e = 0.0003;
@@ -779,7 +798,9 @@ PRECISION dPdT(PRECISION e, PRECISION rhob) {
         dT = pPrimaryVariables[1] - mPrimaryVariables[1];
         
         return dp/dT;
-    }
+    }*/
+    
+    return primaryVariablesEOS(e, rhob, EOState->dPdT)*HBARC;
     
 #else
     return rhob;

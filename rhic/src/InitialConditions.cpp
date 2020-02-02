@@ -26,6 +26,7 @@
 #include "../include/MonteCarloGlauberModel.h"
 #include "../include/HydroParameters.h"
 #include "../include/EquationOfState.h"
+#include "../include/TransportCoefficients.h"
 
 #include "../include/HydroPlus.h"
 #include "../include/SourceTerms.h"
@@ -728,7 +729,7 @@ void longitudinalEnergyDensityDistribution(double * const __restrict__ eL, void 
     
     for(int k = 0; k < nz; ++k) {
         double eta = (k - (nz-1)/2)*dz;
-        double etaScaled = fabs(eta) - etaFlat/2;
+        double etaScaled = fabs(eta) - etaFlat;
         double arg = -etaScaled * etaScaled / (etaVariance * etaVariance) / 2 * THETA_FUNCTION(etaScaled);
         eL[k] = 2 * exp(arg);
     }
@@ -753,6 +754,110 @@ void longitudinalBaryonDensityDistribution(double * const __restrict__ rhoLa, do
         rhoLa[k] = (exp(-(eta-etaMean)*(eta-etaMean)/(2*etaVariance1*etaVariance1))*THETA_FUNCTION(eta-etaMean+1.e-2) + exp(-(eta-etaMean)*(eta-etaMean)/(2*etaVariance2*etaVariance2))*THETA_FUNCTION(etaMean-eta-1.e-2));
         rhoLb[k] = (exp(-(-eta-etaMean)*(-eta-etaMean)/(2*etaVariance1*etaVariance1))*THETA_FUNCTION(-eta-etaMean+1.e-2) + exp(-(-eta-etaMean)*(-eta-etaMean)/(2*etaVariance2*etaVariance2))*THETA_FUNCTION(etaMean+eta-1.e-2));
     }
+}
+
+/**************************************************************************************************************************************************/
+/* Baryon Diffusion CP
+/**************************************************************************************************************************************************/
+void setBaryonDiffusionCPInitialCondition(void * latticeParams, void * initCondParams, void * hydroParams) {
+    
+    struct InitialConditionParameters * initCond = (struct InitialConditionParameters *) initCondParams;
+    struct HydroParameters * hydro = (struct HydroParameters *) hydroParams;
+    struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
+    
+    int nx = lattice->numLatticePointsX;
+    int ny = lattice->numLatticePointsY;
+    int nz = lattice->numLatticePointsRapidity;
+    double dx = lattice->latticeSpacingX;
+    double dy = lattice->latticeSpacingY;
+    double dz = lattice->latticeSpacingRapidity;
+    
+    double t0 = hydro->initialProperTimePoint;
+    int criticalSlowingDown = hydro->criticalSlowingDown;
+    
+    double etaFlat = initCond->rapidityMean;
+    double etaVariance = initCond->rapidityVariance;
+    double etaVariance1 = initCond->bRapidityVariance1;
+    double etaVariance2 = initCond->bRapidityVariance2;
+    double etaMean = initCond->bRapidityMean;
+    
+    double e0 = initCond->initialEnergyDensity;
+    double rhob0 = initCond->initialBaryonDensity;
+    double bNorm = initCond->bNorm;
+
+    double eL[nz];
+    double rhoLa[nz], rhoLb[nz];
+    
+    char rhobb[] = "output/kappaB.dat";
+    ofstream baryonden(rhobb);
+    
+    for(int i = 2; i < nx+2; ++i) {
+        for(int j = 2; j < ny+2; ++j) {
+            for(int k = 2; k < nz+2; ++k) {
+                int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+                
+                double eta = (k - (nz+1)/2)*dz;
+                
+                double etaScaled = fabs(eta) - etaFlat;
+                double arg = -etaScaled * etaScaled / (etaVariance * etaVariance) / 2 * THETA_FUNCTION(etaScaled);
+                eL[k-2] = 2 * exp(arg);
+                
+                rhoLa[k-2] = (exp(-(eta-etaMean)*(eta-etaMean)/(2*etaVariance1*etaVariance1))*THETA_FUNCTION(eta-etaMean+1.e-2) + exp(-(eta-etaMean)*(eta-etaMean)/(2*etaVariance2*etaVariance2))*THETA_FUNCTION(etaMean-eta-1.e-2));
+                rhoLb[k-2] = (exp(-(-eta-etaMean)*(-eta-etaMean)/(2*etaVariance1*etaVariance1))*THETA_FUNCTION(-eta-etaMean+1.e-2) + exp(-(-eta-etaMean)*(-eta-etaMean)/(2*etaVariance2*etaVariance2))*THETA_FUNCTION(etaMean+eta-1.e-2));
+                
+                
+                e[s] = (PRECISION) e0 / t0 * (eL[k-2] + 1.e-5);
+                rhob[s] = (PRECISION) rhob0 / t0 * (bNorm * (rhoLa[k-2] + rhoLb[k-2]) + 1.e-5);
+                p[s] = equilibriumPressure(e[s], rhob[s]);
+                
+                u->ux[s] = 0;
+                u->uy[s] = 0;
+                u->un[s] = 0;
+                u->ut[s] = 1.;
+#ifdef VMU
+                q->nbt[s] = 0.0;
+                q->nbx[s] = 0.0;
+                q->nby[s] = 0.0;
+                q->nbn[s] = 0.0;
+ 
+                // initial profiles of kappaB
+                
+                double T = effectiveTemperature(e[s], rhob[s]);
+                double alphaB = chemicalPotentialOverT(e[s], rhob[s]);
+                double seq = equilibriumEntropy(e[s], rhob[s], p[s], T, alphaB);
+                double muB = T * alphaB;
+                
+                PRECISION diffusionCoeff[2];
+                baryonDiffusionCoefficient(T, muB, diffusionCoeff);
+                
+                double kappaKinetic = baryonDiffusionCoefficientKinetic(T, rhob[s], alphaB, e[s], p[s]);
+                double kappaHolography = diffusionCoeff[0];
+                double kappaAdscft = baryonDiffusionCoefficientAdscft(T, rhob[s], alphaB, e[s], p[s], seq);
+                double kappaPlus = baryonDiffusionCoefficientHydroPlus(T, rhob[s], alphaB, e[s], p[s], seq);
+                
+                if(criticalSlowingDown){
+                    double corrL = correlationLength(T, muB);
+                    kappaKinetic = corrL * kappaKinetic;
+                    kappaHolography = corrL * kappaHolography;
+                    kappaAdscft = corrL * kappaAdscft;
+                    kappaPlus = corrL * kappaPlus;
+                }
+                
+                baryonden
+                << setprecision(5) << setw(10) << (i-2 - (nx-1)/2.0) * dx
+                << setprecision(5) << setw(10) << (j-2 - (ny-1)/2.0) * dy
+                << setprecision(5) << setw(10) << (k-2 - (nz-1)/2.0) * dz
+                << setprecision(6) << setw(18) << kappaKinetic
+                << setprecision(6) << setw(18) << kappaHolography
+                << setprecision(6) << setw(18) << kappaAdscft
+                << setprecision(6) << setw(18) << kappaPlus
+                << endl;
+#endif
+            }
+        }
+    }
+    
+    baryonden.close();
 }
 
 /**************************************************************************************************************************************************/
@@ -1062,9 +1167,6 @@ void setConstantDensityInitialCondition(void * latticeParams, void * initCondPar
 
     double eT = 5.5;
     
-    //char rhobb[] = "output/kappaB.dat";
-    //ofstream baryonden(rhobb);
-    
 	for(int i = 2; i < nx+2; ++i) {
 		for(int j = 2; j < ny+2; ++j) {
 			for(int k = 2; k < nz+2; ++k) {
@@ -1073,31 +1175,10 @@ void setConstantDensityInitialCondition(void * latticeParams, void * initCondPar
                 e[s] = (PRECISION) e0 / t0 * (eL[k-2] * eT + 1.e-5);
                 rhob[s] = (PRECISION) 1 / t0 * (0.332452 * (rhoLa[k-2] + rhoLb[k-2]) * eT + 1.e-5);// normalization factor 0.33
                 p[s] = equilibriumPressure(e[s], rhob[s]);
-                
-/*#ifdef VMU
-                double T = effectiveTemperature(e[s], rhob[s]);
-                double alphaB = chemicalPotentialOverT(e[s], rhob[s]);
-                double seq = equilibriumEntropy(e[s], rhob[s], p[s], T, alphaB);
-                
-                double kappaKinetic = baryonDiffusionCoefficient(T, rhob[s], alphaB, e[s], p[s]);
-                double kappaHolography = baryonDiffusionConstant(T, alphaB*T)*T;
-                double kappaAdscft = criticalBaryonDiffusionCoefficientAdscft(T, rhob[s], alphaB, e[s], p[s], seq);
-                double kappaPlus = criticalBaryonDiffusionCoefficientPlus(T, rhob[s], alphaB, e[s], p[s], seq);
-                
-                baryonden
-                << setprecision(5) << setw(10) << (i-2 - (nx-1)/2.0) * dx
-                << setprecision(5) << setw(10) << (j-2 - (ny-1)/2.0) * dy
-                << setprecision(5) << setw(10) << (k-2 - (nz-1)/2.0) * dz
-                << setprecision(6) << setw(18) << kappaKinetic
-                << setprecision(6) << setw(18) << kappaHolography
-                << setprecision(6) << setw(18) << kappaAdscft
-                << setprecision(6) << setw(18) << kappaPlus
-                << endl;
-#endif*/
+
 			}
 		}
 	}
-    //baryonden.close();
 }
 
 /**************************************************************************************************************************************************/
@@ -1541,7 +1622,7 @@ void setMusicInitialCondition(void * latticeParams, const char *rootDirectory) {
     sprintf(fname, "%s/%s", rootDirectory, "/tests/MUSIC-test/musictest.dat");
     file = fopen(fname, "r");
     
-    if (file == NULL)
+    /*if (file == NULL)
     {
         printf("Couldn't open musictest.dat!\n");
     }
@@ -1587,9 +1668,9 @@ void setMusicInitialCondition(void * latticeParams, const char *rootDirectory) {
 #endif
             }
         }
-    }
+    }*/
     
-    /*if (file == NULL)
+    if (file == NULL)
         {
             printf("Couldn't open musictest.dat!\n");
         }
@@ -1619,7 +1700,7 @@ void setMusicInitialCondition(void * latticeParams, const char *rootDirectory) {
                     }
                 }
             }
-        }*/
+        }
 }
 
 /**************************************************************************************************************************************************/
@@ -2101,6 +2182,11 @@ void setInitialConditions(void * latticeParams, void * initCondParams, void * hy
         case 16:{
             printf("(1+1)D longitudinal expansion...\n");
             setLongitudinalExpansionInitialCondition(latticeParams, initCondParams, hydroParams);
+            return;
+        }
+        case 17:{
+            printf("Baryon diffusion CP...\n");
+            setBaryonDiffusionCPInitialCondition(latticeParams, initCondParams, hydroParams);
             return;
         }
 		default: {

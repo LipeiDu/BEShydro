@@ -12,6 +12,9 @@ double shearViscosityToEntropyDensity;
 double freezeoutEnergyDensityGeV;
 int initializePimunuNavierStokes;
 int initializePiNavierStokes;
+int kappaType;
+int gradientType;
+int criticalSlowingDown;
 
 void loadHydroParameters(config_t *cfg, const char* configDirectory, void * params) {
 	// Read the file
@@ -28,6 +31,11 @@ void loadHydroParameters(config_t *cfg, const char* configDirectory, void * para
 
 	getIntegerProperty(cfg, "initializePimunuNavierStokes", &initializePimunuNavierStokes, 1);
     getIntegerProperty(cfg, "initializePiNavierStokes", &initializePiNavierStokes, 1);
+    
+    getIntegerProperty(cfg, "kappaType", &kappaType, 1);
+    getIntegerProperty(cfg, "gradientType", &gradientType, 1);
+    
+    getIntegerProperty(cfg, "criticalSlowingDown", &criticalSlowingDown, 0);
 
 	struct HydroParameters * hydro = (struct HydroParameters *) params;
 	hydro->initialProperTimePoint = initialProperTimePoint;
@@ -35,4 +43,7 @@ void loadHydroParameters(config_t *cfg, const char* configDirectory, void * para
 	hydro->freezeoutEnergyDensityGeV = freezeoutEnergyDensityGeV;
 	hydro->initializePimunuNavierStokes = initializePimunuNavierStokes;
     hydro->initializePiNavierStokes = initializePiNavierStokes;
+    hydro->kappaType = kappaType;
+    hydro->gradientType = gradientType;
+    hydro->criticalSlowingDown = criticalSlowingDown;
 }

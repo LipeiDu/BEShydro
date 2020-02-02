@@ -27,7 +27,7 @@
 
 using namespace std;
 
-#define GaussianXI
+//#define GaussianXI
 
 #define dQvec 0.7 // difference between the elements of Q vector of slow modes
 #define Q0 0.5
@@ -303,15 +303,15 @@ void getCorrelationLengthTable(){
     FILE *filexi;
     PRECISION x, y;
     
-    filexi = fopen ("../Tmu_table/xivsmuT.dat","r");
+    filexi = fopen ("input/profiles/ximut.dat","r");
     if(filexi==NULL){
-        printf("xivsmuT.dat was not opened...\n");
+        printf("ximut.dat was not opened...\n");
         exit(-1);
     }
     else
     {
         fseek(filexi,0L,SEEK_SET);
-        for(int i = 0; i < 9396; ++i){
+        for(int i = 0; i < 8686; ++i){
             fscanf(filexi,"%lf %lf %lf", & x, & y, & xieq[i]);
         }
     }
@@ -326,11 +326,9 @@ PRECISION correlationLength(PRECISION T, PRECISION muB){
     PRECISION T0 = T*HBARC;
     PRECISION muB0 = muB*HBARC;
     
-    if((0.08<=T0)&&(T0<=0.24)){
-        if((0.22<=muB0)&&(muB0<=0.45)){
-            return InferredPrimaryVariable(muB0, T0-0.08, 0.22, 0.002, 81, 0.002, 0, xieq);
-        }
-    }else
+    if((0.07<=T0)&&(T0<=0.27)&&(0.11<=muB0)&&(muB0<=0.28))
+        return InferredPrimaryVariable(T0, muB0-0.11, 0.07, 0.002, 86, 0.002, 0, xieq);
+    else
         return 1.0;
 #else
     PRECISION T0 = T*HBARC;

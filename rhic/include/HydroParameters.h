@@ -18,6 +18,9 @@ struct HydroParameters
 	double freezeoutEnergyDensityGeV;
 	int initializePimunuNavierStokes;
     int initializePiNavierStokes;
+    int kappaType;
+    int gradientType;
+    int criticalSlowingDown;
 };
 
 void loadHydroParameters(config_t *cfg, const char* configDirectory, void * params);

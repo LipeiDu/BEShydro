@@ -26,7 +26,7 @@
 //#define DYNAMICAL_SOURCE
 
 //#define HydroPlus
-//#define CRITICAL
+#define CRITICAL
 
 /**************************************************************************************************************************************************/
 /*********************************************************/
@@ -161,6 +161,7 @@ typedef struct
     PRECISION *Temperature;
     PRECISION *alphab;
     PRECISION *dpdrhob;
+    PRECISION *dPdT;
     PRECISION *Chib;
 } EQUATION_OF_STATE;
 

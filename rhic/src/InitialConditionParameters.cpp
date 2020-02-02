@@ -26,6 +26,7 @@ double rapidityMean; // flat region around \ets_s = 0
 double bRapidityVariance1;
 double bRapidityVariance2;
 double bRapidityMean;
+double bNorm;
 
 void loadInitialConditionParameters(config_t *cfg, const char* configDirectory, void * params) {
 
@@ -45,6 +46,7 @@ void loadInitialConditionParameters(config_t *cfg, const char* configDirectory, 
     getDoubleProperty(cfg, "bRapidityVariance1", &bRapidityVariance1, 0.2);
     getDoubleProperty(cfg, "bRapidityVariance2", &bRapidityVariance2, 2.0);
     getDoubleProperty(cfg, "bRapidityMean", &bRapidityMean, 2.0);
+    getDoubleProperty(cfg, "bNorm", &bNorm, 1.0);
 
 	getDoubleProperty(cfg, "initialEnergyDensity", &initialEnergyDensity, 1.0);
 	getDoubleProperty(cfg, "scatteringCrossSectionNN", &scatteringCrossSectionNN, 62);
@@ -68,4 +70,5 @@ void loadInitialConditionParameters(config_t *cfg, const char* configDirectory, 
     initCond->bRapidityVariance1 = bRapidityVariance1;
     initCond->bRapidityVariance2 = bRapidityVariance2;
     initCond->bRapidityMean = bRapidityMean;
+    initCond->bNorm = bNorm;
 }

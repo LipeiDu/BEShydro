@@ -29,6 +29,7 @@ struct InitialConditionParameters
     double bRapidityVariance1;
     double bRapidityVariance2;
     double bRapidityMean;
+    double bNorm;
 };
 
 void loadInitialConditionParameters(config_t *cfg, const char* configDirectory, void * params);
