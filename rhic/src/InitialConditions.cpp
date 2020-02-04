@@ -1984,7 +1984,7 @@ void GaussianProfile(void * latticeParams, void * initCondParams) {
 #ifndef ANISOTROPIC
                 rhob[s] = fac * pow(T0,3.0) * exp(-2.0*omega*sqrt(1.0+(x*x+y*y)/R0/R0/omega) + 2.0*omega);
 #else
-                rhob[s] = fac * pow(T0,3.0) * (exp(-2.0*omega*sqrt(1.0+(y*y)/R0/R0/omega) + 2.0*omega) + exp(-2.0*omega*sqrt(1.0+(x*x)/R1/R1/omega) + 2.0*omega));
+                rhob[s] = fac * pow(T0,3.0) * (exp(-2.0*omega*sqrt(1.0+(y*y)/R0/R0/omega) + 2.0*omega) * exp(-2.0*omega*sqrt(1.0+(x*x)/R1/R1/omega) + 2.0*omega));
 #endif
                 PRECISION Ti = pow(rhob[s]/fac,0.33333333);
                 
