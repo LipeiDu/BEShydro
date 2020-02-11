@@ -274,17 +274,17 @@ void callFOFinder(int dim, int start, int nx, int ny, int nz, int n, double t0, 
             else z_frac = 0.0;
 
             //first write the contravariant position vector
-            freezeoutSurfaceFile << cor.get_centroid_elem(i,0) + cell_tau << "\t ";
-            freezeoutSurfaceFile << cor.get_centroid_elem(i,1) + cell_x << "\t ";
-            freezeoutSurfaceFile << cor.get_centroid_elem(i,2) + cell_y << "\t ";
-            if (dim == 4) freezeoutSurfaceFile << cor.get_centroid_elem(i,3) + cell_z << "\t ";
-            else freezeoutSurfaceFile << cell_z << "\t ";
+            freezeoutSurfaceFile << setprecision(5) << setw(15) << cor.get_centroid_elem(i,0) + cell_tau ;//<< "\t ";
+            freezeoutSurfaceFile << setprecision(5) << setw(15) << cor.get_centroid_elem(i,1) + cell_x ;//<< "\t ";
+            freezeoutSurfaceFile << setprecision(5) << setw(15) << cor.get_centroid_elem(i,2) + cell_y ;//<< "\t ";
+            if (dim == 4) freezeoutSurfaceFile << setprecision(5) << setw(15) << cor.get_centroid_elem(i,3) + cell_z ;//<< "\t ";
+            else freezeoutSurfaceFile << setprecision(5) << setw(15) << cell_z ;//<< "\t ";
             //then the contravariant surface normal element; note jacobian factors of tau for milne coordinates
-            freezeoutSurfaceFile << t * cor.get_normal_elem(i,0) << "\t ";
-            freezeoutSurfaceFile << t * cor.get_normal_elem(i,1) << "\t ";
-            freezeoutSurfaceFile << t * cor.get_normal_elem(i,2) << "\t ";
-            if (dim == 4) freezeoutSurfaceFile << t * cor.get_normal_elem(i,3) << "\t ";
-            else freezeoutSurfaceFile << 0.0 << "\t ";
+            freezeoutSurfaceFile << setprecision(5) << setw(15) << t * cor.get_normal_elem(i,0) ;//<< "\t ";
+            freezeoutSurfaceFile << setprecision(5) << setw(15) << t * cor.get_normal_elem(i,1) ;//<< "\t ";
+            freezeoutSurfaceFile << setprecision(5) << setw(15) << t * cor.get_normal_elem(i,2) ;//<< "\t ";
+            if (dim == 4) freezeoutSurfaceFile << setprecision(5) << setw(15) << t * cor.get_normal_elem(i,3) ;//<< "\t ";
+            else freezeoutSurfaceFile << setprecision(5) << setw(15) << 0.0 ;//<< "\t ";
             //write all the necessary hydro dynamic variables by first performing linear interpolation from values at
             //corners of hypercube
               
@@ -298,36 +298,38 @@ void callFOFinder(int dim, int start, int nx, int ny, int nz, int n, double t0, 
               for (int ivar = 0; ivar < dim; ivar++)
               {
                 temp = interpolateVariable4D(hydrodynamic_evoution, ivar, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                freezeoutSurfaceFile << temp << "\t ";
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t ";
               }
               //write the energy density
               temp = interpolateVariable4D(hydrodynamic_evoution, 4, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-              freezeoutSurfaceFile << temp << "\t "; //note : iSpectra reads in file in fm^x units e.g. energy density should be written in fm^-4
+              freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t "; //note : iSpectra reads in file in fm^x units e.g. energy density should be written in fm^-4
               //baryon density
               double temp2 = interpolateVariable4D(hydrodynamic_evoution, 16, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
               //the temperature !this needs to be checked
               double temp3 = effectiveTemperature(temp,temp2);
-              freezeoutSurfaceFile << temp3 << "\t ";
-              //the baryon chemical potential
-              freezeoutSurfaceFile << chemicalPotentialOverT(temp,temp2)*temp3 << "\t ";
+              freezeoutSurfaceFile << setprecision(5) << setw(15) << temp3 ;//<< "\t ";
+              //calculate chemical potential
+              double temp4 = chemicalPotentialOverT(temp,temp2)*temp3;
               //the thermal pressure
-              freezeoutSurfaceFile << equilibriumPressure(temp,temp2) << "\t ";
+              freezeoutSurfaceFile << setprecision(5) << setw(15) << equilibriumPressure(temp,temp2) ;//<< "\t ";
               //write ten components of pi_(mu,nu) shear viscous tensor
               for (int ivar = 5; ivar < 15; ivar++)
               {
                 temp = interpolateVariable4D(hydrodynamic_evoution, ivar, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                freezeoutSurfaceFile << temp << "\t ";
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t ";
               }
               //write the bulk pressure Pi
               temp = interpolateVariable4D(hydrodynamic_evoution, 15, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-              freezeoutSurfaceFile << temp << "\t ";
+              freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t ";
+              //write the baryon chemical potential
+              freezeoutSurfaceFile << setprecision(5) << setw(15) << temp4 ;//<< "\t ";
               //write baryon density
-              freezeoutSurfaceFile << temp2 << "\t ";
+              freezeoutSurfaceFile << setprecision(5) << setw(15) << temp2 ;//<< "\t ";
               //write the baryon diffusion
               for (int ivar = 17; ivar < 21; ivar++)
               {
                 temp = interpolateVariable4D(hydrodynamic_evoution, ivar, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                freezeoutSurfaceFile << temp << "\t ";
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t ";
               }
               //start a new line
               freezeoutSurfaceFile << endl;
@@ -341,36 +343,36 @@ void callFOFinder(int dim, int start, int nx, int ny, int nz, int n, double t0, 
               for (int ivar = 0; ivar < 4; ivar++)
               {
                 temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
-                freezeoutSurfaceFile << temp << "\t ";
+                freezeoutSurfaceFile << temp ;//<< "\t ";
               }
               //write the energy density
               temp = interpolateVariable3D(hydrodynamic_evoution, 4, it, ix, iy, tau_frac, x_frac, y_frac);
-              freezeoutSurfaceFile << temp << "\t "; //note units of fm^-4 appropriate for iSpectra reading
+              freezeoutSurfaceFile << temp ;//<< "\t "; //note units of fm^-4 appropriate for iSpectra reading
               //baryon density
               double temp2 = interpolateVariable4D(hydrodynamic_evoution, 16, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
               //the temperature !this needs to be checked
               double temp3 = effectiveTemperature(temp,temp2);
-              freezeoutSurfaceFile << temp3 << "\t ";
+              freezeoutSurfaceFile << temp3 ;//<< "\t ";
               //the baryon chemical potential
-              freezeoutSurfaceFile << chemicalPotentialOverT(temp,temp2)*temp3 << "\t ";
+              freezeoutSurfaceFile << chemicalPotentialOverT(temp,temp2)*temp3 ;//<< "\t ";
               //the thermal pressure
-              freezeoutSurfaceFile << equilibriumPressure(temp,temp2) << "\t ";
+              freezeoutSurfaceFile << equilibriumPressure(temp,temp2) ;//<< "\t ";
               //write ten components of pi_(mu,nu) shear viscous tensor
               for (int ivar = 5; ivar < 15; ivar++)
               {
                 temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
-                freezeoutSurfaceFile << temp << "\t ";
+                freezeoutSurfaceFile << temp ;//<< "\t ";
               }
               //write the bulk pressure Pi
               temp = interpolateVariable3D(hydrodynamic_evoution, 15, it, ix, iy, tau_frac, x_frac, y_frac);
-              freezeoutSurfaceFile << temp << "\t ";
+              freezeoutSurfaceFile << temp ;//<< "\t ";
               //write baryon density
-              freezeoutSurfaceFile << temp2 << "\t ";
+              freezeoutSurfaceFile << temp2 ;//<< "\t ";
               //write the baryon diffusion
               for (int ivar = 17; ivar < 21; ivar++)
               {
                 temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
-                freezeoutSurfaceFile << temp << "\t ";
+                freezeoutSurfaceFile << temp ;//<< "\t ";
               }
               //start a new line
               freezeoutSurfaceFile << endl;

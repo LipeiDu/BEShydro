@@ -28,8 +28,17 @@
 /* calculate source terms for dissipative compnents, e.g. shear, bulk and baryon diffusion etc.
 /**************************************************************************************************************************************************/
 
-void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISION * const __restrict__  piRHS, PRECISION * const __restrict__ nbmuRHS, PRECISION * const __restrict__ phiQRHS, PRECISION nbt, PRECISION nbx, PRECISION nby, PRECISION nbn, PRECISION rhob, PRECISION Nablat_rhob, PRECISION Nablax_rhob, PRECISION Nablay_rhob, PRECISION Nablan_rhob, PRECISION alphaB, PRECISION Nablat_alphaB, PRECISION Nablax_alphaB, PRECISION Nablay_alphaB, PRECISION Nablan_alphaB, PRECISION T, PRECISION Nablat_T, PRECISION Nablax_T, PRECISION Nablay_T, PRECISION Nablan_T, PRECISION seq, PRECISION t, PRECISION e, PRECISION p, PRECISION ut, PRECISION ux, PRECISION uy, PRECISION un, PRECISION utp, PRECISION uxp, PRECISION uyp, PRECISION unp, PRECISION pitt, PRECISION pitx, PRECISION pity, PRECISION pitn, PRECISION pixx, PRECISION pixy, PRECISION pixn, PRECISION piyy, PRECISION piyn, PRECISION pinn, PRECISION Pi, PRECISION dxut, PRECISION dyut, PRECISION dnut, PRECISION dxux, PRECISION dyux, PRECISION dnux, PRECISION dxuy, PRECISION dyuy, PRECISION dnuy, PRECISION dxun, PRECISION dyun, PRECISION dnun, PRECISION dkvk, PRECISION d_etabar, PRECISION d_dt, const PRECISION * const __restrict__ PhiQ, const PRECISION * const __restrict__ equiPhiQ, int kappaType, int gradientType, int criticalSlowingDown)
+void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISION * const __restrict__  piRHS, PRECISION * const __restrict__ nbmuRHS, PRECISION * const __restrict__ phiQRHS, PRECISION nbt, PRECISION nbx, PRECISION nby, PRECISION nbn, PRECISION rhob, PRECISION Nablat_rhob, PRECISION Nablax_rhob, PRECISION Nablay_rhob, PRECISION Nablan_rhob, PRECISION alphaB, PRECISION Nablat_alphaB, PRECISION Nablax_alphaB, PRECISION Nablay_alphaB, PRECISION Nablan_alphaB, PRECISION T, PRECISION Nablat_T, PRECISION Nablax_T, PRECISION Nablay_T, PRECISION Nablan_T, PRECISION seq, PRECISION t, PRECISION e, PRECISION p, PRECISION ut, PRECISION ux, PRECISION uy, PRECISION un, PRECISION utp, PRECISION uxp, PRECISION uyp, PRECISION unp, PRECISION pitt, PRECISION pitx, PRECISION pity, PRECISION pitn, PRECISION pixx, PRECISION pixy, PRECISION pixn, PRECISION piyy, PRECISION piyn, PRECISION pinn, PRECISION Pi, PRECISION dxut, PRECISION dyut, PRECISION dnut, PRECISION dxux, PRECISION dyux, PRECISION dnux, PRECISION dxuy, PRECISION dyuy, PRECISION dnuy, PRECISION dxun, PRECISION dyun, PRECISION dnun, PRECISION dkvk, PRECISION d_dt, const PRECISION * const __restrict__ PhiQ, const PRECISION * const __restrict__ equiPhiQ, void * hydroParams)
 {
+    
+    struct HydroParameters * hydro = (struct HydroParameters *) hydroParams;
+    
+    PRECISION etabar = (PRECISION)(hydro->shearViscosityToEntropyDensity);
+    PRECISION Cb = (PRECISION)(hydro->cB);
+    int kappaType = hydro->kappaType;
+    int gradientType = hydro->gradientType;
+    int criticalSlowingDown = hydro->criticalSlowingDown;
+    
     /*******************************************************************************/
     /* Sec. I basic elements
     /*******************************************************************************/
@@ -42,7 +51,7 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
 	//*********************************************************/
     
     // shear stress tensor
-    PRECISION taupiInv = T / 5  / d_etabar;//0.6 * rhob;// //d_etabar is eta/(e+p)
+    PRECISION taupiInv = T / 5  / etabar;//0.6 * rhob;// //d_etabar is eta/(e+p)
     PRECISION beta_pi = (e + p) / 5;//0.8 * T * rhob;//
     
 	// bulk transport coefficients
@@ -61,7 +70,7 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     
     switch (kappaType) {
         case 0: {
-            kappaB = baryonDiffusionCoefficientKinetic(T, rhob, alphaB, e, p);
+            kappaB = baryonDiffusionCoefficientKinetic(Cb, T, rhob, alphaB, e, p);
             break;
         }
         case 1: {
@@ -641,7 +650,7 @@ PRECISION d_dz
 /* load source terms for all components, but exclude source terms directly dependent of gradients of shear, bulk and baryon diffusion
 /**************************************************************************************************************************************************/
 
-void loadSourceTerms2(const PRECISION * const __restrict__ Q, PRECISION * const __restrict__ S, const FLUID_VELOCITY * const __restrict__ u, PRECISION utp, PRECISION uxp, PRECISION uyp, PRECISION unp, PRECISION t, const PRECISION * const __restrict__ evec, const PRECISION * const __restrict__ pvec, int s, int d_ncx, int d_ncy, int d_ncz, PRECISION d_etabar, PRECISION d_dt, PRECISION d_dx, PRECISION d_dy, PRECISION d_dz, const DYNAMICAL_SOURCES * const __restrict__ Source, const PRECISION * const __restrict__ rhobvec, PRECISION rhobp, const PRECISION * const __restrict__ alphaBvec, PRECISION alphaBp, const PRECISION * const __restrict__ Tvec, PRECISION Tp, PRECISION seq, const SLOW_MODES *  const __restrict__ eqPhiQ, int kappaType, int gradientType, int criticalSlowingDown)
+void loadSourceTerms2(const PRECISION * const __restrict__ Q, PRECISION * const __restrict__ S, const FLUID_VELOCITY * const __restrict__ u, PRECISION utp, PRECISION uxp, PRECISION uyp, PRECISION unp, PRECISION t, const PRECISION * const __restrict__ evec, const PRECISION * const __restrict__ pvec, int s, int d_ncx, int d_ncy, int d_ncz, PRECISION d_dt, PRECISION d_dx, PRECISION d_dy, PRECISION d_dz, const DYNAMICAL_SOURCES * const __restrict__ Source, const PRECISION * const __restrict__ rhobvec, PRECISION rhobp, const PRECISION * const __restrict__ alphaBvec, PRECISION alphaBp, const PRECISION * const __restrict__ Tvec, PRECISION Tp, PRECISION seq, const SLOW_MODES * const __restrict__ eqPhiQ, void * hydroParams)
 {
 	//=========================================================
 	// conserved variables
@@ -1004,7 +1013,7 @@ void loadSourceTerms2(const PRECISION * const __restrict__ Q, PRECISION * const 
     PRECISION nbmuRHS[NUMBER_PROPAGATED_VMU_COMPONENTS];
     PRECISION phiQRHS[NUMBER_SLOW_MODES];
     
-	setDissipativeSourceTerms(pimunuRHS, &piRHS, nbmuRHS, phiQRHS, nbt, nbx, nby, nbn, rhobs, Nablat_rhob, Nablax_rhob, Nablay_rhob, Nablan_rhob, alphaBs, Nablat_alphaB, Nablax_alphaB, Nablay_alphaB, Nablan_alphaB, Ts, Nablat_T, Nablax_T, Nablay_T, Nablan_T, seq, t, es, p, ut, ux, uy, un, utp, uxp, uyp, unp, pitt, pitx, pity, pitn, pixx, pixy, pixn, piyy, piyn, pinn, Pi, dxut, dyut, dnut, dxux, dyux, dnux, dxuy, dyuy, dnuy, dxun, dyun, dnun, dkvk, d_etabar, d_dt, PhiQ, equiPhiQ, kappaType, gradientType, criticalSlowingDown);
+	setDissipativeSourceTerms(pimunuRHS, &piRHS, nbmuRHS, phiQRHS, nbt, nbx, nby, nbn, rhobs, Nablat_rhob, Nablax_rhob, Nablay_rhob, Nablan_rhob, alphaBs, Nablat_alphaB, Nablax_alphaB, Nablay_alphaB, Nablan_alphaB, Ts, Nablat_T, Nablax_T, Nablay_T, Nablan_T, seq, t, es, p, ut, ux, uy, un, utp, uxp, uyp, unp, pitt, pitx, pity, pitn, pixx, pixy, pixn, piyy, piyn, pinn, Pi, dxut, dyut, dnut, dxux, dyux, dnux, dxuy, dyuy, dnuy, dxun, dyun, dnun, dkvk, d_dt, PhiQ, equiPhiQ, hydroParams);
     
 #ifdef PIMUNU
     for(unsigned int n = 0; n < NUMBER_PROPAGATED_PIMUNU_COMPONENTS; ++n) S[n+4] = pimunuRHS[n];// for shear

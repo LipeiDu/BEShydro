@@ -21,6 +21,7 @@ struct HydroParameters
     int kappaType;
     int gradientType;
     int criticalSlowingDown;
+    double cB;
 };
 
 void loadHydroParameters(config_t *cfg, const char* configDirectory, void * params);

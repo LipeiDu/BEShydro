@@ -218,17 +218,17 @@ void outputAnalysisa(int n, double t, FILE *fpan, void * latticeParams)
                     
                     if((k-2 - (nz-1)/2) >= 0 && (k-2 - (nz-1)/2) % zFREQ == 0){
                         
-                        double x = (i-2 - (nx-1)/2.) * dx;
-                        double y = (j-2 - (ny-1)/2.) * dy;
-                        double z = (k-2 - (nz-1)/2.) * dz;
-                        
-                        int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
-                        
-                        zv[m] = z;
-                        Tv[m] = T[s];
-                        muBv[m] = T[s] * alphaB[s];
-                                                
-                        m++;
+                        if(i == 2 && j == 2){
+                            double z = (k-2 - (nz-1)/2.) * dz;
+                            
+                            int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+                            
+                            zv[m] = z;
+                            Tv[m] = T[s];
+                            muBv[m] = T[s] * alphaB[s];
+                                                    
+                            m++;
+                        }
                     }
                 }
             }

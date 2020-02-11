@@ -23,7 +23,6 @@ PRECISION bulkViscosityToEntropyDensity(PRECISION T);
 
 // baryon transport coefficients
 
-const PRECISION Cb = 0.4;//4.0;
 const PRECISION delta_nn = 0.;//1.0;
 const PRECISION lambda_nn = 0.;//0.6;
 const PRECISION tau_nw = 0.;//1.0;// coupling between baryon diffusion and vorticity
@@ -34,7 +33,7 @@ void getBaryonDiffusionCoefficientTable();
 
 void baryonDiffusionCoefficient(PRECISION T, PRECISION muB, PRECISION * const __restrict__ diffusionCoeff);
 
-PRECISION baryonDiffusionCoefficientKinetic(PRECISION T, PRECISION rhob, PRECISION alphaB, PRECISION e, PRECISION p);
+PRECISION baryonDiffusionCoefficientKinetic(PRECISION Cb, PRECISION T, PRECISION rhob, PRECISION alphaB, PRECISION e, PRECISION p);
 
 PRECISION baryonDiffusionCoefficientTest(PRECISION T, PRECISION rhob, PRECISION alphaB);
 

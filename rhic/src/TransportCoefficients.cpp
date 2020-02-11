@@ -48,7 +48,7 @@ PRECISION bulkViscosityToEntropyDensity(PRECISION T) {
 /**************************************************************************************************************************************************/
 
 // G. S. Denicol, C. Gale, S. Jeon, A. Monnai, B. Schenke, and C. Shen, (2018), arXiv:1804.10557 [nucl-th].
-PRECISION baryonDiffusionCoefficientKinetic(PRECISION T, PRECISION rhob, PRECISION alphaB, PRECISION e, PRECISION p){
+PRECISION baryonDiffusionCoefficientKinetic(PRECISION Cb, PRECISION T, PRECISION rhob, PRECISION alphaB, PRECISION e, PRECISION p){
     PRECISION HyCotangent = 1/tanh(alphaB);
     if(isnan(HyCotangent)) printf("kappaB is nan. e=%4e,\t rhob=%4e,\t mub_over_T=%4e,\t T=%4e. \n",e,rhob, alphaB, T);
     
