@@ -44,7 +44,7 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
 {
   output(e, t, outputDir, "e", latticeParams);
   output(p, t, outputDir, "p", latticeParams);
-  //output(seq, t, outputDir, "seq", latticeParams);
+  output(seq, t, outputDir, "seq", latticeParams);
   //output(u->ux, t, outputDir, "ux", latticeParams);
   //output(u->uy, t, outputDir, "uy", latticeParams);
   output(u->un, t, outputDir, "un", latticeParams);
@@ -54,13 +54,14 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   //output(q->tty, t, outputDir, "tty", latticeParams);
   //output(q->ttn, t, outputDir, "ttn", latticeParams);
   #ifdef PIMUNU
+  output(q->pitn, t, outputDir, "pitn", latticeParams);
   //output(q->pitx, t, outputDir, "pitx", latticeParams);
   //output(q->pixx, t, outputDir, "pixx", latticeParams);
   //output(q->pixy, t, outputDir, "pixy", latticeParams);
   //output(q->pixn, t, outputDir, "pixn", latticeParams);
   //output(q->piyy, t, outputDir, "piyy", latticeParams);
   //output(q->piyn, t, outputDir, "piyn", latticeParams);
-  //output(q->pinn, t, outputDir, "pinn", latticeParams);
+  output(q->pinn, t, outputDir, "pinn", latticeParams);
   #endif
   #ifdef PI
   output(q->Pi, t, outputDir, "Pi", latticeParams);
@@ -69,14 +70,14 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   #ifdef NBMU
   output(rhob, t, outputDir, "rhob", latticeParams);
   output(alphaB, t, outputDir, "alphaB", latticeParams);
-  //output(q->Nbt, t, outputDir, "Nbt", latticeParams);
+  output(q->Nbt, t, outputDir, "Nbt", latticeParams);
   #endif
   #ifdef VMU
   output(q->nbt, t, outputDir, "nbtau", latticeParams);
   //output(q->nbx, t, outputDir, "nbx", latticeParams);
   //output(q->nby, t, outputDir, "nby", latticeParams);
   output(q->nbn, t, outputDir, "nbn", latticeParams);
-  //outputPhaseDiagram(alphaB, T, t, outputDir, "muBT", latticeParams);
+  outputPhaseDiagram(alphaB, T, t, outputDir, "muBT", latticeParams);
   #endif
   #ifdef HydroPlus
   //output(q->phiQ[0], t, outputDir, "phiQ0", latticeParams);

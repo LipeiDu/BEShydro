@@ -11,11 +11,11 @@
 
 //shear transport coefficients
 
-const PRECISION delta_pipi = 1.33333;
-const PRECISION tau_pipi = 1.42857;
+const PRECISION delta_pipi = 0.;//1.33333;
+const PRECISION tau_pipi = 0.;//1.42857;
 const PRECISION delta_PiPi = 0.666667;
 const PRECISION lambda_piPi = 1.2;
-const PRECISION tau_piw = 1.0; //coupling between shear and vorticity
+const PRECISION tau_piw = 0.;//1.0; //coupling between shear and vorticity
 
 //bulk transport coefficients
 

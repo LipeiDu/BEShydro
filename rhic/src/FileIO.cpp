@@ -11,7 +11,7 @@
 #include "../include/LatticeParameters.h"
 #include "../include/DynamicalVariables.h"
 
-//#define OUTPUT_SLICE
+#define OUTPUT_SLICE
 
 void output(const PRECISION * const var, double t, const char *pathToOutDir, const char *name, void * latticeParams) {
 	FILE *fp;
@@ -42,7 +42,7 @@ void output(const PRECISION * const var, double t, const char *pathToOutDir, con
 #ifndef OUTPUT_SLICE
 				fprintf(fp, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,var[s]);
 #else
-                if(j == (ny+3)/2) fprintf(fp, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,var[s]);
+                if(i == 2 && j == 2) fprintf(fp, "%.3f\t%.3f\t%.3f\t%.8f\n",x,y,z,var[s]);
 #endif
 			}
 		}
