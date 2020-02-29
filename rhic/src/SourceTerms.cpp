@@ -42,8 +42,8 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
 	//*********************************************************/
     
     // shear stress tensor
-    PRECISION taupiInv = 0.6 * rhob;//T / 5  / d_etabar;// //d_etabar is eta/(e+p)
-    PRECISION beta_pi = 0.8 * T * rhob;//(e + p) / 5;//
+    PRECISION taupiInv = T / 5  / d_etabar;//0.6 * rhob;// //d_etabar is eta/(e+p)
+    PRECISION beta_pi = (e + p) / 5;//0.8 * T * rhob;//
     
 	// bulk transport coefficients
 	PRECISION cs2 = speedOfSoundSquared(e, rhob);

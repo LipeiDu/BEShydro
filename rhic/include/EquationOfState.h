@@ -10,7 +10,7 @@
 #include "../include/DynamicalVariables.h"
 
 #define CONFORMAL_EOS
-#define EOS_TEST
+//#define EOS_TEST
 
 // ideal gas of massless quarks and gluons
 #define EOS_FACTOR 13.8997 // Nc=3, Nf=2.5
