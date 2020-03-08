@@ -20,13 +20,13 @@ const PRECISION rhomax = 1.0;
 
 // regulation method 2
 const PRECISION chi0 = 10.0;
-const PRECISION epsilon0 = 0.1;
+const PRECISION epsilon0 = 0.15;//0.1;
 const PRECISION reg_width = 0.01;
 const PRECISION rmax_pi = 1.0;
 const PRECISION rmax_Pi = 1.0;
 const PRECISION rmax_n = 1.0;
 
-#define Regulation_OLD
+//#define Regulation_OLD
 
 void regulateDissipativeCurrents(PRECISION t, const CONSERVED_VARIABLES * const __restrict__ currrentVars, const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p, const PRECISION * const __restrict__ rhob, const FLUID_VELOCITY * const __restrict__ u, int ncx, int ncy, int ncz) {
     
