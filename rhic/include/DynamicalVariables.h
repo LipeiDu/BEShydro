@@ -23,10 +23,10 @@
 #define RootSolver_with_Baryon
 #define EOS_with_baryon
 
-//#define DYNAMICAL_SOURCE
+#define DYNAMICAL_SOURCE
 
-#define HydroPlus
-#define CRITICAL
+//#define HydroPlus
+//#define CRITICAL
 
 /**************************************************************************************************************************************************/
 /*********************************************************/

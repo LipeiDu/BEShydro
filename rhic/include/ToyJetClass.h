@@ -25,5 +25,5 @@ public:
   //update the four position of the parton - NOT CORRECT FIX IT
   void updatePosition(double dtau);
   //get parton energy loss based on fluid variables
-  void energyLoss(int nx, int ny, int nz, double dt, double dx, double dy, double dz, double *ut, double* ux, double *uy, double* un, double *e, double *rhob);
+  void energyLoss(int nx, int ny, int nz, double t, double dt, double dx, double dy, double dz, double *ut, double* ux, double *uy, double* un, double *e, double *rhob);
 };

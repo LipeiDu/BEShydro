@@ -5,6 +5,7 @@
 //**********************************************************************************//
 
 #include <math.h> // for math functions
+#include <cmath>
 #include <stdio.h> // for printf
 #include <stdlib.h> //TEMP
 #include <iostream>
@@ -119,17 +120,23 @@ void setDynamicalSources(void * latticeParams, void * initCondParams, double *dp
 	//construct an array of the gaussian smeared jet position
 	double smearedPosition[ncx * ncy * ncz];
 	double width = 0.1; //width of gaussian smearing
+    double wid = 2 * width * width;
+    double fac = 1 / width / sqrt(2 * M_PI);
+    
+    //printf("source term: parton has position {%f, %f, %f, %f}\n", pos[0],pos[1],pos[2],pos[3]);
 
 	for(int i = 2; i < nx+2; ++i){
         for(int j = 2; j < ny+2; ++j){
             for(int k = 2; k < nz+2; ++k){
                 int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
-                double x = (double)i * dx + xmin;
-                double y = (double)j * dy + ymin;
-                double z = (double)k * dz + zmin;
-                smearedPosition[s] = exp((-1.0)*(pos[1] - x) * (pos[1] - x) / width)
-                                   * exp((-1.0)*(pos[2] - y) * (pos[2] - y) / width)
-                                   * exp((-1.0)*(pos[3] - z) * (pos[3] - z) / width);
+                double x = (double) (i-2) * dx + xmin;
+                double y = (double) (j-2) * dy + ymin;
+                double z = (double) (k-2) * dz + zmin;
+                
+                //smearedPosition[s] = exp((-1.0)*(pos[1] - x) * (pos[1] - x) / width) * exp((-1.0)*(pos[2] - y) * (pos[2] - y) / width) * exp((-1.0)*(pos[3] - z) * (pos[3] - z) / width);
+                
+                smearedPosition[s] = fac * exp((-1.0)*(pos[1] - x) * (pos[1] - x) / wid) * exp((-1.0)*(pos[2] - y) * (pos[2] - y) / wid);
+                
             }//k
         }//j
     }//i

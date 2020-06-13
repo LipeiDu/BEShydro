@@ -32,10 +32,10 @@
 #include "../include/DynamicalSources.h"
 #include "../include/HydroAnalysis.h"
 
-#define FREQ 100 //write output to file every FREQ timesteps
+#define FREQ 50 //write output to file every FREQ timesteps
 #define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
-#define JET 0 // 0 to turn off jet evolution, 1 to turn it on
+#define JET 1 // 0 to turn off jet evolution, 1 to turn it on
 
 /**************************************************************************************************************************************************/
 /* choose dynamical quantities to output
@@ -46,7 +46,7 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   //output(p, t, outputDir, "p", latticeParams);
   //output(seq, t, outputDir, "seq", latticeParams);
   output(u->ux, t, outputDir, "ux", latticeParams);
-  //output(u->uy, t, outputDir, "uy", latticeParams);
+  output(u->uy, t, outputDir, "uy", latticeParams);
   //output(u->un, t, outputDir, "un", latticeParams);
   output(u->ut, t, outputDir, "ut", latticeParams);
   //output(q->ttt, t, outputDir, "ttt", latticeParams);
@@ -152,19 +152,21 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
 
   if (JET)
   {
-    //declare a jet parton instance
-    printf("initializing jet parton at center of grid with momentum in y direction \n");
     //initialize four momenta and position to zero
     for (int ip = 0; ip < 4; ip++)
     {
       parton.momentum[ip] = 0.0;
       parton.position[ip] = 0.0;
     }
+      
     // initialize jet at center of coordinate grid with momenta along y direction
     parton.mass = 1;
     parton.position[0] = t0; //same as hydro start time
-    parton.momentum[0] = 12.0; //nonzero p^tau
-    parton.momentum[2] = 10.0; //nonzero p^y
+    parton.momentum[0] = 1.0; //nonzero p^tau
+    parton.momentum[1] = 1.0; //nonzero p^x
+      
+    //declare a jet parton instance
+    printf("initializing jet parton at center of grid with momentum in x direction \n");
   }
 
   //************************************************************************************\
@@ -327,11 +329,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     if (JET)
     {
       //get the local fluid velocity and energy density/temperature and evolve jet momentum
-      parton.energyLoss(nx, ny, nz, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob);
-      //evolve the jet parton position
-      parton.updatePosition(dt);
+      parton.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob);
       //set hydro source terms
       setDynamicalSources(latticeParams, initCondParams, parton.dp_dtau, parton.position);
+      //evolve the jet parton position
+      parton.updatePosition(dt);
     }
     
     //=======================================================
