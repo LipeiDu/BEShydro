@@ -612,6 +612,32 @@ void testBaryCoeff(){
     printf("Baryon coeff table is reproduced.\n");
 }
 
+void testJetCoeff(){
+    
+    char EOStable1[] = "output/jetCoefficients.dat";
+    ofstream eos_table1(EOStable1);
+    
+    PRECISION qhat;
+    
+    for(int i = 0; i < 75; ++i) {
+        for(int j = 0; j < 90; ++j){
+            
+            PRECISION Ttest = (90.0 + i * 5.0)*0.001/HBARC;
+            PRECISION muBtest = (0.0 + j * 5.0)*0.001/HBARC;
+            
+            qhat = qHat(Ttest, muBtest);
+
+            eos_table1
+            << setprecision(6) << setw(18) << Ttest*1000*HBARC << setprecision(6) << setw(18) << muBtest*1000*HBARC
+            << setprecision(6) << setw(18) << qhat*HBARC*HBARC << endl;
+
+        }
+    }
+    
+    eos_table1.close();
+    printf("Jet coeff table is reproduced.\n");
+}
+
 /*PRECISION baryonDiffusionConstant(PRECISION T, PRECISION mub){
  PRECISION T0 = T*HBARC*1000;
  PRECISION mub0 = mub*HBARC*1000;

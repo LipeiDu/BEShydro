@@ -150,3 +150,82 @@ void baryonDiffusionCoefficient(PRECISION T, PRECISION muB, PRECISION * const __
     diffusionCoeff[1] = DBT / T; // DB in [fm]
 #endif
 }
+
+/**************************************************************************************************************************************************/
+/* jet-medium paramemters
+/**************************************************************************************************************************************************/
+
+// conformal arXiv:hep-ph/0605178, fac taken from 1507.06556
+PRECISION qHatCFT(PRECISION T){
+    
+    PRECISION fac = 21.0;
+    
+    return fac * T * T * T;
+}
+
+// tables from 1507.06556
+void getqhatTable(){
+#ifdef JET
+    FILE *fileqhat;
+    PRECISION temp;
+    PRECISION chem;
+    
+    // in the table: T [MeV] , muB [MeV] , qhat/qhat_CFT
+    fileqhat = fopen ("input/coefficients/qhat.dat","r");
+    if(fileqhat==NULL){
+        printf("The file qhat.dat was not opened...\n");
+        exit(-1);
+    }
+    else
+    {
+        fseek(fileqhat,0L,SEEK_SET);
+        for(int i = 0; i < 5525; ++i){
+            fscanf(fileqhat,"%lf %lf %lf", & temp, & chem, & JetCoeff->qhat[i]);
+        }
+    }
+    fclose(fileqhat);
+    
+    printf("qhat table is read in.\n");
+#endif
+}
+
+PRECISION qHat(PRECISION T, PRECISION muB){
+    
+    PRECISION T0 = T*HBARC*1000; // MeV
+    PRECISION muB0 = fabs(muB*HBARC*1000); // MeV
+    
+    PRECISION qHAT; // qhat/qhat_CFT
+    
+    if((100<=T0)&&(T0<419)){
+        if((0<=muB0)&&(muB0<419)){
+            qHAT = InferredPrimaryVariable(T0, muB0, 100., 5., 85, 5., 0, JetCoeff->qhat);
+            //DBT = InferredPrimaryVariable(T0, muB0, 100., 1., 401, 1., 0, BaryDiffCoeff->DB);
+        }else{
+            qHAT = InferredPrimaryVariable(T0, 419, 100., 5., 85, 5., 0, JetCoeff->qhat);
+            //DBT = InferredPrimaryVariable(T0, 400., 100., 1., 401, 1., 0, BaryDiffCoeff->DB);
+        }
+    }else if(T0<100)
+    {
+        if((0<=muB0)&&(muB0<419)){
+            qHAT = InferredPrimaryVariable(100., muB0, 100., 5., 85, 5., 0, JetCoeff->qhat);
+            //DBT = InferredPrimaryVariable(100., muB0, 100., 1., 401, 1., 0, BaryDiffCoeff->DB);
+        }else{ // using values at T=100 and muB=400
+            qHAT = 1.0214966454406247;
+            //DBT = 0.034289064162551376;
+        }
+    }else
+    {
+        if((0<=muB0)&&(muB0<419)){
+            qHAT = InferredPrimaryVariable(419., muB0, 100., 5., 85, 5., 0, JetCoeff->qhat);
+            //DBT = InferredPrimaryVariable(419., muB0, 100., 1., 401, 1., 0, BaryDiffCoeff->DB);
+        }else{ // using values at T=420 and muB=400
+            qHAT = 1.3084476621169798;
+            //DBT = 0.1547150351237801;
+        }
+    }
+    
+    // qHAT is the ratio between qhat_nonconformal/qhat_conformal
+    
+    return qHAT * qHatCFT(T); // in fm^-3 since T is in fm^-1 and so is qHatCFT
+}
+

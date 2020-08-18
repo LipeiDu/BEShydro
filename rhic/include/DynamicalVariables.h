@@ -28,6 +28,8 @@
 //#define HydroPlus
 //#define CRITICAL
 
+//#define JET
+
 /**************************************************************************************************************************************************/
 /*********************************************************/
 //Conservation laws//
@@ -186,6 +188,13 @@ typedef struct
     PRECISION *sourceb;
 } DYNAMICAL_SOURCES;
 
+// jet coefficients
+typedef struct
+{
+    PRECISION *qhat;
+    PRECISION *ehat;
+} JET_COEFF;
+
 
 /**************************************************************************************************************************************************/
 /* instances
@@ -208,6 +217,8 @@ extern DYNAMICAL_SOURCES *Source;
 extern EQUATION_OF_STATE *EOState;
 
 extern BARYON_DIFFUSION_COEFF *BaryDiffCoeff;
+
+extern JET_COEFF * JetCoeff;
 
 /**************************************************************************************************************************************************/
 /* initialization and update energy momentum tensor, net baryon current and slow modes

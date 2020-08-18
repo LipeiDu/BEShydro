@@ -42,5 +42,10 @@ PRECISION baryonDiffusionCoefficientAdscft(PRECISION T, PRECISION rhob, PRECISIO
 
 PRECISION baryonDiffusionCoefficientHydroPlus(PRECISION T, PRECISION rhob, PRECISION alphaB, PRECISION e, PRECISION p, PRECISION seq);
 
+void getqhatTable();
+
+PRECISION qHat(PRECISION T, PRECISION muB);
+PRECISION qHatCFT(PRECISION T);
+
 
 #endif /* TransportCoefficients_hpp */

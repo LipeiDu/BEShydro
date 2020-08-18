@@ -35,7 +35,6 @@
 #define FREQ 50 //write output to file every FREQ timesteps
 #define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
-#define JET 1 // 0 to turn off jet evolution, 1 to turn it on
 
 /**************************************************************************************************************************************************/
 /* choose dynamical quantities to output
@@ -44,7 +43,7 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
 {
   output(e, t, outputDir, "e", latticeParams);
   //output(p, t, outputDir, "p", latticeParams);
-  //output(seq, t, outputDir, "seq", latticeParams);
+  output(seq, t, outputDir, "seq", latticeParams);
   output(u->ux, t, outputDir, "ux", latticeParams);
   output(u->uy, t, outputDir, "uy", latticeParams);
   //output(u->un, t, outputDir, "un", latticeParams);
@@ -125,7 +124,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   double freezeoutTemperatureGeV = hydro->freezeoutTemperatureGeV;
   const double hbarc = 0.197326938;
   const double freezeoutTemperature = freezeoutTemperatureGeV/hbarc;
-  const double freezeoutEnergyDensity = 0.15/hbarc;
+  const double freezeoutEnergyDensity = EOS_FACTOR * powf(freezeoutTemperature, 4.0); //0.22/hbarc;//
     
   printf("Grid size = %d x %d x %d\n", nx, ny, nz);
   printf("spatial resolution = (%.3f, %.3f, %.3f)\n", lattice->latticeSpacingX, lattice->latticeSpacingY, lattice->latticeSpacingRapidity);
@@ -148,26 +147,38 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   //* Jet initialization
   //************************************************************************************/
   
-  jetParton parton;
+  jetParton parton, parton1;
 
-  if (JET)
-  {
+#ifdef JET
+      getqhatTable();
+      //testJetCoeff();
+      
     //initialize four momenta and position to zero
     for (int ip = 0; ip < 4; ip++)
     {
       parton.momentum[ip] = 0.0;
       parton.position[ip] = 0.0;
+      parton1.momentum[ip] = 0.0;
+      parton1.position[ip] = 0.0;
     }
       
     // initialize jet at center of coordinate grid with momenta along y direction
     parton.mass = 1;
     parton.position[0] = t0; //same as hydro start time
+    parton.position[1] = 1.0;
     parton.momentum[0] = 1.0; //nonzero p^tau
-    parton.momentum[1] = 1.0; //nonzero p^x
+    parton.momentum[1] = -1.0; //nonzero p^x
+      
+    parton1.mass = 1;
+    parton1.position[0] = t0; //same as hydro start time
+    parton1.position[1] = 1.0;
+    parton1.momentum[0] = 1.0; //nonzero p^tau
+    parton1.momentum[1] = 1.0; //nonzero p^x
       
     //declare a jet parton instance
-    printf("initializing jet parton at center of grid with momentum in x direction \n");
-  }
+    printf("initializing jet parton at (%f,%f,%f,%f) with momentum (%f,%f,%f,%f) \n",parton.position[0],parton.position[1],parton.position[2],parton.position[3],parton.momentum[0],parton.momentum[1],parton.momentum[2],parton.momentum[3]);
+    //printf("initializing jet parton2 at (%f,%f,%f,%f) with momentum (%f,%f,%f,%f) \n",parton1.position[0],parton1.position[1],parton1.position[2],parton1.position[3],parton1.momentum[0],parton1.momentum[1],parton1.momentum[2],parton1.momentum[3]);
+#endif
 
   //************************************************************************************\
   //* initialize cornelius for freezeout surface finding
@@ -326,15 +337,22 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     //=======================================================
     //*  JET evolution
     //=======================================================
-    if (JET)
-    {
+#ifdef JET
+      //set source terms 0
+      zeroSource(latticeParams, initCondParams);
+        
       //get the local fluid velocity and energy density/temperature and evolve jet momentum
       parton.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob);
+      //parton1.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob);
+        
       //set hydro source terms
       setDynamicalSources(latticeParams, initCondParams, parton.dp_dtau, parton.position);
+      //setDynamicalSources(latticeParams, initCondParams, parton1.dp_dtau, parton1.position);
+        
       //evolve the jet parton position
       parton.updatePosition(dt);
-    }
+      //parton1.updatePosition(dt);
+#endif
     
     //=======================================================
     //*  dynamical sources

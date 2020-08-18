@@ -11,6 +11,7 @@
 #include "../include/EquationOfState.h"
 #include "../include/DynamicalVariables.h"
 #include "../include/ToyJetClass.h"
+#include "../include/TransportCoefficients.h"
 
 
 //update the four momentum of parton; just an euler step
@@ -62,8 +63,13 @@ void jetParton::energyLoss(int nx, int ny, int nz, double t, double dt, double d
     //dp_dtau[3] = (-1.0) * ((momentum[3] / mass) - un[s]) / t_R;
       
       double temp = effectiveTemperature(e[s],rhob[s]);
+      double chem = chemicalPotentialOverT(e[s],rhob[s]) * temp;
       
-      double ehat = 1./3./(1./4./M_PI) * temp * temp;
+      //double ehat = 1./3./(1./4./M_PI) * temp * temp; // L. Yan et al
+      
+      // double ehat = qHatCFT(temp) / 4. / temp; // H. Liu et al
+      
+      double ehat = qHat(temp, chem) / 4. / temp; // R. Rougemont et al
       
       dp_dtau[0] = (-1.0) * ehat * momentum[0] / mass / t;
       dp_dtau[1] = (-1.0) * ehat * momentum[1] / mass / t;

@@ -10,6 +10,7 @@
 void testEOS();
 void testBaryCoeff();
 void testHydroPlus();
+void testJetCoeff();
 
 void outputAnalysis(double t, FILE *outputDir, void * latticeParams);
 void outputHydroPlus(double t, const char *pathToOutDir, void * latticeParams);

@@ -34,6 +34,8 @@ EQUATION_OF_STATE *EOState;
 
 BARYON_DIFFUSION_COEFF *BaryDiffCoeff;
 
+JET_COEFF * JetCoeff;
+
 DYNAMICAL_SOURCES *Source;
 
 PRECISION *Qvec; // Q vectors of slow modes
@@ -237,6 +239,16 @@ void allocateHostMemory(int len) {
     BaryDiffCoeff->sigmaB = (PRECISION *)calloc(128721, bytes);
     BaryDiffCoeff->DB = (PRECISION *)calloc(128721, bytes);
 #endif
+    
+    //=======================================================================
+    // Jet
+    //=======================================================================
+    
+    #ifdef JET
+        JetCoeff = (JET_COEFF *)calloc(1, sizeof(JET_COEFF));
+        JetCoeff->qhat = (PRECISION *)calloc(5525, bytes);
+        JetCoeff->ehat = (PRECISION *)calloc(5525, bytes);
+    #endif
     
     //=======================================================================
     // Slow modes at equilibrium
@@ -546,6 +558,10 @@ void freeHostMemory() {
 #ifdef VMU
     free(BaryDiffCoeff->sigmaB);
     free(BaryDiffCoeff->DB);
+#endif
+#ifdef JET
+    free(JetCoeff->qhat);
+    free(JetCoeff->ehat);
 #endif
 
     free(rhob);

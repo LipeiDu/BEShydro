@@ -337,43 +337,45 @@ void callFOFinder(int dim, int start, int nx, int ny, int nz, int n, double t0, 
             //************************************************************************************/
             else
             {
-              //first write the contravariant flow velocity
-              for (int ivar = 0; ivar < 4; ivar++)
-              {
-                temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
-                freezeoutSurfaceFile << temp << "\t ";
-              }
-              //write the energy density
-              temp = interpolateVariable3D(hydrodynamic_evoution, 4, it, ix, iy, tau_frac, x_frac, y_frac);
-              freezeoutSurfaceFile << temp << "\t "; //note units of fm^-4 appropriate for iSpectra reading
-              //baryon density
-              double temp2 = interpolateVariable4D(hydrodynamic_evoution, 16, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-              //the temperature !this needs to be checked
-              double temp3 = effectiveTemperature(temp,temp2);
-              freezeoutSurfaceFile << temp3 << "\t ";
-              //the baryon chemical potential
-              freezeoutSurfaceFile << chemicalPotentialOverT(temp,temp2)*temp3 << "\t ";
-              //the thermal pressure
-              freezeoutSurfaceFile << equilibriumPressure(temp,temp2) << "\t ";
-              //write ten components of pi_(mu,nu) shear viscous tensor
-              for (int ivar = 5; ivar < 15; ivar++)
-              {
-                temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
-                freezeoutSurfaceFile << temp << "\t ";
-              }
-              //write the bulk pressure Pi
-              temp = interpolateVariable3D(hydrodynamic_evoution, 15, it, ix, iy, tau_frac, x_frac, y_frac);
-              freezeoutSurfaceFile << temp << "\t ";
-              //write baryon density
-              freezeoutSurfaceFile << temp2 << "\t ";
-              //write the baryon diffusion
-              for (int ivar = 17; ivar < 21; ivar++)
-              {
-                temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
-                freezeoutSurfaceFile << temp << "\t ";
-              }
-              //start a new line
-              freezeoutSurfaceFile << endl;
+                //first write the contravariant flow velocity
+                for (int ivar = 0; ivar < 4; ivar++)
+                {
+                  temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
+                  freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t ";
+                }
+                //write the energy density
+                temp = interpolateVariable3D(hydrodynamic_evoution, 4, it, ix, iy, tau_frac, x_frac, y_frac);
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t "; //note units of fm^-4 appropriate for iSpectra reading
+                //baryon density
+                double temp2 = interpolateVariable4D(hydrodynamic_evoution, 16, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
+                //the temperature !this needs to be checked
+                double temp3 = effectiveTemperature(temp,temp2);
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << temp3 ;//<< "\t ";
+                //calculate chemical potential
+                double temp4 = chemicalPotentialOverT(temp,temp2)*temp3;
+                //the thermal pressure
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << equilibriumPressure(temp,temp2) ;//<< "\t ";
+                //write ten components of pi_(mu,nu) shear viscous tensor
+                for (int ivar = 5; ivar < 15; ivar++)
+                {
+                  temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
+                  freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t ";
+                }
+                //write the bulk pressure Pi
+                temp = interpolateVariable3D(hydrodynamic_evoution, 15, it, ix, iy, tau_frac, x_frac, y_frac);
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t ";
+                //write the baryon chemical potential
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << temp4 ;//<< "\t ";
+                //write baryon density
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << temp2 ;//<< "\t ";
+                //write the baryon diffusion
+                for (int ivar = 17; ivar < 21; ivar++)
+                {
+                  temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
+                  freezeoutSurfaceFile << setprecision(5) << setw(15) << temp ;//<< "\t ";
+                }
+                //start a new line
+                freezeoutSurfaceFile << setprecision(5) << setw(15) << endl;
             }
           }
         }

@@ -146,11 +146,11 @@ void setDynamicalSources(void * latticeParams, void * initCondParams, double *dp
         for(int j = 2; j < ny+2; ++j){
             for(int k = 2; k < nz+2; ++k){
                 int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
-                Source->sourcet[s] = -dp_dtau[0] * smearedPosition[s];
-                Source->sourcex[s] = -dp_dtau[1] * smearedPosition[s];
-                Source->sourcey[s] = -dp_dtau[2] * smearedPosition[s];
-                Source->sourcen[s] = -dp_dtau[3] * smearedPosition[s];
-                Source->sourceb[s] = dummy;
+                Source->sourcet[s] += -dp_dtau[0] * smearedPosition[s];
+                Source->sourcex[s] += -dp_dtau[1] * smearedPosition[s];
+                Source->sourcey[s] += -dp_dtau[2] * smearedPosition[s];
+                Source->sourcen[s] += -dp_dtau[3] * smearedPosition[s];
+                Source->sourceb[s] += dummy;
             }//k
         }//j
     }//i

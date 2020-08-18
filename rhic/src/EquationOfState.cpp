@@ -548,7 +548,7 @@ void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __r
     
     PrimaryVariables[0] = e/3;
     PrimaryVariables[1] = powf(e/EOS_FACTOR, 0.25);
-    PrimaryVariables[2] = 0.145;
+    PrimaryVariables[2] = EOS_ALPHA;
     
     /*if((0<=e0) && (e0<0.0036))
     {
