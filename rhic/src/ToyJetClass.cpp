@@ -67,9 +67,9 @@ void jetParton::energyLoss(int nx, int ny, int nz, double t, double dt, double d
       
       //double ehat = 1./3./(1./4./M_PI) * temp * temp; // L. Yan et al
       
-      // double ehat = qHatCFT(temp) / 4. / temp; // H. Liu et al
+      double ehat = qHatCFT(temp) / 4. / temp; // H. Liu et al
       
-      double ehat = qHat(temp, chem) / 4. / temp; // R. Rougemont et al
+      // double ehat = qHat(temp, chem) / 4. / temp; // R. Rougemont et al
       
       dp_dtau[0] = (-1.0) * ehat * momentum[0] / mass / t;
       dp_dtau[1] = (-1.0) * ehat * momentum[1] / mass / t;

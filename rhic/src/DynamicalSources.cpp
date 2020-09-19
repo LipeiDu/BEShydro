@@ -119,7 +119,7 @@ void setDynamicalSources(void * latticeParams, void * initCondParams, double *dp
 
 	//construct an array of the gaussian smeared jet position
 	double smearedPosition[ncx * ncy * ncz];
-	double width = 0.1; //width of gaussian smearing
+	double width = 0.3; //width of gaussian smearing
     double wid = 2 * width * width;
     double fac = 1 / width / sqrt(2 * M_PI);
     

@@ -924,8 +924,8 @@ void setConstantDensityInitialCondition(void * latticeParams, void * initCondPar
     double eL[nz];
     double rhoLa[nz], rhoLb[nz];
     
-    longitudinalEnergyDensityDistribution(eL, latticeParams, initCondParams);
-    longitudinalBaryonDensityDistribution(rhoLa, rhoLb, latticeParams, initCondParams);
+    //longitudinalEnergyDensityDistribution(eL, latticeParams, initCondParams);
+    //longitudinalBaryonDensityDistribution(rhoLa, rhoLb, latticeParams, initCondParams);
 
     double eT = 5.5;
     
@@ -937,8 +937,12 @@ void setConstantDensityInitialCondition(void * latticeParams, void * initCondPar
 			for(int k = 2; k < nz+2; ++k) {
 				int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                 
-                e[s] = (PRECISION) e0 / t0 * (eL[k-2] * eT + 1.e-5);
-                rhob[s] = (PRECISION) 1 / t0 * (0.332452 * (rhoLa[k-2] + rhoLb[k-2]) * eT + 1.e-5);// normalization factor 0.33
+                //e[s] = (PRECISION) e0 / t0 * (eL[k-2] * eT + 1.e-5);
+                //rhob[s] = (PRECISION) 1 / t0 * (0.332452 * (rhoLa[k-2] + rhoLb[k-2]) * eT + 1.e-5);// normalization factor 0.33
+                //p[s] = equilibriumPressure(e[s], rhob[s]);
+                
+                e[s] = (PRECISION) e0;
+                rhob[s] = (PRECISION) rhob0;
                 p[s] = equilibriumPressure(e[s], rhob[s]);
                 
 /*#ifdef VMU
