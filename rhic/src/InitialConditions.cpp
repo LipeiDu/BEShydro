@@ -830,14 +830,14 @@ void setBaryonDiffusionCPInitialCondition(void * latticeParams, void * initCondP
                 PRECISION diffusionCoeff[2];
                 baryonDiffusionCoefficient(T, muB, diffusionCoeff);
                 
-                double kappaKinetic = baryonDiffusionCoefficientKinetic(T, rhob[s], alphaB, e[s], p[s]);
+                //double kappaKinetic = baryonDiffusionCoefficientKinetic(T, rhob[s], alphaB, e[s], p[s]);
                 double kappaHolography = diffusionCoeff[0];
                 double kappaAdscft = baryonDiffusionCoefficientAdscft(T, rhob[s], alphaB, e[s], p[s], seq);
                 double kappaPlus = baryonDiffusionCoefficientHydroPlus(T, rhob[s], alphaB, e[s], p[s], seq);
                 
                 if(criticalSlowingDown){
                     double corrL = correlationLength(T, muB);
-                    kappaKinetic = corrL * kappaKinetic;
+                    //kappaKinetic = corrL * kappaKinetic;
                     kappaHolography = corrL * kappaHolography;
                     kappaAdscft = corrL * kappaAdscft;
                     kappaPlus = corrL * kappaPlus;
@@ -847,7 +847,7 @@ void setBaryonDiffusionCPInitialCondition(void * latticeParams, void * initCondP
                 << setprecision(5) << setw(10) << (i-2 - (nx-1)/2.0) * dx
                 << setprecision(5) << setw(10) << (j-2 - (ny-1)/2.0) * dy
                 << setprecision(5) << setw(10) << (k-2 - (nz-1)/2.0) * dz
-                << setprecision(6) << setw(18) << kappaKinetic
+                //<< setprecision(6) << setw(18) << kappaKinetic
                 << setprecision(6) << setw(18) << kappaHolography
                 << setprecision(6) << setw(18) << kappaAdscft
                 << setprecision(6) << setw(18) << kappaPlus
@@ -1038,39 +1038,39 @@ void setDynamicalSourceInitialCondition(void * latticeParams, void * initCondPar
                     for(int k = 2; k < nz+2; ++k) {
                         int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                         
-                        e[s] = (PRECISION) 1.e-3;
-                        rhob[s] = 1.e-5;
-                        p[s] = 1.e-3;
+                        e[s] = (PRECISION) ed;
+                        rhob[s] = rhobd;
+                        p[s] = pd;
                         
-                        PRECISION ux = 0;
-                        PRECISION uy = 0;
-                        PRECISION un = 0;
+                        PRECISION ux = 0.;
+                        PRECISION uy = 0.;
+                        PRECISION un = 0.;
                         
-                        u->ux[s] = 0;
-                        u->uy[s] = 0;
-                        u->un[s] = 0;
-                        u->ut[s] = 0;//sqrt(1+ux*ux+uy*uy+t0*t0*un*un);
+                        u->ux[s] = 0.;
+                        u->uy[s] = 0.;
+                        u->un[s] = 0.;
+                        u->ut[s] = 0.;//sqrt(1+ux*ux+uy*uy+t0*t0*un*un);
                         
 #ifdef PIMUNU
-                        q->pitt[s] = 0;
-                        q->pitx[s] = 0;
-                        q->pity[s] = 0;
-                        q->pitn[s] = 0;
-                        q->pixx[s] = 0;
-                        q->pixy[s] = 0;
-                        q->pixn[s] = 0;
-                        q->piyy[s] = 0;
-                        q->piyn[s] = 0;
-                        q->pinn[s] = 0;
+                        q->pitt[s] = 0.;
+                        q->pitx[s] = 0.;
+                        q->pity[s] = 0.;
+                        q->pitn[s] = 0.;
+                        q->pixx[s] = 0.;
+                        q->pixy[s] = 0.;
+                        q->pixn[s] = 0.;
+                        q->piyy[s] = 0.;
+                        q->piyn[s] = 0.;
+                        q->pinn[s] = 0.;
 #endif
 #ifdef PI
-                        q->Pi[s] = 0;
+                        q->Pi[s] = 0.;
 #endif
 #ifdef VMU
-                        q->nbt[s] = 0;
-                        q->nbx[s] = 0;
-                        q->nby[s] = 0;
-                        q->nbn[s] = 0;
+                        q->nbt[s] = 0.;
+                        q->nbx[s] = 0.;
+                        q->nby[s] = 0.;
+                        q->nbn[s] = 0.;
 #endif
                     }
                 }

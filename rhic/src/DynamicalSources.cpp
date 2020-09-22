@@ -38,7 +38,8 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
 
     FILE *sourcefile;
     char fname[255];
-    sprintf(fname, "%s/%s%d.dat", rootDirectory, "input/dynamical-source/Sources",n);
+    //sprintf(fname, "%s/%s%d.dat", rootDirectory, "input/dynamical-source/Sources",n);
+    sprintf(fname, "%s/%s%d.dat", rootDirectory, "../dynamical_results/3UrQMD_events/output3/output3/Sources",n);
     sourcefile = fopen(fname, "r");
     
     double x, y, z;
@@ -60,6 +61,8 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
           }
        }
     }
+    
+    printf("The source file %d.dat was read in...\n",n);
 
     fclose(sourcefile);
 }

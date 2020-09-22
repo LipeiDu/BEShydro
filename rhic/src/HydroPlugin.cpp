@@ -32,7 +32,7 @@
 #include "../include/DynamicalSources.h"
 #include "../include/HydroAnalysis.h"
 
-#define FREQ 200 //write output to file every FREQ timesteps
+#define FREQ 1 //write output to file every FREQ timesteps
 #define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
 #define JET 0 // 0 to turn off jet evolution, 1 to turn it on
@@ -45,8 +45,8 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   output(e, t, outputDir, "e", latticeParams);
   output(p, t, outputDir, "p", latticeParams);
   //output(seq, t, outputDir, "seq", latticeParams);
-  //output(u->ux, t, outputDir, "ux", latticeParams);
-  //output(u->uy, t, outputDir, "uy", latticeParams);
+  output(u->ux, t, outputDir, "ux", latticeParams);
+  output(u->uy, t, outputDir, "uy", latticeParams);
   output(u->un, t, outputDir, "un", latticeParams);
   output(u->ut, t, outputDir, "ut", latticeParams);
   //output(q->ttt, t, outputDir, "ttt", latticeParams);
@@ -54,9 +54,9 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   //output(q->tty, t, outputDir, "tty", latticeParams);
   //output(q->ttn, t, outputDir, "ttn", latticeParams);
   #ifdef PIMUNU
-  //output(q->pitx, t, outputDir, "pitx", latticeParams);
-  //output(q->pixx, t, outputDir, "pixx", latticeParams);
-  //output(q->pixy, t, outputDir, "pixy", latticeParams);
+  output(q->pitx, t, outputDir, "pitx", latticeParams);
+  output(q->pixx, t, outputDir, "pixx", latticeParams);
+  output(q->pixy, t, outputDir, "pixy", latticeParams);
   //output(q->pixn, t, outputDir, "pixn", latticeParams);
   //output(q->piyy, t, outputDir, "piyy", latticeParams);
   //output(q->piyn, t, outputDir, "piyn", latticeParams);
@@ -263,7 +263,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   for (int n = 1; n <= nt+1; ++n)
   {
     
-    outputAnalysisa(n, t, fpan, latticeParams);
+    //outputAnalysisa(n, t, fpan, latticeParams);
     //outputBaryonCP(t, outputDir, latticeParams);
       
     // copy variables back to host and write to disk
@@ -306,10 +306,17 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     accumulator1 = checkForCellsAboveTc(nx, ny, nz, freezeoutEnergyDensity, e);
       
     if (accumulator1 == 0) accumulator2 += 1;
-    if (accumulator2 >= FOFREQ+1 && (n > numberOfSourceFiles)) //only break once freezeout finder has had a chance to search/write to file
+    if (accumulator2 >= FOFREQ+1) //only break once freezeout finder has had a chance to search/write to file
     {
-      printf("\nAll cells have dropped below freezeout energy density\n");
-      break;
+        if(initialConditionType==13){
+            if(n > numberOfSourceFiles){
+                printf("\nAll cells have dropped below freezeout energy density\n");
+                break;
+            }
+        }else{
+            printf("\nAll cells have dropped below freezeout energy density\n");
+            break;
+        }
     }
     
     //************************************************************************************\

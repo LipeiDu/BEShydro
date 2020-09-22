@@ -14,19 +14,19 @@
 /*********************************************************/
 //Main switch//
 
-//#define PIMUNU
+#define PIMUNU
 //#define PI
 
-#define NBMU
-#define VMU
+//#define NBMU
+//#define VMU
 
-#define RootSolver_with_Baryon
-#define EOS_with_baryon
+//#define RootSolver_with_Baryon
+//#define EOS_with_baryon
 
-//#define DYNAMICAL_SOURCE
+#define DYNAMICAL_SOURCE
 
 //#define HydroPlus
-#define CRITICAL
+//#define CRITICAL
 
 /**************************************************************************************************************************************************/
 /*********************************************************/
