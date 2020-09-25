@@ -20,7 +20,94 @@
 #include "../include/InitialConditionParameters.h"
 #include "../include/HydroParameters.h"
 
+#include <H5Cpp.h>
+#include <H5File.h>
+
 using namespace std;
+
+#define HDF5
+
+/**************************************************************************************************************************************************/
+/* ghost cells for the dynamical source terms
+/**************************************************************************************************************************************************/
+
+void setGhostCellVarsSource(DYNAMICAL_SOURCES * Source, int s, int sBC)
+{
+    Source->sourcet[s] = Source->sourcet[sBC];
+    Source->sourcex[s] = Source->sourcex[sBC];
+    Source->sourcey[s] = Source->sourcey[sBC];
+    Source->sourcen[s] = Source->sourcen[sBC];
+    Source->sourceb[s] = Source->sourceb[sBC];
+}
+
+void setGhostCellsSource(DYNAMICAL_SOURCES * Source, void * latticeParams)
+{
+    struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
+
+    int nx,ny,nz,ncx,ncy,ncz;
+    
+    nx = lattice->numLatticePointsX;
+    ny = lattice->numLatticePointsY;
+    nz = lattice->numLatticePointsRapidity;
+    
+    ncx = lattice->numComputationalLatticePointsX;
+    ncy = lattice->numComputationalLatticePointsY;
+    ncz = lattice->numComputationalLatticePointsRapidity;
+
+    int iBC,jBC,kBC;
+    int s,sBC;
+    
+    for(int j = 2; j < ncy; ++j) {
+        for(int k = 2; k < ncz; ++k) {
+            iBC = 2;
+            for (int i = 0; i <= 1; ++i) {
+                s = columnMajorLinearIndex(i, j, k, ncx, ncy);
+                sBC = columnMajorLinearIndex(iBC, j, k, ncx, ncy);
+                setGhostCellVarsSource(Source,s,sBC);
+            }
+            iBC = nx + 1;
+            for (int i = nx + 2; i <= nx + 3; ++i) {
+                s = columnMajorLinearIndex(i, j, k, ncx, ncy);
+                sBC = columnMajorLinearIndex(iBC, j, k, ncx, ncy);
+                setGhostCellVarsSource(Source,s,sBC);
+            }
+        }
+    }
+    
+    for(int i = 2; i < ncx; ++i) {
+        for(int k = 2; k < ncz; ++k) {
+            jBC = 2;
+            for (int j = 0; j <= 1; ++j) {
+                s = columnMajorLinearIndex(i, j, k, ncx, ncy);
+                sBC = columnMajorLinearIndex(i, jBC, k, ncx, ncy);
+                setGhostCellVarsSource(Source,s,sBC);
+            }
+            jBC = ny + 1;
+            for (int j = ny + 2; j <= ny + 3; ++j) {
+                s = columnMajorLinearIndex(i, j, k, ncx, ncy);
+                sBC = columnMajorLinearIndex(i, jBC, k, ncx, ncy);
+                setGhostCellVarsSource(Source,s,sBC);
+            }
+        }
+    }
+    
+    for(int i = 2; i < ncx; ++i) {
+        for(int j = 2; j < ncy; ++j) {
+            kBC = 2;
+            for (int k = 0; k <= 1; ++k) {
+                s = columnMajorLinearIndex(i, j, k, ncx, ncy);
+                sBC = columnMajorLinearIndex(i, j, kBC, ncx, ncy);
+                setGhostCellVarsSource(Source,s,sBC);
+            }
+            kBC = nz + 1;
+            for (int k = nz + 2; k <= nz + 3; ++k) {
+                s = columnMajorLinearIndex(i, j, k, ncx, ncy);
+                sBC = columnMajorLinearIndex(i, j, kBC, ncx, ncy);
+                setGhostCellVarsSource(Source,s,sBC);
+            }
+        }
+    }
+}
 
 /**************************************************************************************************************************************************/
 /* Initialize the dynamical source terms
@@ -36,6 +123,7 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
 	int ny = lattice->numLatticePointsY;
 	int nz = lattice->numLatticePointsRapidity;
 
+#ifndef HDF5
     FILE *sourcefile;
     char fname[255];
     //sprintf(fname, "%s/%s%d.dat", rootDirectory, "input/dynamical-source/Sources",n);
@@ -62,9 +150,57 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
        }
     }
     
-    printf("The source file %d.dat was read in...\n",n);
+    printf("The source file Sources%d.dat was read in...\n",n);
 
     fclose(sourcefile);
+    
+#else
+    
+	char fname[255];
+	sprintf(fname, "%s/%s%d.h5", rootDirectory, "../part2s/sourceTerms/output/Sources",n);
+	//sourcefile = fopen(fname, "r");
+
+	H5::H5File file( fname, H5F_ACC_RDONLY );
+	H5::DataSet dataset = file.openDataSet( "data" );
+	H5::DataSpace dataspace = dataset.getSpace();
+	int rank = dataspace.getSimpleExtentNdims();
+	hsize_t dims_out[4];
+	int ndims = dataspace.getSimpleExtentDims( dims_out, NULL);
+	//H5::DataSpace mspace(RANK, dims);
+
+	//read the source terms (Sb, St, Sx, Sy, Sn) into a single array
+	float *Sall;
+    int nElements = nx * ny * nz;
+	Sall = (float *)calloc( 5*nElements, sizeof(float) );
+	dataset.read( Sall, H5::PredType::NATIVE_FLOAT, dataspace);
+
+	//split this array into corresponding source terms
+	for(int i = 2; i < nx+2; ++i){
+		for(int j = 2; j < ny+2; ++j){
+			for(int k = 2; k < nz+2; ++k){
+                
+                //this index runs over grid with ghost cells
+				int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+				//this index runs over grid without ghost cells
+				int s_m = columnMajorLinearIndex(i-2, j-2, k-2, nx, ny);
+				
+				Source->sourcet[s] = (PRECISION) Sall[5*s_m];
+				Source->sourcex[s] = (PRECISION) Sall[5*s_m + 1];
+				Source->sourcey[s] = (PRECISION) Sall[5*s_m + 2];
+				if (nz > 1) Source->sourcen[s] = (PRECISION) Sall[5*s_m + 3];
+                
+                Source->sourceb[s] = (PRECISION) Sall[5*s_m + 4];
+                
+			} //for(int k = 2; k < nz+2; ++k)
+		} // for(int j = 2; j < ny+2; ++j)
+	} // for(int i = 2; i < nx+2; ++i)
+    
+    printf("The source file Sources%d.h5 was read in...\n",n);
+    
+#endif
+    
+    // ghost cells for dynamical sources
+    setGhostCellsSource(Source, latticeParams);
 }
 
 /**************************************************************************************************************************************************/
@@ -92,6 +228,9 @@ void zeroSource(void * latticeParams, void * initCondParams)
             }//k
         }//j
     }//i
+    
+    // ghost cells for dynamical sources
+    setGhostCellsSource(Source, latticeParams);
 }
 
 /**************************************************************************************************************************************************/
