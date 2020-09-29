@@ -1049,7 +1049,7 @@ void setDynamicalSourceInitialCondition(void * latticeParams, void * initCondPar
                         u->ux[s] = 0.;
                         u->uy[s] = 0.;
                         u->un[s] = 0.;
-                        u->ut[s] = 0.;//sqrt(1+ux*ux+uy*uy+t0*t0*un*un);
+                        u->ut[s] = 1.;//sqrt(1+ux*ux+uy*uy+t0*t0*un*un);
                         
 #ifdef PIMUNU
                         q->pitt[s] = 0.;

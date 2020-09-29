@@ -14,7 +14,7 @@
 #include "../include/EquationOfState.h"
 #include "../include/HydroPlus.h"
 
-#define MAX_ITERS 100
+#define MAX_ITERS 10000
 
 #define Method_Newton
 
