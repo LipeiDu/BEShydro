@@ -1,0 +1,8 @@
+#PBS -l walltime=0:50:00
+#PBS -l nodes=1:ppn=5,mem=32GB
+#PBS -m abe
+#PBS -M du.458@osu.edu
+
+cd /home/du.458/BEShydro
+sh run5.sh 5
+sh run1.sh 1

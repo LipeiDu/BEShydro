@@ -29,10 +29,14 @@ const PRECISION rmax_n = 1.0;
 #define Regulation_OLD
 
 void regulateDissipativeCurrents(PRECISION t, const CONSERVED_VARIABLES * const __restrict__ currrentVars, const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p, const PRECISION * const __restrict__ rhob, const FLUID_VELOCITY * const __restrict__ u, int ncx, int ncy, int ncz) {
-    
-    for(int i = 2; i < ncx-2; ++i) {
+ 
+#pragma omp parallel for collapse(3)
+#ifdef TILE
+#pragma unroll_and_jam
+#endif
+    for(int k = 2; k < ncz-2; ++k) {
         for(int j = 2; j < ncy-2; ++j) {
-            for(int k = 2; k < ncz-2; ++k) {
+            for(int i = 2; i < ncx-2; ++i) {
                 int s = columnMajorLinearIndex(i, j, k, ncx, ncy);
 #ifdef PIMUNU
                 PRECISION pitt = currrentVars->pitt[s];

@@ -191,8 +191,8 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
                 
                 Source->sourceb[s] = (PRECISION) Sall[5*s_m + 4];
                 
-                //Source->sourcex[s] = 0.;
-                //Source->sourcey[s] = 0.;
+                Source->sourcex[s] = 0.;
+                Source->sourcey[s] = 0.;
                 Source->sourcen[s] = 0.;
                 
 			} //for(int k = 2; k < nz+2; ++k)
@@ -220,9 +220,9 @@ void zeroSource(void * latticeParams, void * initCondParams)
     int ny = lattice->numLatticePointsY;
     int nz = lattice->numLatticePointsRapidity;
     
-    for(int i = 2; i < nx+2; ++i){
+    for(int k = 2; k < nz+2; ++k){
         for(int j = 2; j < ny+2; ++j){
-            for(int k = 2; k < nz+2; ++k){
+            for(int i = 2; i < nx+2; ++i){
                 int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                 Source->sourcet[s] = 0.0;
                 Source->sourcex[s] = 0.0;

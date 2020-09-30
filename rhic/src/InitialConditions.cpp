@@ -7,6 +7,7 @@
 #include <math.h> // for math functions
 #include <stdio.h> // for printf
 #include <stdlib.h> //TEMP
+#include <cstdlib>
 
 #include <iostream>
 #include <fstream>
@@ -2039,8 +2040,8 @@ void setSoundPropagationInitialCondition(void * latticeParams, void * initCondPa
         double ed = e0 + de*sin(2*M_PI*x/lambda);
         // periodic boundary conditions
         if (i==2) {
-            vx = cs*de/(e0+p0)*sin(2*M_PI*abs(x)/lambda);
-            ed = e0 + de*sin(2*M_PI*abs(x)/lambda);
+            vx = cs*de/(e0+p0)*sin(2*M_PI*fabs(x)/lambda);
+            ed = e0 + de*sin(2*M_PI*fabs(x)/lambda);
         }
         
         double u0 = 1/sqrt(1-vx*vx);

@@ -130,9 +130,9 @@ void setInitialConditionSlowModes(void * latticeParams, void * hydroParams)
     }
 
     // initialization of slow mdoes at/out of equilibrium
-    for(int i = 2; i < nx+2; ++i) {
+    for(int k = 2; k < nz+2; ++k) {
         for(int j = 2; j < ny+2; ++j) {
-            for(int k = 2; k < nz+2; ++k) {
+            for(int i = 2; i < nx+2; ++i) {
                 
                 int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                 

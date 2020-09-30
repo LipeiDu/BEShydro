@@ -153,13 +153,10 @@ void outputBaryonCP(double t, const char *pathToOutDir, void * latticeParams)
     
     int nt = t/d_dt;
     if(nt % tFREQ == 0){
-        for(int i = 2; i < d_ncx+2; ++i) {
+        
+        for(int k = 2; k < d_ncz+2; ++k) {
             for(int j = 2; j < d_ncy+2; ++j) {
-                
-                // only print out the center of the transverse plane
-                //if(i== (d_ncx+3)/2 && j== (d_ncy+3)/2){
-                    
-                    for(int k = 2; k < d_ncz+2; ++k) {
+                    for(int i = 2; i < d_ncx+2; ++i) {
                         
                         // print out info at some rapidities, with zPREQ
                         if((k-2 - (d_ncz-1)/2.) >= 0 && (k-2) % zFREQ == 0){
@@ -186,7 +183,6 @@ void outputBaryonCP(double t, const char *pathToOutDir, void * latticeParams)
                             fclose(fpn);
                         }
                     }
-                //}
             }
         }
     }
@@ -212,9 +208,9 @@ void outputAnalysisa(int n, double t, FILE *fpan, void * latticeParams)
         
         int m = 0;
         
-        for(int i = 2; i < nx+2; ++i) {
+        for(int k = 2; k < nz+2; ++k) {
             for(int j = 2; j < ny+2; ++j) {
-                for(int k = 2; k < nz+2; ++k) {
+                for(int i = 2; i < nx+2; ++i) {
                     
                     if((k-2 - (nz-1)/2) >= 0 && (k-2 - (nz-1)/2) % zFREQ == 0){
                         

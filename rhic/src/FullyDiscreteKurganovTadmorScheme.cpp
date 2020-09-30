@@ -21,6 +21,10 @@
 #include "../include/HydroPlus.h"
 #include "../include/RegulationScheme.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 
 /**************************************************************************************************************************************************/
 /* store nearest and next-to-nearest neighbors of all conserved variables at each grid to a 5 times longer array
@@ -44,9 +48,15 @@ int s, int ptr, int smm, int sm, int sp, int spp)
 
 void eulerStepKernelSource(PRECISION t, const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p, const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up, int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION dz, const PRECISION * const __restrict__ rhob, const PRECISION * const __restrict__ rhobp, const PRECISION * const __restrict__ alphaB, const PRECISION * const __restrict__ alphaBp, const PRECISION * const __restrict__ T, const PRECISION * const __restrict__ Tp, const PRECISION * const __restrict__ seq, SLOW_MODES *  const __restrict__ eqPhiQ, void * hydroParams)
 {
-	for(int i = 2; i < ncx-2; ++i) {
+    
+#pragma omp parallel for collapse(3)
+#ifdef TILE
+#pragma unroll_and_jam
+#endif
+    
+	for(int k = 2; k < ncz-2; ++k) {
 		for(int j = 2; j < ncy-2; ++j) {
-			for(int k = 2; k < ncz-2; ++k) {
+			for(int i = 2; i < ncx-2; ++i) {
 				int s = columnMajorLinearIndex(i, j, k, ncx, ncy);
                 
                 //=====================================================================================
@@ -97,6 +107,10 @@ void eulerStepKernelSource(PRECISION t, const CONSERVED_VARIABLES * const __rest
 				loadSourceTerms2(Q, S, u, up->ut[s], up->ux[s], up->uy[s], up->un[s], t, e, p, s, ncx, ncy, ncz, dt, dx, dy, dz, Source, rhob, rhobp[s], alphaB, alphaBp[s], T, Tp[s], seq[s], eqPhiQ, hydroParams);
                 
 				PRECISION result[NUMBER_ALL_EVOLVING_VARIABLES];
+                
+#ifdef SIMD
+#pragma omp simd
+#endif
 				for (unsigned int n = 0; n < NUMBER_ALL_EVOLVING_VARIABLES; ++n) {
 					*(result+n) = *(Q+n) + dt * ( *(S+n) );
 				}
@@ -151,9 +165,15 @@ void eulerStepKernelSource(PRECISION t, const CONSERVED_VARIABLES * const __rest
 
 void eulerStepKernelX(PRECISION t, const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e, int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, const PRECISION * const __restrict__ rhob)
 {
-	for(int i = 2; i < ncx-2; ++i) {
-		for(int j = 2; j < ncy-2; ++j) {
-			for(int k = 2; k < ncz-2; ++k) {
+    
+#pragma omp parallel for collapse(3)
+#ifdef TILE
+#pragma unroll_and_jam
+#endif
+    
+    for(int k = 2; k < ncz-2; ++k) {
+        for(int j = 2; j < ncy-2; ++j) {
+            for(int i = 2; i < ncx-2; ++i) {
 				int s = columnMajorLinearIndex(i, j, k, ncx, ncy);
                 
                 //=====================================================================================
@@ -218,6 +238,9 @@ void eulerStepKernelX(PRECISION t, const CONSERVED_VARIABLES * const __restrict_
                 PRECISION Hx[NUMBER_ALL_EVOLVING_VARIABLES];
                 loadSourceTermsX(I, Hx, u, s, dx);
                 
+#ifdef SIMD
+#pragma omp simd
+#endif
 				for (unsigned int n = 0; n < NUMBER_ALL_EVOLVING_VARIABLES; ++n) {
                     *(result+n) = (*(Hbackwards+n) - *(Hforward+n))/dx + *(Hx+n);
                     *(result+n) *= dt;
@@ -274,9 +297,15 @@ void eulerStepKernelX(PRECISION t, const CONSERVED_VARIABLES * const __restrict_
 
 void eulerStepKernelY(PRECISION t, const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e, int ncx, int ncy, int ncz, PRECISION dt, PRECISION dy, const PRECISION * const __restrict__ rhob)
 {
-	for(int i = 2; i < ncx-2; ++i) {
-		for(int j = 2; j < ncy-2; ++j) {
-			for(int k = 2; k < ncz-2; ++k) {
+    
+#pragma omp parallel for collapse(3)
+#ifdef TILE
+#pragma unroll_and_jam
+#endif
+    
+    for(int k = 2; k < ncz-2; ++k) {
+        for(int j = 2; j < ncy-2; ++j) {
+            for(int i = 2; i < ncx-2; ++i) {
 				int s = columnMajorLinearIndex(i, j, k, ncx, ncy);
                 
                 //=====================================================================================
@@ -342,6 +371,9 @@ void eulerStepKernelY(PRECISION t, const CONSERVED_VARIABLES * const __restrict_
                 PRECISION Hy[NUMBER_ALL_EVOLVING_VARIABLES];
 				loadSourceTermsY(J, Hy, u, s, dy);
 
+#ifdef SIMD
+#pragma omp simd
+#endif
                 for (unsigned int n = 0; n < NUMBER_ALL_EVOLVING_VARIABLES; ++n) {
                     *(result+n) = (*(Hbackwards+n) - *(Hforward+n))/dy + *(Hy+n);
                     *(result+n) *= dt;
@@ -397,9 +429,15 @@ void eulerStepKernelY(PRECISION t, const CONSERVED_VARIABLES * const __restrict_
 
 void eulerStepKernelZ(PRECISION t, const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e, int ncx, int ncy, int ncz, PRECISION dt, PRECISION dz, const PRECISION * const __restrict__ rhob)
 {
-	for(int i = 2; i < ncx-2; ++i) {
-		for(int j = 2; j < ncy-2; ++j) {
-			for(int k = 2; k < ncz-2; ++k) {
+    
+#pragma omp parallel for collapse(3)
+#ifdef TILE
+#pragma unroll_and_jam
+#endif
+    
+    for(int k = 2; k < ncz-2; ++k) {
+        for(int j = 2; j < ncy-2; ++j) {
+            for(int i = 2; i < ncx-2; ++i) {
 				int s = columnMajorLinearIndex(i, j, k, ncx, ncy);
                 
                 //=====================================================================================
@@ -466,6 +504,9 @@ void eulerStepKernelZ(PRECISION t, const CONSERVED_VARIABLES * const __restrict_
                 PRECISION Hz[NUMBER_ALL_EVOLVING_VARIABLES];
 				loadSourceTermsZ(K, Hz, u, s, t, dz);
 
+#ifdef SIMD
+#pragma omp simd
+#endif
                 for (unsigned int n = 0; n < NUMBER_ALL_EVOLVING_VARIABLES; ++n) {
                     *(result+n) = (*(Hbackwards+n) - *(Hforward+n))/dz + *(Hz+n);
                     *(result+n) *= dt;
@@ -520,9 +561,14 @@ void eulerStepKernelZ(PRECISION t, const CONSERVED_VARIABLES * const __restrict_
 
 void convexCombinationEulerStepKernel(const CONSERVED_VARIABLES * const __restrict__ q, CONSERVED_VARIABLES * const __restrict__ Q, int ncx, int ncy, int ncz)
 {
-	for(int i = 2; i < ncx-2; ++i) {
-		for(int j = 2; j < ncy-2; ++j) {
-			for(int k = 2; k < ncz-2; ++k) {
+    
+#pragma omp parallel for collapse(3)
+#ifdef TILE
+#pragma unroll_and_jam
+#endif
+    for(int k = 2; k < ncz-2; ++k) {
+        for(int j = 2; j < ncy-2; ++j) {
+            for(int i = 2; i < ncx-2; ++i) {
 				int s = columnMajorLinearIndex(i, j, k, ncx, ncy);
 				Q->ttt[s] += q->ttt[s];
 				Q->ttt[s] /= 2;
