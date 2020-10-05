@@ -307,7 +307,9 @@ PRECISION chemicalPotentialOverT(PRECISION e, PRECISION rhob){
 #ifndef CONFORMAL_EOS
     return primaryVariablesEOS(e, rhob, EOState->alphab)*HBARC;
 #else
-    return primaryVariablesConformalEOS(e, rhob, EOState->alphab)*HBARC;
+    //return primaryVariablesConformalEOS(e, rhob, EOState->alphab)*HBARC;
+    
+    return EOS_ALPHA;
 #endif
 #endif
 }
@@ -395,7 +397,9 @@ PRECISION effectiveTemperature(PRECISION e, PRECISION rhob) {
 #ifndef CONFORMAL_EOS
     return primaryVariablesEOS(e, fabs(rhob), EOState->Temperature);
 #else
-    return primaryVariablesConformalEOS(e, fabs(rhob), EOState->Temperature);
+    //return primaryVariablesConformalEOS(e, fabs(rhob), EOState->Temperature);
+    
+    return powf(e/EOS_FACTOR, 0.25);
 #endif
 #endif
 }

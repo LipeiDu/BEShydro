@@ -33,7 +33,7 @@
 #include "../include/HydroAnalysis.h"
 
 #define FREQ 50 //write output to file every FREQ timesteps
-#define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
+#define FOFREQ 1 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
 
 /**************************************************************************************************************************************************/
@@ -129,6 +129,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   printf("Grid size = %d x %d x %d\n", nx, ny, nz);
   printf("spatial resolution = (%.3f, %.3f, %.3f)\n", lattice->latticeSpacingX, lattice->latticeSpacingY, lattice->latticeSpacingRapidity);
   printf("freezeout temperature = %.3f [fm^-1], eF = %.3f [fm^-4]\n", freezeoutTemperature, freezeoutEnergyDensity);
+  printf("freezeout temperature = %.3f [GeV], eF = %.3f [GeV fm^-3]\n", freezeoutTemperatureGeV, freezeoutEnergyDensity*hbarc);
 
   //************************************************************************************\
   //* Allocation and reading in tables

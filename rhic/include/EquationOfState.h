@@ -14,7 +14,7 @@
 // ideal gas of massless quarks and gluons
 #define EOS_FACTOR 13.8997 // Nc=3, Nf=2.5
 
-#define EOS_ALPHA 0.145 //0.5 //
+#define EOS_ALPHA 0.2 //0.5 //
 
 
 void getEquationOfStateTable();
