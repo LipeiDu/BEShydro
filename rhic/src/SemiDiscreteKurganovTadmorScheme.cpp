@@ -25,6 +25,11 @@ void flux(const PRECISION * const __restrict__ data, PRECISION * const __restric
 	// left and right extrapolated values of the conserved variables
 	int ptr = 0;
 	PRECISION qmm, qm, q, qp, qpp;
+    
+#ifdef SIMD
+#pragma omp simd
+#endif
+    
 	for (unsigned int n = 0; n < NUMBER_ALL_EVOLVING_VARIABLES; ++n) {
 		qmm = *(data+ptr);
 		qm 	= *(data+ptr+1);
@@ -44,6 +49,11 @@ void flux(const PRECISION * const __restrict__ data, PRECISION * const __restric
 
 	PRECISION a,qR_n,qL_n,FqR,FqL,res;
 	a = localPropagationSpeed(utR,uxR,uyR,unR,utL,uxL,uyL,unL,spectralRadius);
+    
+#ifdef SIMD
+#pragma omp simd
+#endif
+    
 	for (unsigned int n = 0; n < NUMBER_ALL_EVOLVING_VARIABLES; ++n) {
 		qR_n = qR[n];
 		qL_n = qL[n];

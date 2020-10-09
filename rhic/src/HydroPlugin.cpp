@@ -166,7 +166,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     // initialize jet at center of coordinate grid with momenta along y direction
     parton.mass = 1;
     parton.position[0] = t0; //same as hydro start time
-    parton.position[1] = 0.0;
+    parton.position[1] = 1.0;
     parton.momentum[0] = 1.0; //nonzero p^tau
     parton.momentum[1] = 1.0; //nonzero p^x
       

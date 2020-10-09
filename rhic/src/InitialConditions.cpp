@@ -1284,11 +1284,11 @@ void setIdealGubserInitialCondition(void * latticeParams, void * initCondParams,
         }
     }
 #else
-    double L = 1.0; // L is the q used in Gubser profile
+    double L = 1.0/4.3; // L is the q used in Gubser profile
     
-    for(int i = 2; i < nx+2; ++i) {
+    for(int k = 2; k < nz+2; ++k) {
         for(int j = 2; j < ny+2; ++j) {
-            for(int k = 2; k < nz+2; ++k) {
+            for(int i = 2; i < nx+2; ++i) {
                 
                 double x = (i-2 - (nx-1)/2.)*dx;
                 double y = (j-2 - (ny-1)/2.)*dy;
@@ -1298,12 +1298,12 @@ void setIdealGubserInitialCondition(void * latticeParams, void * initCondParams,
 
                 // T, e, and p with conformal EoS
                 
-                double C = 1.2;
+                double C = 3.23512;
                 double T = (C/t0) * pow(2*L*t0, 0.6666666666666667)/pow((1 + 2*L*L*(t0*t0 + r*r) + pow(L,4)*pow((t0*t0 - r*r),2)),0.3333333333333333);
                 
-                e[s] = (PRECISION) (13.9 * pow(T,4));
+                e[s] = (PRECISION) (13.9164 * pow(T,4));
                 p[s] = e[s]/3.0;
-                rhob[s] = (PRECISION) (EOS_ALPHA * 0.28 * pow(T,3));
+                rhob[s] = (PRECISION) (EOS_ALPHA * 0.277903 * pow(T,3));
                 
                 // Gubser flow profiles
                 

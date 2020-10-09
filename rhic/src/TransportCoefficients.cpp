@@ -158,7 +158,7 @@ void baryonDiffusionCoefficient(PRECISION T, PRECISION muB, PRECISION * const __
 // conformal arXiv:hep-ph/0605178, fac taken from 1507.06556
 PRECISION qHatCFT(PRECISION T){
     
-    PRECISION fac = 4.6;//21.02;
+    PRECISION fac = 21.02;//4.6;//
     
     return fac * T * T * T;
 }

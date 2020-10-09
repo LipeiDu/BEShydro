@@ -78,9 +78,9 @@ void zeroSource(void * latticeParams, void * initCondParams)
     int ny = lattice->numLatticePointsY;
     int nz = lattice->numLatticePointsRapidity;
     
-    for(int i = 2; i < nx+2; ++i){
+    for(int k = 2; k < nz+2; ++k){
         for(int j = 2; j < ny+2; ++j){
-            for(int k = 2; k < nz+2; ++k){
+            for(int i = 2; i < nx+2; ++i){
                 int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                 Source->sourcet[s] = 0.0;
                 Source->sourcex[s] = 0.0;
@@ -119,15 +119,15 @@ void setDynamicalSources(void * latticeParams, void * initCondParams, double *dp
 
 	//construct an array of the gaussian smeared jet position
 	double smearedPosition[ncx * ncy * ncz];
-	double width = 0.3; //width of gaussian smearing
+	double width = 0.2; //width of gaussian smearing
     double wid = 2 * width * width;
     double fac = 1 / width / sqrt(2 * M_PI);
     
     //printf("source term: parton has position {%f, %f, %f, %f}\n", pos[0],pos[1],pos[2],pos[3]);
 
-	for(int i = 2; i < nx+2; ++i){
+	for(int k = 2; k < nz+2; ++k){
         for(int j = 2; j < ny+2; ++j){
-            for(int k = 2; k < nz+2; ++k){
+            for(int i = 2; i < nx+2; ++i){
                 int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                 double x = (double) (i-2) * dx + xmin;
                 double y = (double) (j-2) * dy + ymin;
@@ -142,9 +142,9 @@ void setDynamicalSources(void * latticeParams, void * initCondParams, double *dp
     }//i
 
     //now multiply the smeared position by energy loss corresponding to vector components
-	for(int i = 2; i < nx+2; ++i){
+	for(int k = 2; k < nz+2; ++k){
         for(int j = 2; j < ny+2; ++j){
-            for(int k = 2; k < nz+2; ++k){
+            for(int i = 2; i < nx+2; ++i){
                 int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                 Source->sourcet[s] += -dp_dtau[0] * smearedPosition[s];
                 Source->sourcex[s] += -dp_dtau[1] * smearedPosition[s];
