@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <cmath>
+#include <stdlib.h>
 
 #include "../include/EquationOfState.h"
 #include "../include/DynamicalVariables.h"
@@ -34,7 +35,7 @@ void jetParton::updatePosition(double dtau)
 }
 
 
-void jetParton::energyLoss(int nx, int ny, int nz, double t, double dt, double dx, double dy, double dz, double *ut, double* ux, double *uy, double* un, double *e, double *rhob)
+void jetParton::energyLoss(int nx, int ny, int nz, double t, double dt, double dx, double dy, double dz, double *ut, double* ux, double *uy, double* un, double *e, double *rhob, int energyLossType)
 {
 
   int ncx = nx + 4;
@@ -65,11 +66,32 @@ void jetParton::energyLoss(int nx, int ny, int nz, double t, double dt, double d
       double temp = effectiveTemperature(e[s],rhob[s]);
       double chem = chemicalPotentialOverT(e[s],rhob[s]) * temp;
       
-      //double ehat = 1./3./(1./4./M_PI) * temp * temp; // L. Yan et al
-      
-      double ehat = qHatCFT(temp) / 4. / temp; // H. Liu et al
-      
-      // double ehat = qHat(temp, chem) / 4. / temp; // R. Rougemont et al
+      double ehat = 0.0;
+    
+      switch (energyLossType) {
+          case 0: {
+              break;
+          }
+          case 1: {
+              ehat = 1./3./(1./4./M_PI) * temp * temp; // L. Yan et al
+              break;
+          }
+          case 2: {
+              ehat = qHatCFT(temp) / 4. / temp; // H. Liu et al
+              break;
+          }
+          case 3: {
+              ehat = qHat(temp, chem) / 4. / temp; // R. Rougemont et al
+              break;
+          }
+          //case 4: {
+          //    ehat = baryonDiffusionCoefficientHydroPlus(T, rhob, alphaB, e, p, seq);
+          //    break;
+          //}
+          default: {
+              exit(-1);
+          }
+      }
       
       dp_dtau[0] = (-1.0) * ehat * momentum[0] / mass / t;
       dp_dtau[1] = (-1.0) * ehat * momentum[1] / mass / t;

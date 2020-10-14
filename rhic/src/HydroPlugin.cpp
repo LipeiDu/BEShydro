@@ -147,7 +147,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   //************************************************************************************\
   //* Jet initialization
   //************************************************************************************/
-  
+    
+  int energyLossType = hydro->energyLossType;
+  double initialPartionPositionX = hydro->initialPartionPositionX;
+  double initialPartonMomentumX = hydro->initialPartonMomentumX;
+    
   jetParton parton, parton1;
 
 #ifdef JET
@@ -166,19 +170,20 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     // initialize jet at center of coordinate grid with momenta along y direction
     parton.mass = 1;
     parton.position[0] = t0; //same as hydro start time
-    parton.position[1] = 1.0;
+    parton.position[1] = initialPartionPositionX;
     parton.momentum[0] = 1.0; //nonzero p^tau
-    parton.momentum[1] = 1.0; //nonzero p^x
+    parton.momentum[1] = initialPartonMomentumX; //nonzero p^x
       
-    parton1.mass = 1;
-    parton1.position[0] = t0; //same as hydro start time
-    parton1.position[1] = 1.0;
-    parton1.momentum[0] = 1.0; //nonzero p^tau
-    parton1.momentum[1] = 1.0; //nonzero p^x
+    //parton1.mass = 1;
+    //parton1.position[0] = t0; //same as hydro start time
+    //parton1.position[1] = 1.0;
+    //parton1.momentum[0] = 1.0; //nonzero p^tau
+    //parton1.momentum[1] = 1.0; //nonzero p^x
       
     //declare a jet parton instance
-    printf("initializing jet parton at (%f,%f,%f,%f) with momentum (%f,%f,%f,%f) \n",parton.position[0],parton.position[1],parton.position[2],parton.position[3],parton.momentum[0],parton.momentum[1],parton.momentum[2],parton.momentum[3]);
+    printf("initializing jet parton at (%.2f,%.2f,%.2f,%.2f) with momentum (%.2f,%.2f,%.2f,%.2f) \n",parton.position[0],parton.position[1],parton.position[2],parton.position[3],parton.momentum[0],parton.momentum[1],parton.momentum[2],parton.momentum[3]);
     //printf("initializing jet parton2 at (%f,%f,%f,%f) with momentum (%f,%f,%f,%f) \n",parton1.position[0],parton1.position[1],parton1.position[2],parton1.position[3],parton1.momentum[0],parton1.momentum[1],parton1.momentum[2],parton1.momentum[3]);
+    printf("energy loss type is %d \n", energyLossType);
 #endif
 
   //************************************************************************************\
@@ -339,17 +344,20 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     //*  JET evolution
     //=======================================================
 #ifdef JET
-      //set source terms 0
-      zeroSource(latticeParams, initCondParams);
-        
-      //get the local fluid velocity and energy density/temperature and evolve jet momentum
-      parton.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob);
-      //parton1.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob);
-        
-      //set hydro source terms
-      setDynamicalSources(latticeParams, initCondParams, parton.dp_dtau, parton.position);
-      //setDynamicalSources(latticeParams, initCondParams, parton1.dp_dtau, parton1.position);
-        
+      if(energyLossType!=0){
+          
+          //set source terms 0
+          zeroSource(latticeParams, initCondParams);
+
+          //get the local fluid velocity and energy density/temperature and evolve jet momentum
+          parton.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob, energyLossType);
+          //parton1.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob);
+
+          //set hydro source terms
+          setDynamicalSources(latticeParams, initCondParams, parton.dp_dtau, parton.position);
+          //setDynamicalSources(latticeParams, initCondParams, parton1.dp_dtau, parton1.position);
+      }
+      
       //evolve the jet parton position
       parton.updatePosition(dt);
       //parton1.updatePosition(dt);
