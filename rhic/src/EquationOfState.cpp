@@ -307,9 +307,9 @@ PRECISION chemicalPotentialOverT(PRECISION e, PRECISION rhob){
 #ifndef CONFORMAL_EOS
     return primaryVariablesEOS(e, rhob, EOState->alphab)*HBARC;
 #else
-    //return primaryVariablesConformalEOS(e, rhob, EOState->alphab)*HBARC;
+    return primaryVariablesConformalEOS(e, rhob, EOState->alphab)*HBARC;
     
-    return EOS_ALPHA;
+    //return EOS_ALPHA;
 #endif
 #endif
 }
@@ -397,9 +397,9 @@ PRECISION effectiveTemperature(PRECISION e, PRECISION rhob) {
 #ifndef CONFORMAL_EOS
     return primaryVariablesEOS(e, fabs(rhob), EOState->Temperature);
 #else
-    //return primaryVariablesConformalEOS(e, fabs(rhob), EOState->Temperature);
+    return primaryVariablesConformalEOS(e, fabs(rhob), EOState->Temperature);
     
-    return powf(e/EOS_FACTOR, 0.25);
+    //return powf(e/EOS_FACTOR, 0.25);
 #endif
 #endif
 }
@@ -550,11 +550,11 @@ void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __r
     PRECISION e0 = e*HBARC;
     PRECISION rhob0 = rhob;
     
-    PrimaryVariables[0] = e/3;
-    PrimaryVariables[1] = powf(e/EOS_FACTOR, 0.25);
-    PrimaryVariables[2] = EOS_ALPHA;
+    PrimaryVariables[0] = e/3.;
+    /*PrimaryVariables[1] = powf(e/EOS_FACTOR, 0.25);
+    PrimaryVariables[2] = EOS_ALPHA;*/
     
-    /*if((0<=e0) && (e0<0.0036))
+    if((0<=e0) && (e0<0.0036))
     {
         if((0<=rhob0) && (rhob0<=0.0249)){//zone 1
             PrimaryVariables[1] = InferredPrimaryVariable(e0, rhob0, 0.0, 0.0003, 500, 0.00005, 0, EOState->Temperature)/HBARC;
@@ -630,7 +630,7 @@ void getPrimaryVariablesCombo(PRECISION e, PRECISION rhob, PRECISION * const __r
             PrimaryVariables[1] = InferredPrimaryVariable(e0, 39.8, 219.355, 10, 200, 0.2, 148580, EOState->Temperature)/HBARC;
             PrimaryVariables[2] = InferredPrimaryVariable(e0, 39.8, 219.355, 10, 200, 0.2, 148580, EOState->alphab);
         }
-    }*/
+    }
 #endif
 #endif
 }

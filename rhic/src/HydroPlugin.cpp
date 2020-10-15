@@ -11,6 +11,7 @@
 #include <vector>
 
 //for cornelius and writing freezeout file
+#include <sstream>
 #include <fstream>
 #include "FreezeOut.cpp"
 #include "Memory.cpp"
@@ -33,7 +34,7 @@
 #include "../include/HydroAnalysis.h"
 
 #define FREQ 50 //write output to file every FREQ timesteps
-#define FOFREQ 1 //call freezeout surface finder every FOFREQ timesteps
+#define FOFREQ 2 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
 
 /**************************************************************************************************************************************************/
@@ -64,7 +65,7 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   #ifdef PI
   output(q->Pi, t, outputDir, "Pi", latticeParams);
   #endif
-  //output(T, t, outputDir, "T", latticeParams);
+  output(T, t, outputDir, "T", latticeParams);
   #ifdef NBMU
   output(rhob, t, outputDir, "rhob", latticeParams);
   //output(alphaB, t, outputDir, "alphaB", latticeParams);
@@ -235,8 +236,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   hyperCube3D = calloc3dArray(hyperCube3D, 2, 2, 2);
 
   //open the freezeout surface file
+  string fzdir = outputDir;
+  fzdir += "/surface.dat";
+  
   ofstream freezeoutSurfaceFile;
-  freezeoutSurfaceFile.open("output/surface.dat");
+  freezeoutSurfaceFile.open(fzdir.c_str());
 
   //************************************************************************************\
   //* Fluid dynamics initialization
