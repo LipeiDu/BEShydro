@@ -155,6 +155,14 @@ void baryonDiffusionCoefficient(PRECISION T, PRECISION muB, PRECISION * const __
 /* jet-medium paramemters
 /**************************************************************************************************************************************************/
 
+// conformal A. Ficnar et al 1311.6160, fac taken from 1507.06556
+PRECISION eHatCFT(PRECISION T, PRECISION x){
+    
+    PRECISION fac = 4.387;//pi/2*sqrt(lambda_t)
+    
+    return fac * T * T * (1 + M_PI * T * x) * (1 + M_PI * T * x);
+}
+
 // conformal arXiv:hep-ph/0605178, fac taken from 1507.06556
 PRECISION qHatCFT(PRECISION T){
     

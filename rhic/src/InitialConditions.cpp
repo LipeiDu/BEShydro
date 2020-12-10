@@ -1298,12 +1298,21 @@ void setIdealGubserInitialCondition(void * latticeParams, void * initCondParams,
 
                 // T, e, and p with conformal EoS
                 
-                double C = 3.23512;
+                // (I) larger mu/T = 0.4
+                //double C = 3.23512;
+                //double T = (C/t0) * pow(2*L*t0, 0.6666666666666667)/pow((1 + 2*L*L*(t0*t0 + r*r) + pow(L,4)*pow((t0*t0 - r*r),2)),0.3333333333333333);
+                
+                //e[s] = (PRECISION) (13.9664 * pow(T,4));
+                //p[s] = e[s]/3.0;
+                //rhob[s] = (PRECISION) (0.111311 * pow(T,3));
+                
+                // (II) smaller mu/T = 0.2, T0=200 MeV
+                double C = 1.74872;
                 double T = (C/t0) * pow(2*L*t0, 0.6666666666666667)/pow((1 + 2*L*L*(t0*t0 + r*r) + pow(L,4)*pow((t0*t0 - r*r),2)),0.3333333333333333);
                 
                 e[s] = (PRECISION) (13.9164 * pow(T,4));
                 p[s] = e[s]/3.0;
-                rhob[s] = (PRECISION) (EOS_ALPHA * 0.277903 * pow(T,3));
+                rhob[s] = (PRECISION) (0.0555806 * pow(T,3));
                 
                 // Gubser flow profiles
                 

@@ -35,7 +35,7 @@ void jetParton::updatePosition(double dtau)
 }
 
 
-void jetParton::energyLoss(int nx, int ny, int nz, double t, double dt, double dx, double dy, double dz, double *ut, double* ux, double *uy, double* un, double *e, double *rhob, int energyLossType)
+void jetParton::energyLoss(int nx, int ny, int nz, double t, double dt, double dx, double dy, double dz, double *ut, double* ux, double *uy, double* un, double *e, double *rhob, int energyLossType, double initialPartionPositionX)
 {
 
   int ncx = nx + 4;
@@ -66,6 +66,7 @@ void jetParton::energyLoss(int nx, int ny, int nz, double t, double dt, double d
       double temp = effectiveTemperature(e[s],rhob[s]);
       double chem = chemicalPotentialOverT(e[s],rhob[s]) * temp;
       
+      // note: ehat is always positive, in dp_dtau a minus sign is added
       double ehat = 0.0;
     
       switch (energyLossType) {
@@ -84,10 +85,11 @@ void jetParton::energyLoss(int nx, int ny, int nz, double t, double dt, double d
               ehat = qHat(temp, chem) / 4. / temp; // R. Rougemont et al
               break;
           }
-          //case 4: {
-          //    ehat = baryonDiffusionCoefficientHydroPlus(T, rhob, alphaB, e, p, seq);
-          //    break;
-          //}
+          case 4: {
+              double delta_x = fabs(position[1] - initialPartionPositionX);
+              ehat = eHatCFT(temp, delta_x);
+              break;
+          }
           default: {
               exit(-1);
           }

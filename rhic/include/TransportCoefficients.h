@@ -46,6 +46,7 @@ void getqhatTable();
 
 PRECISION qHat(PRECISION T, PRECISION muB);
 PRECISION qHatCFT(PRECISION T);
+PRECISION eHatCFT(PRECISION T, PRECISION x);
 
 
 #endif /* TransportCoefficients_hpp */

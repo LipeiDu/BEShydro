@@ -354,7 +354,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
           zeroSource(latticeParams, initCondParams);
 
           //get the local fluid velocity and energy density/temperature and evolve jet momentum
-          parton.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob, energyLossType);
+          parton.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob, energyLossType, initialPartionPositionX);
           //parton1.energyLoss(nx, ny, nz, t, dt, dx, dy, dz, u->ut, u->ux, u->uy, u->un, e, rhob);
 
           //set hydro source terms
