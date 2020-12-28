@@ -285,14 +285,15 @@ void testCorreLength(){
     char EOStable1[] = "output/correL.dat";
     ofstream eos_table1(EOStable1);
 
-    for(int i = 0; i < 101; ++i) {
+    for(int i = 0; i < 151; ++i) {
         for(int j = 0; j < 86; ++j){
 
-            PRECISION Ttest = (0.07 + i * 0.002)/HBARC;
+            PRECISION Ttest = (0.05 + i * 0.002)/HBARC;
             PRECISION muBtest = (0.11 + j * 0.002)/HBARC;
 
             eos_table1 << setprecision(6) << setw(18) << Ttest*HBARC << setprecision(6) << setw(18) << muBtest*HBARC
-                       << setprecision(6) << setw(18) << correlationLength(Ttest, muBtest) << endl;
+                      // << setprecision(6) << setw(18) << correlationLength(Ttest, muBtest) << endl;
+                        << setprecision(6) << setw(18) << corrLen(Ttest, muBtest) << endl;
         }
     }
     

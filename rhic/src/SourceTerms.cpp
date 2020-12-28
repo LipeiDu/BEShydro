@@ -278,7 +278,8 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
 
     // correlation length returns 1.0 if CRITICAL is not defined.
     PRECISION muB = T * alphaB;
-    PRECISION corrL = correlationLength(T, muB);
+    //PRECISION corrL = correlationLength(T, muB);
+    PRECISION corrL = corrLen(T, muB);
 
 #ifdef VMU
     

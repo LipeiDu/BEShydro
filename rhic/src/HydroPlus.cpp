@@ -343,3 +343,40 @@ PRECISION correlationLength(PRECISION T, PRECISION muB){
     return 1.0;
 #endif
 }
+
+PRECISION corrLen(PRECISION T, PRECISION muB){
+
+    // T and mu in GeV
+    PRECISION T0 = T*HBARC;
+    PRECISION muB0 = muB*HBARC;
+    
+    // some parameters in the parametrization
+    PRECISION Tc = 0.16;
+    PRECISION muc = 0.2;
+    PRECISION delta_T = 0.4 * Tc;
+    PRECISION delta_mu = 0.2 * muc;
+    PRECISION A = 0.9;
+    PRECISION Alpha = 0.2; // angle between h and r axes
+    PRECISION xi_min = 1.0;
+    PRECISION xi_max = 3.0;
+    
+    // critical exponent
+    PRECISION nu = 2./3.;
+    
+    // rotation by angle Alpha
+    PRECISION Tp  = (muB0 - muc) * sin(Alpha) + (T0 - Tc) * cos(Alpha);
+    PRECISION mup = (muB0 - muc) * cos(Alpha) - (T0 - Tc) * sin(Alpha);
+    
+    // terms in the parameters
+    PRECISION xi_ratio = xi_min / xi_max;
+    PRECISION xi_ratio_nu = pow(xi_ratio, 2./nu);
+    
+    PRECISION mu2 = (mup / delta_mu) * (mup / delta_mu);
+    PRECISION T2  = (Tp / delta_T) * (Tp / delta_T);
+
+    PRECISION Tanh_term = tanh(mu2 + A * T2);
+    PRECISION Br_term = Tanh_term * (1 - xi_ratio_nu) + xi_ratio_nu;
+    
+    return xi0 / pow(Br_term, nu/2);
+    
+}
