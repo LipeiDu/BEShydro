@@ -433,6 +433,12 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         printf("pitt=%.3f,\t pitx=%.3f,\t pity=%.3f,\t pitn=%.3f\n", pitt, pitx, pity, pitn);
     }
     
+    if (isnan(*e)||isinf(*e)) {
+        printf("Error: e is nan or inf. Quit...\n");
+        exit (EXIT_FAILURE);
+    }
+            
+    
     *p = equilibriumPressure(*e, *rhob);
 
 	PRECISION P = *p + Pi;

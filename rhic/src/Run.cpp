@@ -31,7 +31,7 @@ void runHydro(void * latticeParams, void * initCondParams, void * hydroParams, c
 int main(int argc, char **argv) {
 
 #ifdef _OPENMP
-    int tid = omp_get_thread_num();
+    int tid = omp_get_max_threads();
     printf("Get %d threads...\n", tid);
     
     //clock

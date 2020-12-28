@@ -127,7 +127,7 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
     FILE *sourcefile;
     char fname[255];
     //sprintf(fname, "%s/%s%d.dat", rootDirectory, "input/dynamical-source/Sources",n);
-    sprintf(fname, "%s/%s%d.dat", rootDirectory, "../dynamical_results/3UrQMD_events/output3/output3/Sources",n);
+    sprintf(fname, "%s/%s%d.dat", rootDirectory, "input/DynamicalSources/Sources",n);
     sourcefile = fopen(fname, "r");
     
     double x, y, z;
@@ -140,9 +140,9 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
     {
       fseek(sourcefile,0L,SEEK_SET);
         
-      for(int i = 2; i < nx+2; ++i){
+      for(int k = 2; k < nz+2; ++k){
          for(int j = 2; j < ny+2; ++j){
-             for(int k = 2; k < nz+2; ++k){
+             for(int i = 2; i < nx+2; ++i){
                int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                fscanf(sourcefile,"%le %le %le %le %le %le %le %le\n", &x, &y, &z, & Source->sourcet[s], & Source->sourcex[s], & Source->sourcey[s], & Source->sourcen[s], & Source->sourceb[s]);
              }
@@ -157,7 +157,8 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
 #else
     
 	char fname[255];
-	sprintf(fname, "%s/%s%d.h5", rootDirectory, "../part2s/sourceTerms/output/Sources",n);
+	//sprintf(fname, "%s/%s%d.h5", rootDirectory, "../part2s/sourceTerms/output/Sources",n);
+	sprintf(fname, "%s/%s%d.h5", rootDirectory, "input/DynamicalSources/Sources",n);
 	//sourcefile = fopen(fname, "r");
 
 	H5::H5File file( fname, H5F_ACC_RDONLY );
@@ -175,9 +176,9 @@ void readInSource(int n, void * latticeParams, void * initCondParams, void * hyd
 	dataset.read( Sall, H5::PredType::NATIVE_FLOAT, dataspace);
 
 	//split this array into corresponding source terms
-	for(int i = 2; i < nx+2; ++i){
+	for(int k = 2; k < nz+2; ++k){
 		for(int j = 2; j < ny+2; ++j){
-			for(int k = 2; k < nz+2; ++k){
+			for(int i = 2; i < nx+2; ++i){
                 
                 //this index runs over grid with ghost cells
 				int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
