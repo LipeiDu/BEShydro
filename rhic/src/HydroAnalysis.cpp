@@ -192,7 +192,7 @@ void outputBaryonCP(double t, const char *pathToOutDir, void * latticeParams)
     }
 }
 
-void outputAnalysisa(int n, double t, FILE *fpan, void * latticeParams)
+void outputAnalysisa(int n, double t, FILE *fpan1, FILE *fpan2, void * latticeParams)
 {
     
     struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
@@ -234,11 +234,13 @@ void outputAnalysisa(int n, double t, FILE *fpan, void * latticeParams)
             }
         }
         
-        fprintf(fpan, "%.8f\t",t);
+        fprintf(fpan1, "%.8f\t",t);
         for(int l = 0; l < dnz; ++l){
-            fprintf(fpan, "%.8f\t%.8f\t%.8f\t",zv[l],muBv[l],Tv[l]);
+            fprintf(fpan1, "%.8f\t",zv[l]);
+            fprintf(fpan2, "%.8f\t%.8f\t",muBv[l],Tv[l]);
         }
-        fprintf(fpan, "\n");
+        fprintf(fpan1, "\n");
+        fprintf(fpan2, "\n");
     }
 }
 

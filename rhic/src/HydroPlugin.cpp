@@ -219,8 +219,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   hyperCube3D = calloc3dArray(hyperCube3D, 2, 2, 2);
 
   //open the freezeout surface file
+  string fzdir = outputDir;
+  fzdir += "/surface.dat";
+  
   ofstream freezeoutSurfaceFile;
-  freezeoutSurfaceFile.open("output/surface.dat");
+  freezeoutSurfaceFile.open(fzdir.c_str());
 
   //************************************************************************************\
   //* Fluid dynamics initialization
@@ -252,8 +255,13 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
 
   int accumulator1 = 0;
   int accumulator2 = 0;
-    
-  FILE *fpan = fopen("output/AnalysisData.dat", "w");
+  
+  FILE *fpan1, *fpan2;
+  char fname1[255], fname2[255];
+  sprintf(fname1, "%s/AnalysisData1.dat", outputDir);
+  sprintf(fname2, "%s/AnalysisData2.dat", outputDir);
+  fpan1=fopen(fname1, "w");
+  fpan2=fopen(fname2, "w");
     
   //************************************************************************************\
   //* loop over time steps
@@ -264,7 +272,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   for (int n = 1; n <= nt+1; ++n)
   {
     
-    outputAnalysisa(n, t, fpan, latticeParams);
+    outputAnalysisa(n, t, fpan1, fpan2, latticeParams);
     //outputBaryonCP(t, outputDir, latticeParams);
       
     // copy variables back to host and write to disk
@@ -366,7 +374,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     
   printf("Average time/step: %.3f ms\n",totalTime/((double)nsteps));
     
-  fclose(fpan);
+  fclose(fpan1);
+  fclose(fpan2);
   //************************************************************************************\
   //* Deallocate memory
   //************************************************************************************/

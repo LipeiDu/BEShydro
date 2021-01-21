@@ -12,7 +12,7 @@ void testBaryCoeff();
 void testHydroPlus();
 void testCorreLength();
 
-void outputAnalysisa(int n, double t, FILE *fpan, void * latticeParams);
+void outputAnalysisa(int n, double t, FILE *fpan1, FILE *fpan2, void * latticeParams);
 void outputHydroPlus(double t, const char *pathToOutDir, void * latticeParams);
 void outputBaryonCP(double t, const char *pathToOutDir, void * latticeParams);
 

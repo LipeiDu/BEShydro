@@ -1,5 +1,5 @@
 DIR_MAIN       = ./
-DIR_SRC        = $(DIR_MAIN)rhic
+DIR_SRC        = $(DIR_MAIN)rhic/src
 DIR_H          = $(DIR_MAIN)include/
 DIR_BUILD      = $(DIR_MAIN)build/
 DIR_OBJ        = $(DIR_BUILD)rhic
@@ -7,26 +7,26 @@ DIR_OBJ        = $(DIR_BUILD)rhic
 DEBUG =
 OPTIMIZATION = -O5  
 FLOWTRACE =
-OPTIONS =
+OPTIONS = --keep
 LINK_OPTIONS = -link -L/home/du.458/libconfig/lib/.libs -lconfig -L/home/du.458/googletest/googletest/mybuild/ -lgtest
 CFLAGS = $(DEBUG) $(OPTIMIZATION) $(FLOWTRACE) $(OPTIONS)
-COMPILER = nvcc
-LIBS = -lm -lgsl -lgslcblas -lconfig -lgtest
-INCLUDES = -I rhic/rhic-core/src/include -I rhic/rhic-harness/src/main/include -I rhic/rhic-trunk/src/include -I rhic/rhic-harness/src/include -I /home/du.458/libconfig/lib/ -I /home/du.458/googletest/googletest/include/ -I freezeout -I jet
+COMPILER = nvcc 
+LIBS = -lm -lgsl -lgslcblas -lconfig -lgtest -lhdf5 -lhdf5_cpp
+INCLUDES = -I rhic/include -I /home/du.458/libconfig/lib/ -I /home/du.458/googletest/googletest/include/ -I rhic/freezeout
 
 CPP := $(shell find $(DIR_SRC) -name '*.cpp')
 CPP_OBJ  = $(CPP:$(DIR_SRC)%.cpp=$(DIR_OBJ)%.o)
 OBJ = $(CPP_OBJ) 
 
 EXE =\
-cpu-vh
+beshydro
 
 $(EXE): $(OBJ)
 	echo "Linking:   $@ ($(COMPILER))"
 	$(COMPILER) $(LINK_OPTIONS) -o $@ $^ $(LIBS) $(INCLUDES)
 
 $(DIR_OBJ)%.o: $(DIR_SRC)%.cpp
-	       @[ -d $(DIR_OBJ) ] || find rhic/rhic-core rhic/rhic-harness rhic/rhic-trunk -type d -exec mkdir -p ./build/{} \;
+	       @[ -d $(DIR_OBJ) ] || find rhic/ -type d -exec mkdir -p ./build/{} \;
 	       @echo "Compiling: $< ($(COMPILER))"
 	       $(COMPILER) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
