@@ -32,7 +32,7 @@
 #include "../include/DynamicalSources.h"
 #include "../include/HydroAnalysis.h"
 
-#define FREQ 200 //write output to file every FREQ timesteps
+#define FREQ 100 //write output to file every FREQ timesteps
 #define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
 #define JET 0 // 0 to turn off jet evolution, 1 to turn it on
@@ -120,6 +120,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   double dz = lattice->latticeSpacingRapidity;
   double e0 = initCond->initialEnergyDensity;
     
+  double Tc = hydro->Tc;
+  double muc = hydro->muc;
+    
   int initialConditionType = initCond->initialConditionType;
   int numberOfSourceFiles = initCond->numberOfSourceFiles;
 
@@ -145,7 +148,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   getBaryonDiffusionCoefficientTable();
   // read in the parameterized correlation length xi(T, muB)
   getCorrelationLengthTable();
-  //testCorreLength();
+  //testCorreLength(Tc, muc);
 
   //************************************************************************************\
   //* Jet initialization

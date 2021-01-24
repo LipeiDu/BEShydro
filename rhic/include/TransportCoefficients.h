@@ -23,7 +23,7 @@ PRECISION bulkViscosityToEntropyDensity(PRECISION T);
 
 // baryon transport coefficients
 
-const PRECISION delta_nn = 1.0;
+const PRECISION delta_nn = 1.0;//0.;//
 const PRECISION lambda_nn = 0.;//0.6;
 const PRECISION tau_nw = 0.;//1.0;// coupling between baryon diffusion and vorticity
 

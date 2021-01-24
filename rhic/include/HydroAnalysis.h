@@ -10,7 +10,7 @@
 void testEOS();
 void testBaryCoeff();
 void testHydroPlus();
-void testCorreLength();
+void testCorreLength(double Tc, double muc);
 
 void outputAnalysisa(int n, double t, FILE *fpan1, FILE *fpan2, void * latticeParams);
 void outputHydroPlus(double t, const char *pathToOutDir, void * latticeParams);

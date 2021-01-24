@@ -33,11 +33,18 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     
     struct HydroParameters * hydro = (struct HydroParameters *) hydroParams;
     
+    // specific viscosity
     PRECISION etabar = (PRECISION)(hydro->shearViscosityToEntropyDensity);
+    
+    // baryon diffusion
     PRECISION Cb = (PRECISION)(hydro->cB);
     int kappaType = hydro->kappaType;
     int gradientType = hydro->gradientType;
+    
     int criticalSlowingDown = hydro->criticalSlowingDown;
+    PRECISION Tc = (PRECISION)(hydro->Tc);
+    PRECISION muc = (PRECISION)(hydro->muc);
+    int criticalRelaxationTime = hydro->criticalRelaxationTime;
     
     /*******************************************************************************/
     /* Sec. I basic elements
@@ -65,7 +72,7 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     
     // baryon diffusion
     PRECISION tau_n = Cb/T;//9.0/4.0/rhob;//
-    PRECISION taunInv = 1/tau_n;
+    PRECISION taunInv = 1/(tau_n+1.e-15);
     PRECISION kappaB = 0.0;
     
     switch (kappaType) {
@@ -276,10 +283,15 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
 	PRECISION dPi = -beta_Pi*theta - Pi*tauPiInv - I_Pi;
 #endif
 
+    //*********************************************************\
+    //* correlation length
+    //*********************************************************\
+    
     // correlation length returns 1.0 if CRITICAL is not defined.
     PRECISION muB = T * alphaB;
     //PRECISION corrL = correlationLength(T, muB);
-    PRECISION corrL = corrLen(T, muB);
+    PRECISION corrL = corrLen(T, muB, Tc, muc);
+    PRECISION corrL2 = corrL * corrL;
 
 #ifdef VMU
     
@@ -324,9 +336,13 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     PRECISION chib = chiB(e, rhob+1.e-5);
     
     if(criticalSlowingDown){
-        chib = chib * corrL * corrL;
+        
+        chib = chib * corrL2;
         kappaB = kappaB * corrL;
-        taunInv = taunInv / corrL;
+        
+        if(criticalRelaxationTime){
+            taunInv = taunInv / corrL2;
+        }
     }
     
     switch (gradientType) {
@@ -335,7 +351,7 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
         }
         case 1: { // gradient of rhob + T
             PRECISION facn = 1/(T+1.e-5)/(chib/pow(HBARC,2)+1.e-5);
-            PRECISION facT = 1/(T+1.e-5)/(rhob+1.e-5) * (dPdT(e, rhob) - (e+p)/T);
+            PRECISION facT = 1/(T+1.e-5)/(rhob+1.e-5) * (dPdT(e, rhob) - (e+p)/(T+1.e-5));
             
             Nablat_alphaB = facn * Nablat_rhob + facT * Nablat_T;
             Nablax_alphaB = facn * Nablax_rhob + facT * Nablax_T;
@@ -353,7 +369,7 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
             break;
         }
         case 3: { // gradeint of T
-            PRECISION facT = 1/(T+1.e-5)/(rhob+1.e-5) * (dPdT(e, rhob) - (e+p)/T);
+            PRECISION facT = 1/(T+1.e-5)/(rhob+1.e-5) * (dPdT(e, rhob) - (e+p)/(T+1.e-5));
             
             Nablat_alphaB = facT * Nablat_T;
             Nablax_alphaB = facT * Nablax_T;
@@ -377,7 +393,6 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     //* for the slow modes from Hydro+
     //*********************************************************/
 
-    PRECISION corrL2 = corrL * corrL;
     PRECISION gammaPhi = relaxationCoefficientPhi(rhob, seq, T, corrL2);
 #endif
     

@@ -27,7 +27,7 @@
 
 #define HBARC 0.197326938
 #define zFREQ 25
-#define tFREQ 50
+#define tFREQ 10
 
 using namespace std;
 
@@ -282,20 +282,20 @@ void testEOS(){
     printf("EOS table is reproduced.\n");
 }
 
-void testCorreLength(){
+void testCorreLength(double Tc, double muc){
 
     char EOStable1[] = "output/correL.dat";
     ofstream eos_table1(EOStable1);
 
-    for(int i = 0; i < 151; ++i) {
-        for(int j = 0; j < 86; ++j){
+    for(int i = 0; i < 51; ++i) {
+        for(int j = 0; j < 75; ++j){
 
-            PRECISION Ttest = (0.05 + i * 0.002)/HBARC;
-            PRECISION muBtest = (0.11 + j * 0.002)/HBARC;
+            PRECISION Ttest = (0.1 + i * 0.002)/HBARC;
+            PRECISION muBtest = (0.35 + j * 0.002)/HBARC;
 
             eos_table1 << setprecision(6) << setw(18) << Ttest*HBARC << setprecision(6) << setw(18) << muBtest*HBARC
                       // << setprecision(6) << setw(18) << correlationLength(Ttest, muBtest) << endl;
-                        << setprecision(6) << setw(18) << corrLen(Ttest, muBtest) << endl;
+                        << setprecision(6) << setw(18) << corrLen(Ttest, muBtest, Tc, muc) << endl;
         }
     }
     

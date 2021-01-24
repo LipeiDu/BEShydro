@@ -16,6 +16,9 @@ int kappaType;
 int gradientType;
 int criticalSlowingDown;
 double cB;
+double Tc;
+double muc;
+int criticalRelaxationTime;
 
 void loadHydroParameters(config_t *cfg, const char* configDirectory, void * params) {
 	// Read the file
@@ -38,6 +41,9 @@ void loadHydroParameters(config_t *cfg, const char* configDirectory, void * para
     
     getIntegerProperty(cfg, "criticalSlowingDown", &criticalSlowingDown, 0);
     getDoubleProperty(cfg, "cB", &cB, 0.2);
+    getDoubleProperty(cfg, "Tc", &Tc, 0.138);
+    getDoubleProperty(cfg, "muc", &muc, 0.42);
+    getIntegerProperty(cfg, "criticalRelaxationTime", &criticalRelaxationTime, 1);
 
 	struct HydroParameters * hydro = (struct HydroParameters *) params;
 	hydro->initialProperTimePoint = initialProperTimePoint;
@@ -49,4 +55,7 @@ void loadHydroParameters(config_t *cfg, const char* configDirectory, void * para
     hydro->gradientType = gradientType;
     hydro->criticalSlowingDown = criticalSlowingDown;
     hydro->cB = cB;
+    hydro->Tc = Tc;
+    hydro->muc = muc;
+    hydro->criticalRelaxationTime = criticalRelaxationTime;
 }
