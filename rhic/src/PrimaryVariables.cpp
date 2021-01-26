@@ -13,7 +13,7 @@
 #include "../include/EquationOfState.h"
 #include "../include/HydroPlus.h"
 
-#define MAX_ITERS 100
+#define MAX_ITERS 1000
 
 #define Method_Newton
 
@@ -507,6 +507,19 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         *uy = u0 * M2/(M0 + P);
         *un = u0 * M3/(M0 + P);
     }
+    
+    //what should we do when solution for flow velocity is too large?
+	//MUSIC has revert_grid in this case...
+	if ( *ut > 1.0e2 )
+	{
+		printf("\n found ut = %f in getInferredVariables\n", *ut);
+		printf("M0 = %.9f , e = %.9f, p = %.9f, Pi = %.9f\n", M0, *e, *p, Pi);
+		printf("***REGULATING FLOW VELOCITY FOR THIS CELL! (ut -> 1.0, ui -> 0.0)*** \n");
+		*ut = 1.0;
+		*ux = 0.0;
+		*uy = 0.0;
+		*un = 0.0;
+	}
     
     *T = effectiveTemperature(*e, *rhob);
     *alphaB = chemicalPotentialOverT(*e, *rhob);

@@ -30,6 +30,9 @@ struct InitialConditionParameters
     double bRapidityVariance2;
     double bRapidityMean;
     double bNorm;
+    
+    double energyCutOff;
+    double baryonCutOff;
 };
 
 void loadInitialConditionParameters(config_t *cfg, const char* configDirectory, void * params);

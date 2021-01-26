@@ -784,6 +784,9 @@ void setBaryonDiffusionCPInitialCondition(void * latticeParams, void * initCondP
     double e0 = initCond->initialEnergyDensity;
     double rhob0 = initCond->initialBaryonDensity;
     double bNorm = initCond->bNorm;
+    
+    double energyCutOff = initCond->energyCutOff;
+    double baryonCutOff = initCond->baryonCutOff;
 
     double eL[nz];
     double rhoLa[nz], rhoLb[nz];
@@ -804,8 +807,8 @@ void setBaryonDiffusionCPInitialCondition(void * latticeParams, void * initCondP
                     rhoLb[k-2] = (exp(-(-eta-etaMean)*(-eta-etaMean)/(2*etaVariance1*etaVariance1))*THETA_FUNCTION(-eta-etaMean+1.e-2) + exp(-(-eta-etaMean)*(-eta-etaMean)/(2*etaVariance2*etaVariance2))*THETA_FUNCTION(etaMean+eta-1.e-2));
                     
                     
-                    e[s] = (PRECISION) e0 / t0 * (eL[k-2] + 1.e-15);
-                    rhob[s] = (PRECISION) rhob0 / t0 * (bNorm * (rhoLa[k-2] + rhoLb[k-2]) + 1.e-15);
+                    e[s] = (PRECISION) e0 / t0 * eL[k-2] + energyCutOff;
+                    rhob[s] = (PRECISION) bNorm * rhob0 / t0 * (rhoLa[k-2] + rhoLb[k-2]) + baryonCutOff;
                     p[s] = equilibriumPressure(e[s], rhob[s]);
                 }
             }

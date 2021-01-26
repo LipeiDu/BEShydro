@@ -346,20 +346,31 @@ PRECISION correlationLength(PRECISION T, PRECISION muB){
 
 PRECISION corrLen(PRECISION T, PRECISION muB, PRECISION T_C, PRECISION MU_C){
 
-    // T0 and mu0 in GeV
-    PRECISION T0 = T*HBARC;
-    PRECISION muB0 = muB*HBARC;
+    // T and mu in GeV
+    PRECISION T_GeV = T*HBARC;
+    PRECISION muB_GeV = muB*HBARC;
     
-    PRECISION pi = 3.14159265359;
-
     // some parameters in the parametrization
     
-    PRECISION delta_T = 0.02;
-    PRECISION delta_mu = 0.065;
+//     PRECISION pi = 3.14159265359;
+    
+//     PRECISION delta_T = 0.02;
+//     PRECISION delta_mu = 0.065;
+    
+//     PRECISION Alpha = 4.6 * (pi / 180); // angle between h and r axes
+    
+    
+    PRECISION T0 = 0.155;
+    PRECISION k2 = 0.0149;
+    PRECISION Alpha = atan(2*k2*MU_C/T0);
+    
+    T_C = T0 - k2 * T0 * (MU_C/T0)*(MU_C/T0);
     
     PRECISION A = 0.25;
+    PRECISION fac = pow((sin(Alpha)/sin(0.0524)),1.5);
     
-    PRECISION Alpha = 4.6 * (pi / 180); // angle between h and r axes
+    PRECISION delta_T = T_C * sin(Alpha)/cos(Alpha) * fac;
+    PRECISION delta_mu = A * T_C * cos(Alpha) * fac;
     
     PRECISION xi_min = 1.0;
     PRECISION xi_max = 3.0;
@@ -368,8 +379,8 @@ PRECISION corrLen(PRECISION T, PRECISION muB, PRECISION T_C, PRECISION MU_C){
     PRECISION nu = 2./3.;
 
     // rotation by angle Alpha
-    PRECISION Tp  = (muB0 - MU_C) * sin(Alpha) + (T0 - T_C) * cos(Alpha);
-    PRECISION mup = (muB0 - MU_C) * cos(Alpha) - (T0 - T_C) * sin(Alpha);
+    PRECISION Tp  = (muB_GeV - MU_C) * sin(Alpha) + (T_GeV - T_C) * cos(Alpha);
+    PRECISION mup = (muB_GeV - MU_C) * cos(Alpha) - (T_GeV - T_C) * sin(Alpha);
 
     // terms in the parameters
     PRECISION xi_ratio = xi_min / xi_max;

@@ -14,6 +14,9 @@ int numberOfSourceFiles;
 
 double initialBaryonDensity;
 double initialEnergyDensity;
+double energyCutOff;
+double baryonCutOff;
+
 double scatteringCrossSectionNN;
 double impactParameter;
 double fractionOfBinaryCollisions;
@@ -54,6 +57,9 @@ void loadInitialConditionParameters(config_t *cfg, const char* configDirectory, 
 	getDoubleProperty(cfg, "fractionOfBinaryCollisions", &fractionOfBinaryCollisions, 0.5);
 	getDoubleProperty(cfg, "rapidityVariance", &rapidityVariance, 0.5);
 	getDoubleProperty(cfg, "rapidityMean", &rapidityMean, 0.5);
+    
+    getDoubleProperty(cfg, "energyCutOff", &energyCutOff, 0.2);
+	getDoubleProperty(cfg, "baryonCutOff", &baryonCutOff, 0.1);
 
 	struct InitialConditionParameters * initCond = (struct InitialConditionParameters *) params;
 	initCond->initialConditionType = initialConditionType;
@@ -71,4 +77,6 @@ void loadInitialConditionParameters(config_t *cfg, const char* configDirectory, 
     initCond->bRapidityVariance2 = bRapidityVariance2;
     initCond->bRapidityMean = bRapidityMean;
     initCond->bNorm = bNorm;
+    initCond->energyCutOff = energyCutOff;
+    initCond->baryonCutOff = baryonCutOff;
 }
