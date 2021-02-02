@@ -13,6 +13,7 @@ FLOWTRACE =
 
 #OPTIONS = -fopenmp -march=native -fopt-info-vec #-funroll-loops #-static-libstdc++ # for g++ with vector info 
 #OPTIONS = -qopenmp -std=c++11 -lhdf5 -lhdf5_cpp # for icpc
+#OPTIONS = -fopenmp -march=native -std=c++11 -lhdf5 -lhdf5_cpp # for g++
 OPTIONS = -fopenmp -march=native -std=c++11 -lhdf5 -lhdf5_cpp # for g++
 
 

@@ -17,6 +17,10 @@
 #include "../include/HydroParameters.h"
 #include "../include/HydroPlugin.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 const char *version = "";
 const char *address = "";
 
@@ -25,6 +29,15 @@ void runHydro(void * latticeParams, void * initCondParams, void * hydroParams, c
 }
 
 int main(int argc, char **argv) {
+    
+#ifdef _OPENMP
+    int tid = omp_get_max_threads();
+    printf("Get %d threads...\n", tid);
+
+    //clock
+    double sec = 0.0;
+    sec = omp_get_wtime();
+#endif
 
 	struct CommandLineArguments cli;
 	struct LatticeParameters latticeParams;
@@ -82,6 +95,12 @@ int main(int argc, char **argv) {
 		runHydro(&latticeParams, &initCondParams, &hydroParams, rootDirectory, cli.outputDirectory);
 		printf("Done hydro.\n");
 	}
+    
+#ifdef _OPENMP
+    sec = omp_get_wtime() - sec;
+
+    printf("Hydro took %f seconds\n", sec);
+#endif
 
 	return 0;
 }

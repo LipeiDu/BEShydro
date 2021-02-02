@@ -14,6 +14,11 @@
 #include "../include/EquationOfState.h"
 #include "../include/HydroPlus.h"
 
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 /**************************************************************************************************************************************************/
 /* instances
 /**************************************************************************************************************************************************/
@@ -271,6 +276,11 @@ void setConservedVariables(double t, void * latticeParams) {
 	int nz = lattice->numLatticePointsRapidity;
 	int ncx = lattice->numComputationalLatticePointsX;
 	int ncy = lattice->numComputationalLatticePointsY;
+    
+#pragma omp parallel for collapse(3)
+#ifdef TILE
+#pragma unroll_and_jam
+#endif
 
 	for (int k = N_GHOST_CELLS_M; k < nz+N_GHOST_CELLS_M; ++k) {
 		for (int j = N_GHOST_CELLS_M; j < ny+N_GHOST_CELLS_M; ++j) {
@@ -421,6 +431,8 @@ void setGhostCellsKernelI(CONSERVED_VARIABLES * const __restrict__ q, PRECISION 
 	ncz = lattice->numComputationalLatticePointsRapidity;
 
 	int iBC,s,sBC;
+    
+#pragma omp parallel for
 	for(int j = 2; j < ncy; ++j) {
 		for(int k = 2; k < ncz; ++k) {
 			iBC = 2;
@@ -450,6 +462,8 @@ void setGhostCellsKernelJ(CONSERVED_VARIABLES * const __restrict__ q, PRECISION 
 	ncz = lattice->numComputationalLatticePointsRapidity;
 
 	int jBC,s,sBC;
+    
+#pragma omp parallel for
 	for(int i = 2; i < ncx; ++i) {
 		for(int k = 2; k < ncz; ++k) {
 			jBC = 2;
@@ -482,6 +496,8 @@ SLOW_MODES *  const __restrict__ eqPhiQ)
 	ncy = lattice->numComputationalLatticePointsY;
 
 	int kBC,s,sBC;
+    
+#pragma omp parallel for
 	for(int i = 2; i < ncx; ++i) {
 		for(int j = 2; j < ncy; ++j) {
 			kBC = 2;

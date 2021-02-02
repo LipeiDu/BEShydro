@@ -192,10 +192,11 @@ void outputBaryonCP(double t, const char *pathToOutDir, void * latticeParams)
     }
 }
 
-void outputAnalysisa(int n, double t, FILE *fpan1, FILE *fpan2, void * latticeParams)
+void outputAnalysisa(int n, double t, FILE *fpan1, FILE *fpan2, FILE *fpan3, void * latticeParams, void * hydroParams)
 {
     
     struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
+    struct HydroParameters * hydro = (struct HydroParameters *) hydroParams;
     
     int nx = lattice->numLatticePointsX;
     int ny = lattice->numLatticePointsY;
@@ -205,8 +206,12 @@ void outputAnalysisa(int n, double t, FILE *fpan1, FILE *fpan2, void * latticePa
     double dy = lattice->latticeSpacingY;
     double dz = lattice->latticeSpacingRapidity;
     
+    double xi_max = hydro->correlationLengthMax;
+    double muc = hydro->muc;
+    PRECISION Cb = (PRECISION)(hydro->cB);
+    
     int dnz = floor(nz/2/zFREQ) + 1;
-    double zv[dnz], Tv[dnz], muBv[dnz];
+    double zv[dnz], Tv[dnz], muBv[dnz], corrLv[dnz], kappaB[dnz], tau_n[dnz];
     
     if((n-1) % tFREQ == 0){
         
@@ -226,6 +231,12 @@ void outputAnalysisa(int n, double t, FILE *fpan1, FILE *fpan2, void * latticePa
                             zv[m] = z;
                             Tv[m] = T[s];
                             muBv[m] = T[s] * alphaB[s];
+                            
+                            corrLv[m] = corrLen(Tv[m], muBv[m], xi_max, muc);
+                            
+                            kappaB[m] = baryonDiffusionCoefficientKinetic(Cb, T[s], rhob[s], alphaB[s], e[s], p[s]);
+                            
+                            tau_n[m] = Cb/T[s];
                                                     
                             m++;
                         }
@@ -235,12 +246,15 @@ void outputAnalysisa(int n, double t, FILE *fpan1, FILE *fpan2, void * latticePa
         }
         
         fprintf(fpan1, "%.8f\t",t);
+        fprintf(fpan3, "%.8f\t",t);
         for(int l = 0; l < dnz; ++l){
             fprintf(fpan1, "%.8f\t",zv[l]);
             fprintf(fpan2, "%.8f\t%.8f\t",muBv[l],Tv[l]);
+            fprintf(fpan3, "%.8f\t%.8f\t%.8f\t",corrLv[l], kappaB[l], tau_n[l]);
         }
         fprintf(fpan1, "\n");
         fprintf(fpan2, "\n");
+        fprintf(fpan3, "\n");
     }
 }
 
@@ -282,7 +296,7 @@ void testEOS(){
     printf("EOS table is reproduced.\n");
 }
 
-void testCorreLength(double Tc, double muc){
+void testCorreLength(double xi_max, double muc){
 
     char EOStable1[] = "output/correL.dat";
     ofstream eos_table1(EOStable1);
@@ -295,7 +309,7 @@ void testCorreLength(double Tc, double muc){
 
             eos_table1 << setprecision(6) << setw(18) << Ttest*HBARC << setprecision(6) << setw(18) << muBtest*HBARC
                       // << setprecision(6) << setw(18) << correlationLength(Ttest, muBtest) << endl;
-                        << setprecision(6) << setw(18) << corrLen(Ttest, muBtest, Tc, muc) << endl;
+                        << setprecision(6) << setw(18) << corrLen(Ttest, muBtest, xi_max, muc) << endl;
         }
     }
     

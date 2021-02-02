@@ -130,9 +130,9 @@ void setInitialConditionSlowModes(void * latticeParams, void * hydroParams)
     }
 
     // initialization of slow mdoes at/out of equilibrium
-    for(int i = 2; i < nx+2; ++i) {
+    for(int k = 2; k < nz+2; ++k) {
         for(int j = 2; j < ny+2; ++j) {
-            for(int k = 2; k < nz+2; ++k) {
+            for(int i = 2; i < nx+2; ++i) {
                 
                 int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                 
@@ -344,7 +344,7 @@ PRECISION correlationLength(PRECISION T, PRECISION muB){
 #endif
 }
 
-PRECISION corrLen(PRECISION T, PRECISION muB, PRECISION T_C, PRECISION MU_C){
+PRECISION corrLen(PRECISION T, PRECISION muB, PRECISION xi_max, PRECISION MU_C){
 
     // T and mu in GeV
     PRECISION T_GeV = T*HBARC;
@@ -364,16 +364,16 @@ PRECISION corrLen(PRECISION T, PRECISION muB, PRECISION T_C, PRECISION MU_C){
     PRECISION k2 = 0.0149;
     PRECISION Alpha = atan(2*k2*MU_C/T0);
     
-    T_C = T0 - k2 * T0 * (MU_C/T0)*(MU_C/T0);
+    PRECISION T_C = T0 - k2 * T0 * (MU_C/T0)*(MU_C/T0);
     
-    PRECISION A = 0.25;
+    PRECISION A = 0.8;
     PRECISION fac = pow((sin(Alpha)/sin(0.0524)),1.5);
     
     PRECISION delta_T = T_C * sin(Alpha)/cos(Alpha) * fac;
     PRECISION delta_mu = A * T_C * cos(Alpha) * fac;
     
     PRECISION xi_min = 1.0;
-    PRECISION xi_max = 3.0;
+    //PRECISION xi_max = 3.0;
 
     // critical exponent
     PRECISION nu = 2./3.;

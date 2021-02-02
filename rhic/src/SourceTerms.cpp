@@ -45,6 +45,7 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     PRECISION Tc = (PRECISION)(hydro->Tc);
     PRECISION muc = (PRECISION)(hydro->muc);
     int criticalRelaxationTime = hydro->criticalRelaxationTime;
+    PRECISION correlationLengthMax = hydro->correlationLengthMax;
     
     /*******************************************************************************/
     /* Sec. I basic elements
@@ -290,7 +291,7 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
     // correlation length returns 1.0 if CRITICAL is not defined.
     PRECISION muB = T * alphaB;
     //PRECISION corrL = correlationLength(T, muB);
-    PRECISION corrL = corrLen(T, muB, Tc, muc);
+    PRECISION corrL = corrLen(T, muB, correlationLengthMax, muc);
     PRECISION corrL2 = corrL * corrL;
 
 #ifdef VMU
@@ -339,6 +340,9 @@ void setDissipativeSourceTerms(PRECISION * const __restrict__ pimunuRHS, PRECISI
         
         chib = chib * corrL2;
         kappaB = kappaB * corrL;
+        
+//         if(corrL>2.)
+//             printf("corre=%lf\n", corrL);
         
         if(criticalRelaxationTime){
             taunInv = taunInv / corrL2;

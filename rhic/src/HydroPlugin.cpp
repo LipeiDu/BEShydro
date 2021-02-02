@@ -122,6 +122,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     
   double Tc = hydro->Tc;
   double muc = hydro->muc;
+  double correlationLengthMax = hydro->correlationLengthMax;
     
   int initialConditionType = initCond->initialConditionType;
   int numberOfSourceFiles = initCond->numberOfSourceFiles;
@@ -148,7 +149,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   getBaryonDiffusionCoefficientTable();
   // read in the parameterized correlation length xi(T, muB)
   getCorrelationLengthTable();
-  //testCorreLength(Tc, muc);
+  //testCorreLength(correlationLengthMax, muc);
 
   //************************************************************************************\
   //* Jet initialization
@@ -259,12 +260,14 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   int accumulator1 = 0;
   int accumulator2 = 0;
   
-  FILE *fpan1, *fpan2;
-  char fname1[255], fname2[255];
+  FILE *fpan1, *fpan2, *fpan3;
+  char fname1[255], fname2[255], fname3[255];
   sprintf(fname1, "%s/AnalysisData1.dat", outputDir);
   sprintf(fname2, "%s/AnalysisData2.dat", outputDir);
+  sprintf(fname3, "%s/AnalysisData3.dat", outputDir);
   fpan1=fopen(fname1, "w");
   fpan2=fopen(fname2, "w");
+  fpan3=fopen(fname3, "w");
     
   //************************************************************************************\
   //* loop over time steps
@@ -275,7 +278,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   for (int n = 1; n <= nt+1; ++n)
   {
     
-    outputAnalysisa(n, t, fpan1, fpan2, latticeParams);
+    outputAnalysisa(n, t, fpan1, fpan2, fpan3, latticeParams, hydroParams);
     //outputBaryonCP(t, outputDir, latticeParams);
       
     // copy variables back to host and write to disk
@@ -310,8 +313,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     else start = 0;
 
     if (nFO == FOFREQ - 1) //call the freezeout finder should this be put before the values are set?
-        callFOFinder(dim, start, nx, ny, nz, n, t0, dt, t, dx, dy, dz, lattice_spacing, freezeoutEnergyDensity, hyperCube4D, hyperCube3D,
-                     energy_density_evoution, hydrodynamic_evoution, freezeoutSurfaceFile, fo_surf, FOFREQ);
+        callFOFinder(dim, start, nx, ny, nz, n, t0, dt, t, dx, dy, dz, lattice_spacing, freezeoutEnergyDensity, hyperCube4D, hyperCube3D, energy_density_evoution, hydrodynamic_evoution, freezeoutSurfaceFile, fo_surf, FOFREQ);
     
     //if all cells are below freezeout temperature end hydro
     accumulator1 = 0;
@@ -379,6 +381,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     
   fclose(fpan1);
   fclose(fpan2);
+  fclose(fpan3);
   //************************************************************************************\
   //* Deallocate memory
   //************************************************************************************/

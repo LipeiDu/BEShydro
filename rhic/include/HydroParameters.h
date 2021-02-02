@@ -25,6 +25,7 @@ struct HydroParameters
     double Tc;
     double muc;
     int criticalRelaxationTime;
+    double correlationLengthMax;
 };
 
 void loadHydroParameters(config_t *cfg, const char* configDirectory, void * params);

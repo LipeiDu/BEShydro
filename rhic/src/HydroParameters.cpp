@@ -19,6 +19,7 @@ double cB;
 double Tc;
 double muc;
 int criticalRelaxationTime;
+double correlationLengthMax;
 
 void loadHydroParameters(config_t *cfg, const char* configDirectory, void * params) {
 	// Read the file
@@ -44,6 +45,7 @@ void loadHydroParameters(config_t *cfg, const char* configDirectory, void * para
     getDoubleProperty(cfg, "Tc", &Tc, 0.138);
     getDoubleProperty(cfg, "muc", &muc, 0.42);
     getIntegerProperty(cfg, "criticalRelaxationTime", &criticalRelaxationTime, 1);
+    getDoubleProperty(cfg, "correlationLengthMax", &correlationLengthMax, 3.0);
 
 	struct HydroParameters * hydro = (struct HydroParameters *) params;
 	hydro->initialProperTimePoint = initialProperTimePoint;
@@ -58,4 +60,5 @@ void loadHydroParameters(config_t *cfg, const char* configDirectory, void * para
     hydro->Tc = Tc;
     hydro->muc = muc;
     hydro->criticalRelaxationTime = criticalRelaxationTime;
+    hydro->correlationLengthMax = correlationLengthMax;
 }
