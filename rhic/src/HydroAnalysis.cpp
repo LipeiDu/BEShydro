@@ -26,8 +26,9 @@
 #include "../include/FluxLimiter.h"
 
 #define HBARC 0.197326938
-#define zFREQ 25
-#define tFREQ 10
+#define zFREQ 1
+#define xFREQ 5
+#define tFREQ 5
 
 using namespace std;
 
@@ -191,6 +192,66 @@ void outputBaryonCP(double t, const char *pathToOutDir, void * latticeParams)
         }
     }
 }
+
+void outputAnalysis3D(int n, double t, FILE *fpan1, FILE *fpan2, FILE *fpan3, void * latticeParams, void * hydroParams)
+{
+    
+    struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
+    struct HydroParameters * hydro = (struct HydroParameters *) hydroParams;
+    
+    int nx = lattice->numLatticePointsX;
+    int ny = lattice->numLatticePointsY;
+    int nz = lattice->numLatticePointsRapidity;
+    
+    double dx = lattice->latticeSpacingX;
+    double dy = lattice->latticeSpacingY;
+    double dz = lattice->latticeSpacingRapidity;
+    
+    double xi_max = hydro->correlationLengthMax;
+    double muc = hydro->muc;
+    PRECISION Cb = (PRECISION)(hydro->cB);
+    
+    double zs, xs, Ts, muBs, corrLs, kappaBs, tauns, qns, seqs, rhobs;
+    
+    if((n-1) % tFREQ == 0){// time steps
+        
+        for(int k = 2; k < nz+2; ++k) {
+            if((k-2 - (nz-1)/2) >= 0 && (k-2 - (nz-1)/2) % zFREQ == 0){
+                zs = (k-2 - (nz-1)/2.) * dz;// eta steps
+                
+                int j = (ny+1)/2;// y=0
+                
+                    for(int i = 2; i < nx+2; ++i) {
+                        if((i-2 - (nx-1)/2) >= 0 && (i-2 - (nx-1)/2) % xFREQ == 0){
+                            xs = (i-2 - (nx-1)/2.) * dx;// x steps
+
+                            int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+                            
+                            Ts = T[s];
+                            muBs = T[s] * alphaB[s];
+                            
+                            corrLs = corrLen(Ts, muBs, xi_max, muc);
+                            
+                            kappaBs = baryonDiffusionCoefficientKinetic(Cb, T[s], rhob[s], alphaB[s], e[s], p[s]);
+                            
+                            tauns = Cb/Ts;
+#ifdef VMU                            
+                            qns = q->nbn[s];
+#else
+                            qns = 0.0;
+#endif                            
+                            seqs = seq[s];
+                                
+                            rhobs = rhob[s];
+                                                     
+                            fprintf(fpan1, "%.4f\t%.4f\t%.4f\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\n", t, zs, xs, muBs, Ts, corrLs, kappaBs, tauns, qns, seqs, rhobs);
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 void outputAnalysisa(int n, double t, FILE *fpan1, FILE *fpan2, FILE *fpan3, void * latticeParams, void * hydroParams)
 {

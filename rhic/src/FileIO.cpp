@@ -11,7 +11,7 @@
 #include "../include/LatticeParameters.h"
 #include "../include/DynamicalVariables.h"
 
-#define OUTPUT_SLICE
+//#define OUTPUT_SLICE
 
 void output(const PRECISION * const var, double t, const char *pathToOutDir, const char *name, void * latticeParams) {
 	FILE *fp;

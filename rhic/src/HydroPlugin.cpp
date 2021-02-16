@@ -278,7 +278,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   for (int n = 1; n <= nt+1; ++n)
   {
     
-    outputAnalysisa(n, t, fpan1, fpan2, fpan3, latticeParams, hydroParams);
+    //outputAnalysisa(n, t, fpan1, fpan2, fpan3, latticeParams, hydroParams);
+      outputAnalysis3D(n, t, fpan1, fpan2, fpan3, latticeParams, hydroParams);
     //outputBaryonCP(t, outputDir, latticeParams);
       
     // copy variables back to host and write to disk

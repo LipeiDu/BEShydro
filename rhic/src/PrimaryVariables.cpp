@@ -5,6 +5,8 @@
 //**********************************************************************************//
 
 #include <math.h>
+#include <stdlib.h>
+
 
 #include "../include/PrimaryVariables.h"
 #include "../include/DynamicalVariables.h"
@@ -508,6 +510,11 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
         *un = u0 * M3/(M0 + P);
     }
     
+    if (isnan(*e)||isinf(*e)) {
+        printf("Error: e is nan or inf. Quit...\n");
+        exit (EXIT_FAILURE);
+    }
+    
 //     //what should we do when solution for flow velocity is too large?
 // 	//MUSIC has revert_grid in this case...
 // 	if ( *ut > 1.0e2 )
@@ -521,28 +528,20 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
 // 		*un = 0.0;
 // 	}
     
-//     if (fabs(*rhob)>100.0*fabs(rhobPrev) && rhobPrev<0.05){
-     if (*rhob<=1.e-3){
-//         printf("rhob = %.9f\t rhobPrev = %.9f \n", *rhob, rhobPrev);
-         *rhob = 1.e-3;
-        
-     }
+
+      if (*rhob<=1.e-3){
+          *rhob = 1.e-3;
+      }
     
     *T = effectiveTemperature(*e, *rhob);
     *alphaB = chemicalPotentialOverT(*e, *rhob);
     
-//     if (*rhob<=1.e-2){
-// //         printf("rhob = %.9f\t rhobPrev = %.9f \n", *rhob, rhobPrev);
-//          *alphaB = 1.e-2;
-        
-//      }
-    
-//      if (*alphaB<1.e-4){
-// //         printf("rhob = %.9f\t rhobPrev = %.9f \n", *rhob, rhobPrev);
-//      *rhob = rhobPrev;
+    if(isnan(*alphaB)){
+        printf("alphaB is nan\n");
+        *rhob = 1.e-5;
+        *alphaB = chemicalPotentialOverT(*e, *rhob);
+    }
 
-//      }
-    
     *seq = equilibriumEntropy(*e, *rhob, *p, *T, *alphaB);
     
     //**************************** non-Newton method ****************************
@@ -732,18 +731,12 @@ void setInferredVariablesKernel(const CONSERVED_VARIABLES * const __restrict__ q
                 //**************************************************************************
                 // NOTES: T, alphaB and seq have no contributions from slow modes even when hydro+ is on, but pressure will have.
                 
-//                 //if (fabs(_rhob)<10.0*fabs(rhob[s]) && rhob[s]>0.05){
-//                 if (rhob[s]<0.05){
-//                     //printf("rhob = %.9f\t rhobPrev = %.9f \n", *rhob, rhobPrev);
-//                     rhob[s]  = _rhob;
-//                 }
-                
-                if (rhob[s]<=1.e-2){
-//         printf("rhob = %.9f\t rhobPrev = %.9f \n", *rhob, rhobPrev);
-                    q->nbt[s] = 1.e-5;
-                    q->nbn[s] = 1.e-5;
+//                 if (rhob[s]<=1.e-2){
+
+//                     q->nbt[s] = 1.e-5;
+//                     q->nbn[s] = 1.e-5;
                         
-                }
+//                 }
                 
                 e[s] = _e;
                 rhob[s]  = _rhob;

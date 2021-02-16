@@ -797,7 +797,7 @@ void setBaryonDiffusionCPInitialCondition(void * latticeParams, void * initCondP
                 for(int k = 2; k < nz+2; ++k) {
                     int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
                     
-                    double eta = (k - (nz+1)/2)*dz;
+                    double eta = (k-2 - (nz-1)/2)*dz;
                     
                     double etaScaled = fabs(eta) - etaFlat;
                     double arg = -etaScaled * etaScaled / (etaVariance * etaVariance) / 2 * THETA_FUNCTION(etaScaled);
@@ -925,6 +925,121 @@ void setBaryonDiffusionCPInitialCondition(void * latticeParams, void * initCondP
     
 //     baryonden.close();*/
 }
+
+
+void setBaryonDiffusionCPInitialCondition3D(void * latticeParams, void * initCondParams, void * hydroParams, const char * rootDirectory) {
+    
+    struct InitialConditionParameters * initCond = (struct InitialConditionParameters *) initCondParams;
+    struct HydroParameters * hydro = (struct HydroParameters *) hydroParams;
+    struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
+    
+    int nx = lattice->numLatticePointsX;
+    int ny = lattice->numLatticePointsY;
+    int nz = lattice->numLatticePointsRapidity;
+    double dx = lattice->latticeSpacingX;
+    double dy = lattice->latticeSpacingY;
+    double dz = lattice->latticeSpacingRapidity;
+    
+    double t0 = hydro->initialProperTimePoint;
+    int criticalSlowingDown = hydro->criticalSlowingDown;
+    
+    double etaFlat = initCond->rapidityMean;
+    double etaVariance = initCond->rapidityVariance;
+    double etaVariance1 = initCond->bRapidityVariance1;
+    double etaVariance2 = initCond->bRapidityVariance2;
+    double etaMean = initCond->bRapidityMean;
+    
+    double e0 = initCond->initialEnergyDensity;
+    double rhob0 = initCond->initialBaryonDensity;
+    double bNorm = initCond->bNorm;
+    
+    double energyCutOff = initCond->energyCutOff;
+    double baryonCutOff = initCond->baryonCutOff;
+
+    double eL[nz];
+    double rhoLa[nz], rhoLb[nz];
+    
+    
+    // read in the transverse distribution
+    
+    char fname[255];
+    sprintf(fname, "%s/%s", rootDirectory, "/input/profiles/sdAvg_order_2_4col.dat");
+    ifstream stream(fname);
+    
+    string dummyLine;
+    getline(stream, dummyLine);
+    
+    double dummy1, dummy2, dummy3, sed_in;
+    
+    int NX = 201;
+    int NY = 201;
+    double DX = 0.1;
+    
+    double density_trans[NX*NY];
+    
+    for(int i = 0; i < NX; ++i) {
+        for(int j = 0; j < NY; ++j) {
+
+            stream >> dummy1 >> dummy2 >> dummy3 >> sed_in;
+
+            int s_m = columnMajorLinearIndex(i, j, 0, NX, NY);
+
+            density_trans[s_m] =  (PRECISION) sed_in;
+        }
+    }
+    
+    printf("Finished reading in sdAvg.dat\n");
+    
+    
+    // add longitudinal distribution
+    
+    for(int i = 2; i < nx+2; ++i) {
+        for(int j = 2; j < ny+2; ++j) {
+            for(int k = 2; k < nz+2; ++k) {
+
+                // longitudinal distributions
+                
+                double eta = (k-2 - (nz-1)/2)*dz;
+
+                double etaScaled = fabs(eta) - etaFlat;
+                double arg = -etaScaled * etaScaled / (etaVariance * etaVariance) / 2 * THETA_FUNCTION(etaScaled);
+                eL[k-2] = 2 * exp(arg);
+
+                rhoLa[k-2] = (exp(-(eta-etaMean)*(eta-etaMean)/(2*etaVariance1*etaVariance1))*THETA_FUNCTION(eta-etaMean+1.e-2) + exp(-(eta-etaMean)*(eta-etaMean)/(2*etaVariance2*etaVariance2))*THETA_FUNCTION(etaMean-eta-1.e-2));
+                rhoLb[k-2] = (exp(-(-eta-etaMean)*(-eta-etaMean)/(2*etaVariance1*etaVariance1))*THETA_FUNCTION(-eta-etaMean+1.e-2) + exp(-(-eta-etaMean)*(-eta-etaMean)/(2*etaVariance2*etaVariance2))*THETA_FUNCTION(etaMean+eta-1.e-2));
+
+
+                // transverse distribution
+                
+//                 double x = (i-2 - (nx-1)/2)*dx;
+//                 double X = (5*(i-2) - (NX-1)/2)*DX;
+                
+                
+                int Nratio = (int) (NX-1)/(nx-1);
+                
+                int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
+                int s_m = columnMajorLinearIndex(Nratio*(i-2), Nratio*(j-2), 0, NX, NY);
+                
+                e[s] = (PRECISION) e0 / t0 * density_trans[s_m] * eL[k-2] + energyCutOff;
+                rhob[s] = (PRECISION) rhob0 / t0 * density_trans[s_m] * (rhoLa[k-2] + rhoLb[k-2]) + baryonCutOff;
+
+                p[s] = equilibriumPressure(e[s], rhob[s]);
+
+                u->ux[s] = 0.0;
+                u->uy[s] = 0.0;
+                u->un[s] = 0.0;
+                u->ut[s] = 1.0;
+#ifdef VMU
+                q->nbt[s] = 0.0;
+                q->nbx[s] = 0.0;
+                q->nby[s] = 0.0;
+                q->nbn[s] = 0.0;
+#endif
+            }
+        }
+    }
+}
+
 
 /**************************************************************************************************************************************************/
 /* Initial conditions for (1+1)D longitudinal expansion
@@ -2253,6 +2368,11 @@ void setInitialConditions(void * latticeParams, void * initCondParams, void * hy
         case 17:{
             printf("Baryon diffusion CP...\n");
             setBaryonDiffusionCPInitialCondition(latticeParams, initCondParams, hydroParams);
+            return;
+        }
+        case 18:{
+            printf("Baryon diffusion CP 3D...\n");
+            setBaryonDiffusionCPInitialCondition3D(latticeParams, initCondParams, hydroParams, rootDirectory);
             return;
         }
 		default: {
