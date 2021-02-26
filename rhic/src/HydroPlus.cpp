@@ -366,17 +366,20 @@ PRECISION corrLen(PRECISION T, PRECISION muB, PRECISION xi_max, PRECISION MU_C){
     
     PRECISION T_C = T0 - k2 * T0 * (MU_C/T0)*(MU_C/T0);
     
-    PRECISION A = 0.8;
-    PRECISION fac = pow((sin(Alpha)/sin(0.0524)),1.5);
+//     PRECISION A = 0.8;
+//     PRECISION fac = pow((sin(Alpha)/sin(0.0524)),1.5);
     
-    PRECISION delta_T = T_C * sin(Alpha)/cos(Alpha) * fac;
-    PRECISION delta_mu = A * T_C * cos(Alpha) * fac;
+//     PRECISION delta_T = T_C * sin(Alpha)/cos(Alpha) * fac;
+//     PRECISION delta_mu = A * T_C * cos(Alpha) * fac;
+    
+    PRECISION delta_T = 0.021;
+    PRECISION delta_mu = 0.066;
     
     PRECISION xi_min = 1.0;
-    //PRECISION xi_max = 3.0;
 
     // critical exponent
     PRECISION nu = 2./3.;
+    PRECISION betaDeltaInv = 0.6;
 
     // rotation by angle Alpha
     PRECISION Tp  = (muB_GeV - MU_C) * sin(Alpha) + (T_GeV - T_C) * cos(Alpha);
@@ -386,10 +389,10 @@ PRECISION corrLen(PRECISION T, PRECISION muB, PRECISION xi_max, PRECISION MU_C){
     PRECISION xi_ratio = xi_min / xi_max;
     PRECISION xi_ratio_nu = pow(xi_ratio, 2./nu);
 
-    PRECISION mu2 = (mup / delta_mu) * (mup / delta_mu);
-    PRECISION T2  = (Tp / delta_T) * (Tp / delta_T);
+    PRECISION mu2 = pow((mup / delta_mu), 2);
+    PRECISION T2  = pow(fabs(Tp / delta_T), 2*betaDeltaInv);
 
-    PRECISION Tanh_term = tanh(mu2 + A * T2);
+    PRECISION Tanh_term = tanh(mu2 + T2);
     PRECISION Br_term = Tanh_term * (1 - xi_ratio_nu) + xi_ratio_nu;
 
     return xi_min / pow(Br_term, nu/2);

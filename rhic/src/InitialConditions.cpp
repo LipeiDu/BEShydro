@@ -942,6 +942,7 @@ void setBaryonDiffusionCPInitialCondition3D(void * latticeParams, void * initCon
     
     double t0 = hydro->initialProperTimePoint;
     int criticalSlowingDown = hydro->criticalSlowingDown;
+    PRECISION Cb = (PRECISION)(hydro->cB);
     
     double etaFlat = initCond->rapidityMean;
     double etaVariance = initCond->rapidityVariance;
@@ -992,6 +993,8 @@ void setBaryonDiffusionCPInitialCondition3D(void * latticeParams, void * initCon
     
     
     // add longitudinal distribution
+    char rhobb[] = "output/initial_kappaB.dat";
+    ofstream baryonden(rhobb);
     
     for(int i = 2; i < nx+2; ++i) {
         for(int j = 2; j < ny+2; ++j) {
@@ -1035,9 +1038,39 @@ void setBaryonDiffusionCPInitialCondition3D(void * latticeParams, void * initCon
                 q->nby[s] = 0.0;
                 q->nbn[s] = 0.0;
 #endif
+                
+                // initial profiles of kappaB
+                if(int(i-2 - (nx-1)/2)==0&&int(j-2 - (ny-1)/2)==0){
+                    
+                    double T = effectiveTemperature(e[s], rhob[s]);
+                    double alphaB = chemicalPotentialOverT(e[s], rhob[s]);
+                    double seq = equilibriumEntropy(e[s], rhob[s], p[s], T, alphaB);
+                    double muB = T * alphaB;
+
+                    PRECISION diffusionCoeff[2];
+                    baryonDiffusionCoefficient(T, muB, diffusionCoeff);
+
+                    double kappaKinetic = baryonDiffusionCoefficientKinetic(Cb, T, rhob[s], alphaB, e[s], p[s]);
+                    double kappaHolography = diffusionCoeff[0];
+                    double kappaAdscft = baryonDiffusionCoefficientAdscft(T, rhob[s], alphaB, e[s], p[s], seq);
+                    
+                    double taun = Cb/T;
+
+                    baryonden
+                    << setprecision(5) << setw(10) << (i-2 - (nx-1)/2.0) * dx
+                    << setprecision(5) << setw(10) << (j-2 - (ny-1)/2.0) * dy
+                    << setprecision(5) << setw(10) << (k-2 - (nz-1)/2.0) * dz
+                    << setprecision(6) << setw(18) << kappaKinetic
+                    << setprecision(6) << setw(18) << kappaHolography
+                    << setprecision(6) << setw(18) << kappaAdscft
+                    << setprecision(6) << setw(18) << taun
+                    << endl;
+                }
             }
         }
     }
+    
+     baryonden.close();
 }
 
 
