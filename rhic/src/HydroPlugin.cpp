@@ -149,7 +149,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   getBaryonDiffusionCoefficientTable();
   // read in the parameterized correlation length xi(T, muB)
   getCorrelationLengthTable();
-  //testCorreLength(correlationLengthMax, muc);
+  testCorreLength(correlationLengthMax, muc);
 
   //************************************************************************************\
   //* Jet initialization

@@ -32,6 +32,105 @@
 
 using namespace std;
 
+PRECISION BaryonDiffusionNS(PRECISION t, int s, int d_ncx, int d_ncy, int d_ncz, PRECISION d_dt, PRECISION d_dx, PRECISION d_dy, PRECISION d_dz, const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ alphaBpvec, const PRECISION * const __restrict__ alphaBvec){
+    
+    PRECISION facX = 1/d_dx/2;
+    PRECISION facY = 1/d_dy/2;
+    PRECISION facZ = 1/d_dz/2;
+    
+    int stride = d_ncx * d_ncy;
+    
+    
+    PRECISION *utvec = u->ut;
+    PRECISION *uxvec = u->ux; 
+    PRECISION *uyvec = u->uy;
+    PRECISION *unvec = u->un;
+
+    PRECISION ut = utvec[s];
+    PRECISION ux = uxvec[s];
+    PRECISION uy = uyvec[s];
+    PRECISION un = unvec[s];
+    
+    PRECISION alphaBp = alphaBpvec[s];
+    PRECISION alphaBs = alphaBvec[s];
+    
+    // derivatives of muB/T
+    PRECISION dtalphaB = (alphaBs - alphaBp) / d_dt;
+    PRECISION dxalphaB = (*(alphaBvec + s + 1) - *(alphaBvec + s - 1)) * facX;
+    PRECISION dyalphaB = (*(alphaBvec + s + d_ncx) - *(alphaBvec + s - d_ncx)) * facY;
+    PRECISION dnalphaB = (*(alphaBvec + s + stride) - *(alphaBvec + s - stride)) * facZ;
+    
+    // gradient of muB/T
+    PRECISION ukdk_alphaB = ut * dtalphaB + ux * dxalphaB + uy * dyalphaB + un * dnalphaB;
+    PRECISION Nablat_alphaB =  dtalphaB - ut * ukdk_alphaB;
+    PRECISION Nablax_alphaB = -dxalphaB - ux * ukdk_alphaB;
+    PRECISION Nablay_alphaB = -dyalphaB - uy * ukdk_alphaB;
+    PRECISION Nablan_alphaB = -1/pow(t,2)*dnalphaB - un * ukdk_alphaB;
+    
+    return Nablan_alphaB;
+}
+
+
+PRECISION BaryonDiffusionKnInvRe(PRECISION t, int s, int d_ncx, int d_ncy, int d_ncz, PRECISION d_dt, PRECISION d_dx, PRECISION d_dy, PRECISION d_dz, PRECISION Cb, const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up, const PRECISION * const __restrict__ rhobvec, PRECISION * const __restrict__ Kn, PRECISION * const __restrict__ InvRe){
+    
+    PRECISION facX = 1/d_dx/2;
+    PRECISION facY = 1/d_dy/2;
+    PRECISION facZ = 1/d_dz/2;
+    
+    int stride = d_ncx * d_ncy;
+    
+    PRECISION t2 = t*t;
+    
+    // expansion rate
+    
+    PRECISION *utpvec = up->ut;
+    PRECISION utp = utpvec[s];
+    
+    PRECISION *utvec = u->ut;
+    PRECISION *uxvec = u->ux; 
+    PRECISION *uyvec = u->uy;
+    PRECISION *unvec = u->un;
+
+    PRECISION ut = utvec[s];
+    PRECISION ux = uxvec[s];
+    PRECISION uy = uyvec[s];
+    PRECISION un = unvec[s];
+    
+    PRECISION dtut = (ut - utp) / d_dt;
+    PRECISION dxux = (*(uxvec + s + 1) - *(uxvec + s - 1)) * facX;
+    PRECISION dyuy = (*(uyvec + s + d_ncx) - *(uyvec + s - d_ncx)) * facY;
+    PRECISION dnun = (*(unvec + s + stride) - *(unvec + s - stride)) * facZ;
+    
+    PRECISION theta = ut / t + dtut + dxux + dyuy + dnun;
+    
+    // magnitude of baryon diffusion
+#ifdef VMU
+    PRECISION nbt = q->nbt[s];
+    PRECISION nbx = q->nbx[s];
+    PRECISION nby = q->nby[s];
+    PRECISION nbn = q->nbn[s];
+#else
+    PRECISION nbt = 0.;
+    PRECISION nbx = 0.;
+    PRECISION nby = 0.;
+    PRECISION nbn = 0.;
+#endif
+    
+    PRECISION normBaryon = fabs(rhob[s]);
+    
+    PRECISION nbnb = nbt*nbt - nbx*nbx - nby*nby - nbn*nbn*t2;
+    PRECISION snbnb = sqrt(fabs(nbnb));
+    if(isnan(snbnb)) printf("found snbnb Nan\n");
+    
+    // relaxation time
+    PRECISION taun = Cb/T[s];
+    
+    // Knudsen number and inverse Renolds number
+    *Kn = taun * theta;
+    *InvRe = snbnb / (normBaryon + 1.e-2);
+}
+
+
 void outputHydroPlus(double t, const char *pathToOutDir, void * latticeParams) {
     
     FILE *fpgamma0, *fpgamma1, *fpgamma2, *fpxi;
@@ -203,15 +302,21 @@ void outputAnalysis3D(int n, double t, FILE *fpan1, FILE *fpan2, FILE *fpan3, vo
     int ny = lattice->numLatticePointsY;
     int nz = lattice->numLatticePointsRapidity;
     
+    int ncx = lattice->numComputationalLatticePointsX;
+    int ncy = lattice->numComputationalLatticePointsY;
+    int ncz = lattice->numComputationalLatticePointsRapidity;
+    
     double dx = lattice->latticeSpacingX;
     double dy = lattice->latticeSpacingY;
     double dz = lattice->latticeSpacingRapidity;
+    double dt = lattice->latticeSpacingProperTime;
     
     double xi_max = hydro->correlationLengthMax;
     double muc = hydro->muc;
     PRECISION Cb = (PRECISION)(hydro->cB);
     
     double zs, xs, Ts, muBs, corrLs, kappaBs, tauns, qns, seqs, rhobs;
+    double nablaEtaAlphaB;
     
     if((n-1) % tFREQ == 0){// time steps
         
@@ -245,6 +350,25 @@ void outputAnalysis3D(int n, double t, FILE *fpan1, FILE *fpan2, FILE *fpan3, vo
                             rhobs = rhob[s];
                                                      
                             fprintf(fpan1, "%.4f\t%.4f\t%.4f\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\n", t, zs, xs, muBs, Ts, corrLs, kappaBs, tauns, qns, seqs, rhobs);
+
+#ifdef VMU                            
+                            nablaEtaAlphaB = BaryonDiffusionNS(t, s, ncx, ncy, ncz, dt, dx, dy, dz, u, alphaBp, alphaB);
+#else
+                            nablaEtaAlphaB = 0.0;
+#endif
+                            fprintf(fpan2, "%.4f\t%.4f\t%.4f\t%.8f\n", t, zs, xs, nablaEtaAlphaB);
+                            
+                            // Kn and Inverse Re
+                            
+                            PRECISION Kn, InvRe;
+                            
+                            BaryonDiffusionKnInvRe(t, s, ncx, ncy, ncz, dt, dx, dy, dz, Cb, u, up, rhob, &Kn, &InvRe);
+                            
+                            if((i-2 - (nx-1)/2) == 0){
+                                
+                                fprintf(fpan3, "%.4f\t%.4f\t%.8f\t%.8f\n", t, zs, Kn, InvRe);
+                                
+                            }
                     }
                 }
             }
@@ -362,11 +486,11 @@ void testCorreLength(double xi_max, double muc){
     char EOStable1[] = "output/correL.dat";
     ofstream eos_table1(EOStable1);
 
-    for(int i = 0; i < 51; ++i) {
-        for(int j = 0; j < 75; ++j){
+    for(int i = 0; i < 201; ++i) {
+        for(int j = 0; j < 125; ++j){
 
-            PRECISION Ttest = (0.1 + i * 0.002)/HBARC;
-            PRECISION muBtest = (0.35 + j * 0.002)/HBARC;
+            PRECISION Ttest = (0.144 + i * 0.00005)/HBARC;
+            PRECISION muBtest = (0.233 + j * 0.00025)/HBARC;
 
             eos_table1 << setprecision(6) << setw(18) << Ttest*HBARC << setprecision(6) << setw(18) << muBtest*HBARC
                       // << setprecision(6) << setw(18) << correlationLength(Ttest, muBtest) << endl;

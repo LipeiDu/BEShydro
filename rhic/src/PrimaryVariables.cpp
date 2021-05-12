@@ -528,17 +528,19 @@ void getInferredVariables(PRECISION t, const PRECISION * const __restrict__ q, P
 // 		*un = 0.0;
 // 	}
     
-
-      if (*rhob<=1.e-3){
-          *rhob = 1.e-3;
+    // code stablization
+      if (*rhob<=1.e-4){
+          *rhob = 1.e-4;
       }
     
     *T = effectiveTemperature(*e, *rhob);
     *alphaB = chemicalPotentialOverT(*e, *rhob);
     
+    // code stablization
+    
     if(isnan(*alphaB)){
         printf("alphaB is nan\n");
-        *rhob = 1.e-5;
+        *rhob = 1.e-3;
         *alphaB = chemicalPotentialOverT(*e, *rhob);
     }
 
@@ -730,14 +732,14 @@ void setInferredVariablesKernel(const CONSERVED_VARIABLES * const __restrict__ q
                 // pass the updated value to external arries
                 //**************************************************************************
                 // NOTES: T, alphaB and seq have no contributions from slow modes even when hydro+ is on, but pressure will have.
-                
-//                 if (rhob[s]<=1.e-2){
+#ifdef VMU                
+                if (rhob[s]<=1.e-2){
 
-//                     q->nbt[s] = 1.e-5;
-//                     q->nbn[s] = 1.e-5;
+                    q->nbt[s] = 1.e-6;
+                    q->nbn[s] = 1.e-6;
                         
-//                 }
-                
+                }
+#endif                
                 e[s] = _e;
                 rhob[s]  = _rhob;
                 T[s] = _T;

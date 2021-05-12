@@ -780,17 +780,16 @@ void setBaryonDiffusionCPInitialCondition(void * latticeParams, void * initCondP
     double etaVariance1 = initCond->bRapidityVariance1;
     double etaVariance2 = initCond->bRapidityVariance2;
     double etaMean = initCond->bRapidityMean;
-    
-    double e0 = initCond->initialEnergyDensity;
-    double rhob0 = initCond->initialBaryonDensity;
-    double bNorm = initCond->bNorm;
+
+    double e0 = 20.0;
+    double rhob0 = 0.5;
+    double bNorm = 3.0;
     
     double energyCutOff = initCond->energyCutOff;
     double baryonCutOff = initCond->baryonCutOff;
 
     double eL[nz];
     double rhoLa[nz], rhoLb[nz];
-    
     
     for(int i = 2; i < nx+2; ++i) {
             for(int j = 2; j < ny+2; ++j) {
@@ -2399,12 +2398,12 @@ void setInitialConditions(void * latticeParams, void * initCondParams, void * hy
             return;
         }
         case 17:{
-            printf("Baryon diffusion CP...\n");
+            printf("Baryon diffusion CP (1+1)D...\n");
             setBaryonDiffusionCPInitialCondition(latticeParams, initCondParams, hydroParams);
             return;
         }
         case 18:{
-            printf("Baryon diffusion CP 3D...\n");
+            printf("Baryon diffusion CP (3+1)D...\n");
             setBaryonDiffusionCPInitialCondition3D(latticeParams, initCondParams, hydroParams, rootDirectory);
             return;
         }
